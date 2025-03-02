@@ -55,10 +55,9 @@ function Sender({ onSubmit, input, setInput, isLoading, stop, className }: Sende
         value={input}
         onChange={handleInput}
         className={cn(
-          'min-h-[24px] max-h-[calc(45dvh)] overflow-hidden resize-none rounded-xl text-base bg-muted',
+          'max-h-[calc(45dvh)] overflow-hidden resize-none rounded-xl text-base bg-muted pb-10',
           className
         )}
-        rows={3}
         autoFocus
         onKeyDown={(event) => {
           if (event.key === 'Enter' && !event.shiftKey) {
