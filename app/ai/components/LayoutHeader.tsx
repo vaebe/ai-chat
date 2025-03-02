@@ -8,7 +8,7 @@ import { useContext, useState } from 'react'
 import { LoginDialog } from '@/components/login-dialog'
 
 function LayoutHeader() {
-  const title = `${process.env.NEXT_PUBLIC_GITHUB_USER_NAME?.toLocaleUpperCase()} AI 小助手`
+  const title = `AI 小助手`
 
   const { data: session, status } = useSession()
 

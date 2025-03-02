@@ -57,7 +57,7 @@ export async function GET(req: Request) {
     const openai = createOpenAI({
       baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1', // AI的API基础URL
       compatibility: 'strict', // 设置兼容模式为严格模式
-      apiKey: process.env.A_LI_AI_API_KEY // 从环境变量获取API密钥
+      apiKey: process.env.OPEN_API_KEY // 从环境变量获取API密钥
     })
 
     const result = await generateText({
