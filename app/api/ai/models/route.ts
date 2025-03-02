@@ -1,14 +1,14 @@
 import { sendJson } from '@/lib/utils'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
+import { auth } from '@/auth'
 
 // todo 获取用户可以使用的模型
 export async function GET() {
   // 未登录返回 null
-  const session = await getServerSession(authOptions)
+  const session = await auth()
 
   // 判断用户 id 是否存在执行对应的逻辑
-  if (session?.user.id) {
+  if (!session?.user?.id) {
+    return sendJson({ code: 401, msg: `无权限!` })
   }
 
   try {

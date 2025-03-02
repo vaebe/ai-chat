@@ -1,10 +1,9 @@
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
 import { sendJson } from '@/lib/utils'
 import { prisma } from '@/prisma'
-import { getServerSession } from 'next-auth'
+import { auth } from "@/auth"
 
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   if (!session) {
     return sendJson({ code: 401, msg: `无权限!` })
   }
