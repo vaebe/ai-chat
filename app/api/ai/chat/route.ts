@@ -1,7 +1,6 @@
 import { CoreMessage, streamText } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
+import { auth } from "@/auth"
 import { prisma } from '@/prisma'
 import { randomUUID } from 'crypto'
 
@@ -47,12 +46,9 @@ async function saveMsg(opts: SaveMsgProps) {
 
 export async function POST(req: Request) {
   // 未登录返回 null
-  const session = await getServerSession(authOptions)
+  const session = await auth()
 
-  const userId = session?.user.id
-  // 判断用户 id 是否存在执行对应的逻辑
-  if (userId) {
-  }
+  const userId = session?.user?.id ?? ''
 
   interface ReqProps {
     messages: CoreMessage[]

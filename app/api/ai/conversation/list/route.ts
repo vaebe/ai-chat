@@ -1,12 +1,11 @@
 import { sendJson } from '@/lib/utils'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
+import { auth } from "@/auth"
 import { prisma } from '@/prisma'
 
 // 获取用户的对话分组
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions)
-  if (!session) {
+  const session = await auth()
+  if (!session?.user?.id) {
     return sendJson({ code: 401, msg: `无权限!` })
   }
 

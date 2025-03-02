@@ -1,7 +1,6 @@
 import { generateText, CoreMessage } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions'
+import { auth } from "@/auth"
 import { sendJson } from '@/lib/utils'
 import { prisma } from '@/prisma'
 import { AIMessage } from '@prisma/client'
@@ -27,9 +26,9 @@ function generatePromptText(list: Array<AIMessage>) {
 
 export async function GET(req: Request) {
   // 未登录返回 null
-  const session = await getServerSession(authOptions)
+  const session = await auth()
 
-  if (!session) {
+  if (!session?.user) {
     return sendJson({ code: 401, msg: `无权限!` })
   }
 
