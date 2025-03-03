@@ -2,12 +2,12 @@
 
 import { useState, useContext } from 'react'
 import { LayoutHeader } from './components/LayoutHeader'
-import { toast } from "sonner"
+import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { AiSharedDataContext } from './components/AiSharedDataContext'
 import { MessageList } from '@/app/ai/components/MessageList'
-import { useChat } from '@ai-sdk/react';
+import { useChat } from '@ai-sdk/react'
 import { StartAConversationPrompt } from './components/StartAConversationPrompt'
 import { Sender } from './components/Sender'
 

@@ -1,4 +1,4 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   async redirects() {
@@ -6,10 +6,10 @@ const nextConfig: NextConfig = {
       {
         source: '/',
         destination: '/ai',
-        permanent: false, 
+        permanent: false
       }
     ]
   }
-};
+}
 
-export default nextConfig;
+export default nextConfig

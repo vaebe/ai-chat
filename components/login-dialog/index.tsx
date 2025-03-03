@@ -3,12 +3,7 @@
 import React, { useState } from 'react'
 import { FullScreenLoading } from '@/components/screen-loading'
 import { GithubLoginButton } from './GithubLoginButton'
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogHeader,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle, DialogHeader } from '@/components/ui/dialog'
 
 interface Props {
   isOpen: boolean

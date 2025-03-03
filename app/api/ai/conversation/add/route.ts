@@ -1,5 +1,5 @@
 import { sendJson } from '@/lib/utils'
-import { auth } from "@/auth"
+import { auth } from '@/auth'
 import { prisma } from '@/prisma'
 import { randomUUID } from 'crypto'
 

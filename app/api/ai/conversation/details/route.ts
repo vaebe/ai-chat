@@ -1,6 +1,6 @@
 import { sendJson } from '@/lib/utils'
 import { prisma } from '@/prisma'
-import { auth } from "@/auth"
+import { auth } from '@/auth'
 
 export async function GET(req: Request) {
   const session = await auth()

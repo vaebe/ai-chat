@@ -1,14 +1,14 @@
 'use client'
 
 import { useEffect, use } from 'react'
-import { useChat } from '@ai-sdk/react';
+import { useChat } from '@ai-sdk/react'
 import { MessageList } from '@/app/ai/components/MessageList'
 import { AiSharedDataContext } from '@/app/ai/components/AiSharedDataContext'
 import { useContext } from 'react'
 import { LayoutHeader } from '@/app/ai/components/LayoutHeader'
 import { StartAConversationPrompt } from '@/app/ai/components/StartAConversationPrompt'
 import { Sender } from '@/app/ai/components/Sender'
-import { toast } from "sonner"
+import { toast } from 'sonner'
 import { AIMessage } from '@prisma/client'
 import { useRouter } from 'next/navigation'
 

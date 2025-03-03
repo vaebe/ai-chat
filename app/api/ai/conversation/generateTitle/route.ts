@@ -1,6 +1,6 @@
 import { generateText, CoreMessage } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
-import { auth } from "@/auth"
+import { auth } from '@/auth'
 import { sendJson } from '@/lib/utils'
 import { prisma } from '@/prisma'
 import { AIMessage } from '@prisma/client'
