@@ -1,6 +1,6 @@
 import { CoreMessage, streamText } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
-import { auth } from "@/auth"
+import { auth } from '@/auth'
 import { prisma } from '@/prisma'
 import { randomUUID } from 'crypto'
 

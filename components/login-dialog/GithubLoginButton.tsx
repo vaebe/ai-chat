@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react'
 import { Button } from '@/components/ui/button'
-import { toast } from "sonner"
+import { toast } from 'sonner'
 import { signIn } from 'next-auth/react'
 
 interface Props {
@@ -8,12 +8,10 @@ interface Props {
 }
 
 function GithubLoginButton({ setIsLoading }: Props) {
-
-
   function handleGithubLogin() {
     setIsLoading(true)
 
-    signIn('github', { callbackUrl: "/ai" }).catch(() => {
+    signIn('github', { callbackUrl: '/ai' }).catch(() => {
       setIsLoading(false)
       toast('登录失败!')
     })

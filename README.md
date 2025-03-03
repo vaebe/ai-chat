@@ -1,5 +1,6 @@
-#  ai-chat
-使用 nextjs、ai-sdk 开发的 AI 对话页面 
+# ai-chat
+
+使用 nextjs、ai-sdk 开发的 AI 对话页面
 
 ## 启动项目
 
@@ -28,4 +29,3 @@ npx prisma generate
 ```bash
 npx shadcn@latest add scroll-area
 ```
-
