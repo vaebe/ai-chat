@@ -13,12 +13,12 @@ export async function PUT(req: Request) {
       dataToUpdate.desc = desc
     }
 
-    const updatedArticle = await prisma.aIConversation.update({
+    const data = await prisma.aIConversation.update({
       where: { id },
       data: dataToUpdate
     })
 
-    return sendJson({ data: updatedArticle })
+    return sendJson({ data })
   } catch (error) {
     console.error(error)
     return sendJson({ code: -1, msg: '更新对话失败!' })
