@@ -9,7 +9,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers: [GitHub],
   session: { strategy: "jwt" },
-  basePath: "/auth",
+  // basePath: "/auth",
   callbacks: {
     authorized({ request, auth }) {
       const { pathname } = request.nextUrl

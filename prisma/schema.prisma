@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgres"
   url      = env("DATABASE_URL")
 }
 
@@ -110,7 +110,7 @@ model AIConversation {
 model AIMessage {
   id                      String    @id @default(cuid())
   role                    String // 'system' | 'user' | 'assistant' | 'data' | 'tool'
-  content                 String    @db.LongText
+  content                 String    @db.Text
   token                   Int
   userId                  String // 所属用户
   conversationId          String // 所属对话分组
