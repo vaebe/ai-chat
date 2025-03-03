@@ -13,7 +13,7 @@ function GithubLoginButton({ setIsLoading }: Props) {
   function handleGithubLogin() {
     setIsLoading(true)
 
-    signIn('github', { redirect: false }).catch(() => {
+    signIn('github', { callbackUrl: "/ai" }).catch(() => {
       setIsLoading(false)
       toast('登录失败!')
     })
