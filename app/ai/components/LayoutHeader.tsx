@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useSession } from 'next-auth/react'
 import { Icon } from '@iconify/react'
 import { AiSharedDataContext } from './AiSharedDataContext'
-import { useContext, useState } from 'react'
+import { useContext } from 'react'
 
 function LayoutHeader() {
   const title = `AI Chat`

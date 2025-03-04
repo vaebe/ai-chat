@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { FullScreenLoading } from '@/components/screen-loading'
 import { useState } from 'react'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
@@ -20,7 +21,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen w-full bg-black text-white">
-      <h1 className="text-3xl font-bold py-6 px-4">AI Chat</h1>
+      <h1 className="text-3xl font-bold py-6 px-4">
+        <Link href="/"> AI Chat</Link>
+      </h1>
 
       <div className="pt-[26vh]">
         <div className="text-3xl font-bold py-6 px-4 text-center">Log in</div>
