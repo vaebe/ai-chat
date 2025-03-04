@@ -29,3 +29,7 @@ npx prisma generate
 ```bash
 npx shadcn@latest add scroll-area
 ```
+
+## favicon 配置生成
+
+[猛击直达](https://realfavicongenerator.net/)

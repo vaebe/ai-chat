@@ -11,9 +11,9 @@ const fontSans = FontSans({
 })
 
 export const metadata: Metadata = {
-  title: 'vaebe blog',
+  title: 'AI Chat',
   description:
-    '我是 Vaebe，一名全栈开发者，专注于前端技术。我的主要技术栈是 Vue 及其全家桶，目前也在使用 React 来构建项目，比如这个博客，它使用 Next.js。',
+    '我是 Vaebe，一名全栈开发者，专注于前端技术。我的主要技术栈是 Vue 及其全家桶，目前也在使用 React 来构建项目，比如这个 AI Chat，它使用 Next.js。',
   icons: {
     icon: [
       {
@@ -33,6 +33,9 @@ export const metadata: Metadata = {
         sizes: '180x180'
       }
     ]
+  },
+  appleWebApp: {
+    title: 'AI Chat'
   },
   manifest: '/favicon/site.webmanifest',
   alternates: {
