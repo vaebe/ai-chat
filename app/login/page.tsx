@@ -3,7 +3,7 @@ import { signIn } from 'next-auth/react'
 import { Icon } from '@iconify/react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { FullScreenLoading } from '@/components/screen-loading'
+import { FullScreenLoading } from '@/components/ScreenLoading'
 import { useState } from 'react'
 import Link from 'next/link'
 
