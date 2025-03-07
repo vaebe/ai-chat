@@ -17,15 +17,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (pathname === '/middleware-example') return !!auth
       return true
     },
-    jwt({ token, trigger, session, account }) {
+    jwt({ token, trigger, session }) {
       if (trigger === 'update') token.name = session.user.name
-      if (account?.provider === 'keycloak') {
-        return { ...token, accessToken: account.access_token }
-      }
       return token
     },
     async session({ session, token }) {
-      if (token?.accessToken) session.accessToken = token.accessToken
+      if (token?.accessToken) {
+        session.accessToken = token.accessToken
+      }
+
+      if (token.sub) {
+        session.user.id = token.sub
+      }
 
       return session
     }
