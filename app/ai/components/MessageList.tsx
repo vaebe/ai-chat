@@ -32,7 +32,7 @@ function AssistantMessage({ message }: { message: Message }) {
         <AvatarImage src="/ai-avatar.png" alt="AI Avatar" />
       </Avatar>
 
-      <Card className="max-w-[80%] p-2">
+      <Card className="w-[90%]  p-4">
         <MarkdownRender content={message.content ?? ''}></MarkdownRender>
       </Card>
     </>
@@ -85,7 +85,10 @@ function MessageList({ messages, isLoading, className }: MessageListProps) {
   return (
     <>
       {!!messages.length && (
-        <ScrollArea ref={scrollAreaRef} style={{ height: `calc(100vh - 150px)`, width: '100%' }}>
+        <ScrollArea
+          ref={scrollAreaRef}
+          style={{ height: `calc(100vh - 150px)`, width: '100%', overflow: 'hidden' }}
+        >
           <div className={cn('w-full md:w-10/12 mx-auto', className)}>
             {messages.map((message) => (
               <MessageInfo key={message.id} message={message}></MessageInfo>
