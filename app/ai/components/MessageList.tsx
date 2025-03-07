@@ -8,6 +8,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Loader2, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Markdown from 'react-markdown'
+import rehypeHighlight from 'rehype-highlight'
+import remarkGfm from 'remark-gfm'
 
 function UserMessage({ message }: { message: Message }) {
   return (
@@ -33,7 +35,9 @@ function AssistantMessage({ message }: { message: Message }) {
       </Avatar>
 
       <Card className="max-w-[80%] p-2">
-        <Markdown>{message.content ?? ''}</Markdown>
+        <Markdown rehypePlugins={[rehypeHighlight]} remarkPlugins={[remarkGfm]}>
+          {message.content ?? ''}
+        </Markdown>
       </Card>
     </>
   )
