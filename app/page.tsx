@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
+    <div className="dark min-h-screen bg-black text-white">
       <header className="flex items-center justify-between px-6 py-2">
         <div className="text-2xl font-bold">AI Chat</div>
 
@@ -12,11 +12,11 @@ export default function Home() {
         </Link>
       </header>
 
-      <p className="text-center">一个使用 next 开发 AI 对话页面,完善中...</p>
-
-      <div className="w-10/12 mx-auto my-10">
-        <img src="/img/chat.jpg" alt="" className="w-full" />
+      <div className="w-9/12 mx-auto my-10">
+        <img src="/img/chat-dark.png" alt="" className="w-full" />
       </div>
-    </main>
+
+      <p className="text-center text-lg">一个使用 next 开发 AI 对话页面完善中...</p>
+    </div>
   )
 }
