@@ -20,7 +20,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-black text-white">
+    <div className="dark min-h-screen w-full bg-black text-white">
       <h1 className="text-3xl font-bold py-6 px-4">
         <Link href="/"> AI Chat</Link>
       </h1>
