@@ -1,15 +1,56 @@
 import { OpenOrCloseSiderbarIcon } from './OpenOrCloseSiderbarIcon'
 import { NewChatIcon } from './NewChatIcon'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { Icon } from '@iconify/react'
 import { AiSharedDataContext } from './AiSharedDataContext'
 import { useContext } from 'react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
+
+function UserAvatar() {
+  const { data: session } = useSession()
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <div className="flex items-center space-x-2 cursor-pointer">
+          <Avatar className="w-8 h-8">
+            <AvatarImage src={session?.user?.image ?? ''} alt="user" />
+            <AvatarFallback>{session?.user?.name ?? 'll'}</AvatarFallback>
+          </Avatar>
+
+          <span>{session?.user?.name ?? 'll'}</span>
+        </div>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuLabel>{session?.user?.email}</DropdownMenuLabel>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => signOut({ redirectTo: '/login' })}
+        >
+          <div className="flex items-center">
+            <Icon icon="lucide:log-out" className="w-5 h-5 mx-2" />
+            <span>退出登录</span>
+          </div>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
 
 function LayoutHeader() {
   const title = `AI Chat`
-
-  const { data: session, status } = useSession()
 
   const { aiSharedData } = useContext(AiSharedDataContext)
 
@@ -17,7 +58,7 @@ function LayoutHeader() {
     <div className="w-full flex items-center justify-between pt-2 px-8">
       <div className="flex items-center">
         {/* 用户已经登录且侧边栏未打开 */}
-        {status === 'authenticated' && !aiSharedData.layoutSidebar && (
+        {!aiSharedData.layoutSidebar && (
           <div>
             <OpenOrCloseSiderbarIcon state={true}></OpenOrCloseSiderbarIcon>
             <NewChatIcon></NewChatIcon>
@@ -28,23 +69,7 @@ function LayoutHeader() {
       </div>
 
       <div>
-        {status === 'unauthenticated' && (
-          <div className="flex items-center cursor-pointer space-x-2 px-3 py-1 rounded-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300 shadow-sm hover:shadow-md">
-            <Icon icon="ri:aed-line" className="mr-2 w-5 h-5" />
-            登录
-          </div>
-        )}
-
-        {status === 'authenticated' && (
-          <div className="flex items-center space-x-2 cursor-pointer">
-            <Avatar className="w-8 h-8">
-              <AvatarImage src={session?.user?.image ?? ''} alt="user" />
-              <AvatarFallback>{session?.user?.name ?? 'll'}</AvatarFallback>
-            </Avatar>
-
-            <span>{session?.user?.name ?? 'll'}</span>
-          </div>
-        )}
+        <UserAvatar></UserAvatar>
       </div>
     </div>
   )
