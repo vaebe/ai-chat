@@ -20,6 +20,10 @@ npx prisma migrate dev --name update_string_fields
 
 ```bash
 npx prisma generate
+
+# 生产环境
+
+npx prisma generate --no-engine
 ```
 
 ## ui
