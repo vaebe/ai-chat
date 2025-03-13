@@ -1,19 +1,16 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+generator client {
+  provider = "prisma-client-js"
+}
+
 model User {
   id            String          @id @default(cuid())
   name          String?
-  username      String?         @unique
-  email         String?         @unique
-  password      String?         @db.Text
-  role          String?         @default("01")
+  email         String          @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
@@ -23,46 +20,37 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@map("user")
 }
 
 model Account {
-  id                       String  @id @default(cuid())
-  userId                   String  @unique
-  type                     String
-  provider                 String
-  providerAccountId        String
-  refresh_token            String? @db.Text
-  access_token             String? @db.Text
-  expires_at               Int?
-  token_type               String?
-  scope                    String?
-  id_token                 String? @db.Text
-  session_state            String?
-  refresh_token_expires_in Int?
-  user                     User?   @relation(fields: [userId], references: [id])
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([provider, providerAccountId])
-  @@index([userId])
-  @@map("account")
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
 }
 
 model Session {
-  id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id])
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@index([userId])
-  @@map("session")
 }
 
 model VerificationToken {
@@ -70,8 +58,7 @@ model VerificationToken {
   token      String
   expires    DateTime
 
-  @@unique([identifier, token])
-  @@map("verification_token")
+  @@id([identifier, token])
 }
 
 // Optional for WebAuthn support
@@ -88,7 +75,6 @@ model Authenticator {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, credentialID])
-  @@map("authenticator")
 }
 
 // =============================== AI 对话 ===============================
@@ -123,7 +109,6 @@ model AIMessage {
 
   conversation AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
-  @@index([conversationId])
+  @@index([userId, conversationId])
   @@map("ai_message")
 }
