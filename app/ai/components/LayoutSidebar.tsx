@@ -131,11 +131,18 @@ function EditConversationName({ info, dialog }: OperateDialogProps) {
         <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
 
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={dialog.hide}>
+          <Button
+            className="cursor-pointer"
+            type="button"
+            variant="secondary"
+            onClick={dialog.hide}
+          >
             取消
           </Button>
 
-          <Button onClick={save}>确认</Button>
+          <Button className="cursor-pointer" onClick={save}>
+            确认
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -177,7 +184,32 @@ function Operate({ info }: { info: AIConversation }) {
   )
 }
 
-function LayoutSidebar() {
+function ChatListItem({ item }: { item: AIConversation }) {
+  const { id } = useParams()
+  const router = useRouter()
+  function switchConversation(curId: string) {
+    if (id === curId) {
+      return
+    }
+
+    router.push(`/ai/${curId}`)
+  }
+
+  return (
+    <div
+      className={`flex items-center justify-between p-2 min-h-10 cursor-pointer rounded dark:text-white  hover:bg-black/10 dark:hover:bg-white/10 ${id === item.id ? 'bg-black/10 dark:bg-white/10' : ''}`}
+      style={{ boxSizing: 'border-box' }}
+      onClick={() => switchConversation(item.id)}
+    >
+      <p className="overflow-hidden whitespace-nowrap" style={{ width: `calc(100% - 50px)` }}>
+        {item.name}
+      </p>
+      <Operate info={item}></Operate>
+    </div>
+  )
+}
+
+function ChatList() {
   const { setAiSharedData, aiSharedData } = useContext(AiSharedDataContext)
 
   useEffect(() => {
@@ -188,39 +220,26 @@ function LayoutSidebar() {
     })
   }, [setAiSharedData])
 
-  const { id } = useParams()
-
-  const router = useRouter()
-  function switchConversation(id: string) {
-    router.push(`/ai/${id}`)
-  }
-
   return (
-    <div className="w-64 p-2 border-r bg-background">
-      <div className="h-[7vh] flex justify-between">
+    <ScrollArea>
+      <div className="h-[92vh] w-11/12 mx-auto space-y-1">
+        {aiSharedData.conversationList.map((item) => (
+          <ChatListItem item={item} key={item.id}></ChatListItem>
+        ))}
+      </div>
+    </ScrollArea>
+  )
+}
+
+function LayoutSidebar() {
+  return (
+    <div className="w-64 border-r bg-background">
+      <div className="p-2 flex justify-between">
         <OpenOrCloseSiderbarIcon state={false}></OpenOrCloseSiderbarIcon>
         <NewChatIcon></NewChatIcon>
       </div>
 
-      <ScrollArea className="flex-1 h-[92vh]">
-        {aiSharedData.conversationList.map((item) => {
-          return (
-            <div
-              key={item.id}
-              className={`flex items-center justify-between p-2 min-h-10 cursor-pointer rounded dark:text-white mb-1 hover:bg-black/10 dark:hover:bg-white/10 ${id === item.id ? 'bg-black/10 dark:bg-white/10' : ''}`}
-              onClick={() => switchConversation(item.id)}
-            >
-              <p
-                className=" overflow-hidden whitespace-nowrap"
-                style={{ width: `calc(100% - 50px)` }}
-              >
-                {item.name}
-              </p>
-              <Operate info={item}></Operate>
-            </div>
-          )
-        })}
-      </ScrollArea>
+      <ChatList></ChatList>
     </div>
   )
 }
