@@ -1,10 +1,21 @@
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { cn } from '@/lib/utils'
 import { Icon } from '@iconify/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
+import * as React from 'react'
 
-function NewChatIcon() {
+function NewChatIcon({ className }: React.ComponentProps<'div'>) {
   const router = useRouter()
+  const pathname = usePathname()
+  function newChat() {
+    if (pathname === '/ai') {
+      return
+    }
+
+    router.push('/ai')
+    router.refresh()
+  }
 
   return (
     <TooltipProvider>
@@ -13,10 +24,8 @@ function NewChatIcon() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => {
-              router.push('/ai')
-              router.refresh()
-            }}
+            onClick={newChat}
+            className={cn('cursor-pointer', className)}
           >
             <Icon icon="hugeicons:pencil-edit-02" className="h-6 w-6"></Icon>
           </Button>
