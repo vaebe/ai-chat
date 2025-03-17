@@ -83,26 +83,22 @@ function MessageList({ messages, isLoading, className }: MessageListProps) {
   }, [messages])
 
   return (
-    <>
-      {!!messages.length && (
-        <ScrollArea
-          ref={scrollAreaRef}
-          style={{ height: `calc(100vh - 150px)`, width: '100%', overflow: 'hidden' }}
-        >
-          <div className={cn('w-full md:w-10/12 mx-auto', className)}>
-            {messages.map((message) => (
-              <MessageInfo key={message.id} message={message}></MessageInfo>
-            ))}
+    <ScrollArea
+      ref={scrollAreaRef}
+      style={{ height: `calc(100vh - 150px)`, width: '100%', overflow: 'hidden' }}
+    >
+      <div className={cn('w-full md:w-10/12 mx-auto', className)}>
+        {messages.map((message) => (
+          <MessageInfo key={message.id} message={message}></MessageInfo>
+        ))}
 
-            {isLoading && (
-              <div className="flex justify-center items-center mt-4">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            )}
+        {isLoading && (
+          <div className="flex justify-center items-center mt-4">
+            <Loader2 className="h-6 w-6 animate-spin" />
           </div>
-        </ScrollArea>
-      )}
-    </>
+        )}
+      </div>
+    </ScrollArea>
   )
 }
 
