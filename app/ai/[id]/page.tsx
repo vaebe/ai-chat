@@ -6,11 +6,9 @@ import { MessageList } from '@/app/ai/components/MessageList'
 import { AiSharedDataContext } from '@/app/ai/components/AiSharedDataContext'
 import { useContext } from 'react'
 import { LayoutHeader } from '@/app/ai/components/LayoutHeader'
-import { StartAConversationPrompt } from '@/app/ai/components/StartAConversationPrompt'
 import { Sender } from '@/app/ai/components/Sender'
 import { toast } from 'sonner'
 import { AIMessage } from '@prisma/client'
-import { useRouter } from 'next/navigation'
 
 export default function AIChatPage(props: { params: Promise<{ id: string }> }) {
   const params = use(props.params)
@@ -30,8 +28,6 @@ export default function AIChatPage(props: { params: Promise<{ id: string }> }) {
     setIsLoading(['submitted', 'streaming'].includes(status))
   }, [status])
 
-  const router = useRouter()
-
   async function setMsg() {
     try {
       const url = `/api/ai/messages/details?id=${conversationId}`
@@ -43,11 +39,6 @@ export default function AIChatPage(props: { params: Promise<{ id: string }> }) {
       }
 
       const data = res?.data ?? []
-
-      if (!data.length) {
-        router.replace('/ai')
-        return
-      }
 
       const list = data.map((item: AIMessage) => ({
         content: item.content,
@@ -95,10 +86,10 @@ export default function AIChatPage(props: { params: Promise<{ id: string }> }) {
         }
       ).then(() => {
         generateConversationTitle()
-      })
 
-      setAiSharedData((d) => {
-        d.aiFirstMsg = ''
+        setAiSharedData((d) => {
+          d.aiFirstMsg = ''
+        })
       })
     } else {
       setMsg()
@@ -114,8 +105,6 @@ export default function AIChatPage(props: { params: Promise<{ id: string }> }) {
   return (
     <div className="flex flex-col h-screen">
       <LayoutHeader></LayoutHeader>
-
-      <StartAConversationPrompt chatStarted={!!messages.length}></StartAConversationPrompt>
 
       <MessageList messages={messages} isLoading={isLoading}></MessageList>
 

@@ -10,7 +10,7 @@ interface SenderProps {
   input: string
   setInput: (value: string) => void
   isLoading: boolean
-  stop: () => void
+  stop?: () => void
   className?: string
 }
 
@@ -78,7 +78,7 @@ function Sender({ onSubmit, input, setInput, isLoading, stop, className }: Sende
         </Button>
 
         {isLoading && (
-          <Button type="button" size="sm" variant="outline" onClick={() => stop()}>
+          <Button type="button" size="sm" variant="outline" onClick={stop}>
             <StopCircle size={18} />
           </Button>
         )}
