@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import { LayoutHeader } from './components/LayoutHeader'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { AiSharedDataContext } from './components/AiSharedDataContext'
 import { MessageList } from '@/app/ai/components/MessageList'
 import { useChat } from '@ai-sdk/react'
@@ -14,10 +13,16 @@ import { Sender } from './components/Sender'
 export default function AIChatPage() {
   const { setAiSharedData } = useContext(AiSharedDataContext)
 
-  const { messages, input, setInput, handleSubmit, isLoading, stop } = useChat({
+  const { messages, input, setInput, stop, status } = useChat({
     api: '/api/ai/chat',
     keepLastMessageOnError: true
   })
+
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    setIsLoading(['submitted', 'streaming'].includes(status))
+  }, [status])
 
   const router = useRouter()
 
@@ -60,21 +65,12 @@ export default function AIChatPage() {
     }
   }
 
-  const [chatStarted, setChatStarted] = useState(false)
-
-  const { status } = useSession()
-
   const onSubmit = () => {
     if (!input.trim()) {
       return
     }
 
-    if (status === 'authenticated') {
-      createConversation()
-    } else {
-      handleSubmit(undefined)
-      if (!chatStarted) setChatStarted(true)
-    }
+    createConversation()
   }
 
   return (
@@ -82,7 +78,7 @@ export default function AIChatPage() {
       <LayoutHeader></LayoutHeader>
 
       <div className="w-full h-full flex flex-col items-center justify-center">
-        <StartAConversationPrompt chatStarted={chatStarted}></StartAConversationPrompt>
+        <StartAConversationPrompt chatStarted={false}></StartAConversationPrompt>
 
         <MessageList messages={messages} isLoading={isLoading} className="md:w-8/12"></MessageList>
 
