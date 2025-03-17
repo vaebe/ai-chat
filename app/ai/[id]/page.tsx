@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, use } from 'react'
+import { useEffect, use, useState } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { MessageList } from '@/app/ai/components/MessageList'
 import { AiSharedDataContext } from '@/app/ai/components/AiSharedDataContext'
@@ -19,12 +19,16 @@ export default function AIChatPage(props: { params: Promise<{ id: string }> }) {
 
   const { aiSharedData, setAiSharedData } = useContext(AiSharedDataContext)
 
-  const { messages, input, handleSubmit, setInput, isLoading, stop, append, setMessages } = useChat(
-    {
-      api: '/api/ai/chat',
-      keepLastMessageOnError: true
-    }
-  )
+  const { messages, input, handleSubmit, setInput, status, stop, append, setMessages } = useChat({
+    api: '/api/ai/chat',
+    keepLastMessageOnError: true
+  })
+
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    setIsLoading(['submitted', 'streaming'].includes(status))
+  }, [status])
 
   const router = useRouter()
 
