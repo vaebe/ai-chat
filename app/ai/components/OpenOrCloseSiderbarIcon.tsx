@@ -17,12 +17,12 @@ function OpenOrCloseSiderbarIcon({ state }: { state: boolean }) {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="outline" size="icon" onClick={handleClick}>
-            <Icon icon="solar:siderbar-linear" className="h-6 w-6"></Icon>
+          <Button variant="outline" size="icon" className="cursor-pointer" onClick={handleClick}>
+            <Icon icon="solar:siderbar-linear" className="h-6 w-6 cursor-pointer"></Icon>
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{state ? '关闭侧边栏' : '打开侧边栏'}</p>
+          <p>{state ? '打开侧边栏' : '关闭侧边栏'}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
