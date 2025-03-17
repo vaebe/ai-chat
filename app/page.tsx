@@ -12,7 +12,7 @@ export default function Home() {
         </Link>
       </header>
 
-      <div className="w-9/12 mx-auto my-10">
+      <div className="w-11/12 md:w-9/12 mx-auto my-10">
         <picture>
           <img src="/img/chat-dark.png" alt="" className="w-full" />
         </picture>
