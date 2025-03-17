@@ -1,32 +1,25 @@
 'use client'
 
-import { useState, useContext, useEffect } from 'react'
+import { useState, useContext } from 'react'
 import { LayoutHeader } from './components/LayoutHeader'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { AiSharedDataContext } from './components/AiSharedDataContext'
-import { MessageList } from '@/app/ai/components/MessageList'
-import { useChat } from '@ai-sdk/react'
 import { StartAConversationPrompt } from './components/StartAConversationPrompt'
 import { Sender } from './components/Sender'
 
 export default function AIChatPage() {
   const { setAiSharedData } = useContext(AiSharedDataContext)
 
-  const { messages, input, setInput, stop, status } = useChat({
-    api: '/api/ai/chat',
-    keepLastMessageOnError: true
-  })
+  const [input, setInput] = useState('')
 
   const [isLoading, setIsLoading] = useState(false)
-
-  useEffect(() => {
-    setIsLoading(['submitted', 'streaming'].includes(status))
-  }, [status])
 
   const router = useRouter()
 
   async function createConversation() {
+    setIsLoading(true)
+
     try {
       const res = await fetch('/api/ai/conversation/add', {
         method: 'POST',
@@ -62,6 +55,8 @@ export default function AIChatPage() {
       router.replace(`/ai/${conversationId}`)
     } catch {
       toast('创建对话失败!')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -74,20 +69,17 @@ export default function AIChatPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen w-full bg-white/10 p-2">
+    <div className="flex flex-col h-screen w-full bg-white/10">
       <LayoutHeader></LayoutHeader>
 
       <div className="w-full h-full flex flex-col items-center justify-center">
         <StartAConversationPrompt chatStarted={false}></StartAConversationPrompt>
-
-        <MessageList messages={messages} isLoading={isLoading} className="md:w-8/12"></MessageList>
 
         <div className="flex justify-center p-2 md:w-8/12 mx-auto">
           <Sender
             onSubmit={onSubmit}
             input={input}
             isLoading={isLoading}
-            stop={stop}
             setInput={setInput}
           ></Sender>
         </div>
