@@ -221,8 +221,8 @@ function ChatList() {
   }, [setAiSharedData])
 
   return (
-    <ScrollArea>
-      <div className="h-[92vh] w-11/12 mx-auto space-y-1">
+    <ScrollArea className="h-[92vh]">
+      <div className="w-64 p-2 space-y-1">
         {aiSharedData.conversationList.map((item) => (
           <ChatListItem item={item} key={item.id}></ChatListItem>
         ))}
