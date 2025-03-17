@@ -157,7 +157,7 @@ function Operate({ info }: { info: AIConversation }) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Icon icon="dashicons:ellipsis" className="w-[40px] cursor-pointer"></Icon>
+          <Icon icon="dashicons:ellipsis" className="w-[20px] cursor-pointer"></Icon>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent>
@@ -199,9 +199,12 @@ function ChatListItem({ item }: { item: AIConversation }) {
     <div
       className={`flex items-center justify-between p-2 min-h-10 cursor-pointer rounded dark:text-white  hover:bg-black/10 dark:hover:bg-white/10 ${id === item.id ? 'bg-black/10 dark:bg-white/10' : ''}`}
       style={{ boxSizing: 'border-box' }}
-      onClick={() => switchConversation(item.id)}
     >
-      <p className="overflow-hidden whitespace-nowrap" style={{ width: `calc(100% - 50px)` }}>
+      <p
+        className="overflow-hidden whitespace-nowrap"
+        style={{ width: `calc(100% - 30px)` }}
+        onClick={() => switchConversation(item.id)}
+      >
         {item.name}
       </p>
       <Operate info={item}></Operate>
