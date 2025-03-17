@@ -9,7 +9,7 @@ interface SenderProps {
   onSubmit: () => void
   input: string
   setInput: (value: string) => void
-  isLoading: boolean
+  isLoading?: boolean
   stop?: () => void
   className?: string
 }

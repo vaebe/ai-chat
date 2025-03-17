@@ -25,9 +25,7 @@ function generatePromptText(list: Array<AIMessage>) {
 }
 
 export async function GET(req: Request) {
-  // 未登录返回 null
   const session = await auth()
-
   if (!session?.user) {
     return sendJson({ code: 401, msg: `无权限!` })
   }
