@@ -55,7 +55,7 @@ function LayoutHeader() {
   const { aiSharedData } = useContext(AiSharedDataContext)
 
   return (
-    <div className="w-full flex items-center justify-between pt-2 px-8">
+    <div className="w-full flex items-center justify-between py-2 pl-2 pr-8">
       <div className="flex items-center">
         {/* 用户已经登录且侧边栏未打开 */}
         {!aiSharedData.layoutSidebar && (
