@@ -2,7 +2,13 @@ import { CoreMessage, streamText } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
 import { auth } from '@/auth'
 import { prisma } from '@/prisma'
-import { randomUUID } from 'crypto'
+import { generateUUID } from '@/lib/utils'
+import { Ratelimit } from '@upstash/ratelimit'
+import { kv } from '@vercel/kv'
+import { NextRequest } from 'next/server'
+
+// 允许最多 30 秒的流式响应
+export const maxDuration = 30
 
 interface SaveMsgProps {
   aiMsg: string
@@ -16,7 +22,7 @@ async function saveMsg(opts: SaveMsgProps) {
   const { aiMsg, userMsg, usage, userId, conversationId } = opts
   const data = [
     {
-      id: randomUUID().replaceAll('-', ''),
+      id: generateUUID(false),
       role: 'user',
       content: userMsg,
       conversationId,
@@ -24,7 +30,7 @@ async function saveMsg(opts: SaveMsgProps) {
       token: usage.completionTokens
     },
     {
-      id: randomUUID().replaceAll('-', ''),
+      id: generateUUID(false),
       role: 'assistant',
       content: aiMsg,
       conversationId,
@@ -44,7 +50,29 @@ async function saveMsg(opts: SaveMsgProps) {
   }
 }
 
-export async function POST(req: Request) {
+const ratelimit = new Ratelimit({
+  redis: kv,
+  limiter: Ratelimit.fixedWindow(1, '30s'),
+  analytics: true, // 启用的分析功能
+  prefix: 'ai_chat'
+})
+
+function getIp(req: NextRequest) {
+  return (
+    req.headers.get('x-forwarded-for')?.split(',')[0] || // Vercel 代理
+    req.headers.get('cf-connecting-ip') || // Cloudflare 代理
+    req.headers.get('x-real-ip') || // 备用
+    'Unknown'
+  )
+}
+
+export async function POST(req: NextRequest) {
+  const { success } = await ratelimit.limit(getIp(req))
+
+  if (!success) {
+    return new Response('Ratelimited!', { status: 429 })
+  }
+
   // 未登录返回 null
   const session = await auth()
 
@@ -67,8 +95,7 @@ export async function POST(req: Request) {
     apiKey: process.env.OPEN_API_KEY // 从环境变量获取API密钥-目前是阿里云
   })
 
-  // 使用streamText函数创建流式文本响应
-  const result = await streamText({
+  const result = streamText({
     model: openai('qwen-turbo-latest'), // 模型名称
     system: '你是一名优秀的前端开发工程师', // 设置AI助手的系统角色提示
     messages, // 传入用户消息历史
