@@ -13,8 +13,7 @@ function NewChatIcon({ className }: React.ComponentProps<'div'>) {
       return
     }
 
-    router.push('/ai')
-    router.refresh()
+    router.replace('/ai')
   }
 
   return (

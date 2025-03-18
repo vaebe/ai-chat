@@ -21,6 +21,8 @@
     "@radix-ui/react-scroll-area": "^1.2.3",
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.1.8",
+    "@upstash/ratelimit": "^2.0.5",
+    "@vercel/kv": "^3.0.0",
     "ai": "^4.1.47",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
