@@ -20,39 +20,29 @@ interface SaveMsgProps {
 
 async function saveMsg(opts: SaveMsgProps) {
   const { aiMsg, userMsg, usage, userId, conversationId } = opts
-  const data = [
-    {
-      id: generateUUID(false),
-      role: 'user',
-      content: userMsg,
-      conversationId,
-      userId,
-      token: usage.completionTokens
-    },
-    {
-      id: generateUUID(false),
-      role: 'assistant',
-      content: aiMsg,
-      conversationId,
-      userId,
-      token: usage.promptTokens
-    }
+
+  const list = [
+    { role: 'user', content: userMsg, token: usage.completionTokens },
+    { role: 'assistant', content: aiMsg, token: usage.promptTokens }
   ]
+  
+  const messages = list.map(msg => ({
+    id: generateUUID(false),
+    conversationId,
+    userId,
+    ...msg
+  }))
 
   try {
-    for (const item of data) {
-      await prisma.aIMessage.create({
-        data: item
-      })
-    }
+    await Promise.all(messages.map(item => prisma.aIMessage.create({ data: item })))
   } catch (error) {
-    console.error(`保存 ai 对话信息失败: ${error}`)
+    console.error(`保存 AI 对话信息失败:`, error)
   }
 }
 
 const ratelimit = new Ratelimit({
   redis: kv,
-  limiter: Ratelimit.fixedWindow(1, '30s'),
+  limiter: Ratelimit.fixedWindow(5, '30s'),
   analytics: true, // 启用的分析功能
   prefix: 'ai_chat'
 })
