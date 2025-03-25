@@ -6,6 +6,7 @@ import { generateUUID } from '@/lib/utils'
 import { Ratelimit } from '@upstash/ratelimit'
 import { kv } from '@vercel/kv'
 import { NextRequest } from 'next/server'
+import { timeTool } from './tools/time'
 
 // 允许最多 30 秒的流式响应
 export const maxDuration = 30
@@ -25,8 +26,8 @@ async function saveMsg(opts: SaveMsgProps) {
     { role: 'user', content: userMsg, token: usage.completionTokens },
     { role: 'assistant', content: aiMsg, token: usage.promptTokens }
   ]
-  
-  const messages = list.map(msg => ({
+
+  const messages = list.map((msg) => ({
     id: generateUUID(false),
     conversationId,
     userId,
@@ -34,7 +35,7 @@ async function saveMsg(opts: SaveMsgProps) {
   }))
 
   try {
-    await Promise.all(messages.map(item => prisma.aIMessage.create({ data: item })))
+    await Promise.all(messages.map((item) => prisma.aIMessage.create({ data: item })))
   } catch (error) {
     console.error(`保存 AI 对话信息失败:`, error)
   }
@@ -89,6 +90,10 @@ export async function POST(req: NextRequest) {
     model: openai('qwen-turbo-latest'), // 模型名称
     system: '你是一名优秀的前端开发工程师', // 设置AI助手的系统角色提示
     messages, // 传入用户消息历史
+    tools: {
+      timeTool
+    },
+    maxSteps: 2,
     onFinish({ text, usage }) {
       if (userId && conversationId) {
         saveMsg({
