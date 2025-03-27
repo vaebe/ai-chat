@@ -6,7 +6,7 @@ import { generateUUID } from '@/lib/utils'
 import { Ratelimit } from '@upstash/ratelimit'
 import { kv } from '@vercel/kv'
 import { NextRequest } from 'next/server'
-import { timeTool } from './tools/time'
+import { timeTool, webReaderTool } from './tools'
 
 // 允许最多 30 秒的流式响应
 export const maxDuration = 30
@@ -91,7 +91,8 @@ export async function POST(req: NextRequest) {
     system: '你是一名优秀的前端开发工程师', // 设置AI助手的系统角色提示
     messages, // 传入用户消息历史
     tools: {
-      timeTool
+      timeTool,
+      webReaderTool
     },
     maxSteps: 2,
     onFinish({ text, usage }) {
