@@ -60,22 +60,23 @@ function RemoveConversation({ info, dialog }: OperateDialogProps) {
   const router = useRouter()
 
   async function remove() {
-    const res = await fetch('/api/ai/conversation/delete', {
+    fetch('/api/ai/conversation/delete', {
       method: 'DELETE',
       body: JSON.stringify({ id: info.id })
-    }).then((res) => res.json())
-
-    if (res.code === 0) {
-      dialog.hide()
-
-      setAiSharedData((d) => {
-        d.conversationList = aiSharedData.conversationList.filter((item) => item.id !== info.id)
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.code === 0) {
+          setAiSharedData((d) => {
+            d.conversationList = aiSharedData.conversationList.filter((item) => item.id !== info.id)
+          })
+        }
       })
 
-      if (info.id === id) {
-        router.push(`/ai`)
-        router.refresh()
-      }
+    dialog.hide()
+
+    if (info.id === id) {
+      router.push(`/ai`)
     }
   }
 
@@ -88,11 +89,18 @@ function RemoveConversation({ info, dialog }: OperateDialogProps) {
         </DialogHeader>
 
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={dialog.hide}>
+          <Button
+            type="button"
+            variant="secondary"
+            className="cursor-pointer"
+            onClick={dialog.hide}
+          >
             取消
           </Button>
 
-          <Button onClick={remove}>确认</Button>
+          <Button onClick={remove} className="cursor-pointer">
+            确认
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
