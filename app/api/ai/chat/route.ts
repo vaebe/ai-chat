@@ -7,6 +7,9 @@ import { Ratelimit } from '@upstash/ratelimit'
 import { kv } from '@vercel/kv'
 import { NextRequest } from 'next/server'
 import { timeTool, webReaderTool } from './tools'
+import { experimental_createMCPClient as createMCPClient } from 'ai'
+import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdio'
+import path from 'path'
 
 // 允许最多 30 秒的流式响应
 export const maxDuration = 30
@@ -86,11 +89,25 @@ export async function POST(req: NextRequest) {
     apiKey: process.env.OPEN_API_KEY // 从环境变量获取API密钥-目前是阿里云
   })
 
+  const mcpClient = await createMCPClient({
+    transport: new StdioMCPTransport({
+      command: 'node',
+      args: [path.resolve(process.cwd(), 'mcp/githubSearch.mjs')],
+      env: {
+        ...process.env,
+        GITHUB_TOKEN: process.env.GITHUB_TOKEN ?? ''
+      }
+    })
+  })
+
+  const mcpTools = await mcpClient.tools()
+
   const result = streamText({
     model: openai('qwen-turbo-latest'), // 模型名称
-    system: '你是一名优秀的前端开发工程师', // 设置AI助手的系统角色提示
+    system: '你是一个通用的智能 AI 可以根据用户的输入回答问题', // 设置AI助手的系统角色提示
     messages, // 传入用户消息历史
     tools: {
+      ...mcpTools,
       timeTool,
       webReaderTool
     },
@@ -105,6 +122,8 @@ export async function POST(req: NextRequest) {
           conversationId: `${conversationId}`
         })
       }
+
+      mcpClient.close()
     }
   })
 
