@@ -2,10 +2,7 @@
 CREATE TABLE "user" (
     "id" TEXT NOT NULL,
     "name" TEXT,
-    "username" TEXT,
-    "email" TEXT,
-    "password" TEXT,
-    "role" TEXT DEFAULT '01',
+    "email" TEXT NOT NULL,
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -16,7 +13,6 @@ CREATE TABLE "user" (
 
 -- CreateTable
 CREATE TABLE "account" (
-    "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "type" TEXT NOT NULL,
     "provider" TEXT NOT NULL,
@@ -28,30 +24,28 @@ CREATE TABLE "account" (
     "scope" TEXT,
     "id_token" TEXT,
     "session_state" TEXT,
-    "refresh_token_expires_in" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "account_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "account_pkey" PRIMARY KEY ("provider","providerAccountId")
 );
 
 -- CreateTable
 CREATE TABLE "session" (
-    "id" TEXT NOT NULL,
     "sessionToken" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "expires" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "session_pkey" PRIMARY KEY ("id")
+    "updatedAt" TIMESTAMP(3) NOT NULL
 );
 
 -- CreateTable
 CREATE TABLE "verification_token" (
     "identifier" TEXT NOT NULL,
     "token" TEXT NOT NULL,
-    "expires" TIMESTAMP(3) NOT NULL
+    "expires" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "verification_token_pkey" PRIMARY KEY ("identifier","token")
 );
 
 -- CreateTable
@@ -100,28 +94,10 @@ CREATE TABLE "ai_message" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "user_username_key" ON "user"("username");
-
--- CreateIndex
 CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "account_userId_key" ON "account"("userId");
-
--- CreateIndex
-CREATE INDEX "account_userId_idx" ON "account"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "account_provider_providerAccountId_key" ON "account"("provider", "providerAccountId");
-
--- CreateIndex
 CREATE UNIQUE INDEX "session_sessionToken_key" ON "session"("sessionToken");
-
--- CreateIndex
-CREATE INDEX "session_userId_idx" ON "session"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "verification_token_identifier_token_key" ON "verification_token"("identifier", "token");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "authenticator_credentialID_key" ON "authenticator"("credentialID");
@@ -130,16 +106,13 @@ CREATE UNIQUE INDEX "authenticator_credentialID_key" ON "authenticator"("credent
 CREATE INDEX "ai_conversation_userId_idx" ON "ai_conversation"("userId");
 
 -- CreateIndex
-CREATE INDEX "ai_message_userId_idx" ON "ai_message"("userId");
-
--- CreateIndex
-CREATE INDEX "ai_message_conversationId_idx" ON "ai_message"("conversationId");
+CREATE INDEX "ai_message_userId_conversationId_idx" ON "ai_message"("userId", "conversationId");
 
 -- AddForeignKey
-ALTER TABLE "account" ADD CONSTRAINT "account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "account" ADD CONSTRAINT "account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "session" ADD CONSTRAINT "session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "session" ADD CONSTRAINT "session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "authenticator" ADD CONSTRAINT "authenticator_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
