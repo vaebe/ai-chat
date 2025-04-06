@@ -37,3 +37,9 @@ npx shadcn@latest add scroll-area
 ## favicon 配置生成
 
 [猛击直达](https://realfavicongenerator.net/)
+
+## 测试 mcp
+
+```bash
+npx @modelcontextprotocol/inspector node mcp/githubSearch.mjs
+```
