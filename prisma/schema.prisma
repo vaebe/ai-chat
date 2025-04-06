@@ -20,6 +20,8 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("user")
 }
 
 model Account {
@@ -41,6 +43,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([provider, providerAccountId])
+  @@map("account")
 }
 
 model Session {
@@ -48,9 +51,10 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  @@map("session")
 }
 
 model VerificationToken {
@@ -59,6 +63,7 @@ model VerificationToken {
   expires    DateTime
 
   @@id([identifier, token])
+  @@map("verification_token")
 }
 
 // Optional for WebAuthn support
@@ -75,6 +80,7 @@ model Authenticator {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, credentialID])
+  @@map("authenticator")
 }
 
 // =============================== AI 对话 ===============================
