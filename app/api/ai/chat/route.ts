@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
   const mcpClient = await createMCPClient({
     transport: new StdioMCPTransport({
       command: 'node',
-      args: [path.resolve(process.cwd(), 'mcp/githubSearch.mjs')],
+      args: [path.resolve(process.cwd(), 'public/mcp/githubSearch.mjs')],
       env: {
         ...process.env,
         GITHUB_TOKEN: process.env.GITHUB_TOKEN ?? ''
