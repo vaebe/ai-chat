@@ -7,11 +7,11 @@ import { Ratelimit } from '@upstash/ratelimit'
 import { kv } from '@vercel/kv'
 import { NextRequest } from 'next/server'
 import { timeTool, webReaderTool } from './tools'
-import { experimental_createMCPClient as createMCPClient } from 'ai'
-import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdio'
+import { createGithubSearchMcpServer } from './mcp'
+import { getClientIp } from '@/lib/utils'
 
-// 允许最多 30 秒的流式响应
-export const maxDuration = 30
+// 允许最多 30 秒的流式响应 (免费版最大支持 60s)
+export const maxDuration = 60
 
 interface SaveMsgProps {
   aiMsg: string
@@ -50,17 +50,8 @@ const ratelimit = new Ratelimit({
   prefix: 'ai_chat'
 })
 
-function getIp(req: NextRequest) {
-  return (
-    req.headers.get('x-forwarded-for')?.split(',')[0] || // Vercel 代理
-    req.headers.get('cf-connecting-ip') || // Cloudflare 代理
-    req.headers.get('x-real-ip') || // 备用
-    'Unknown'
-  )
-}
-
 export async function POST(req: NextRequest) {
-  const { success } = await ratelimit.limit(getIp(req))
+  const { success } = await ratelimit.limit(getClientIp(req))
 
   if (!success) {
     return new Response('Ratelimited!', { status: 429 })
@@ -88,28 +79,18 @@ export async function POST(req: NextRequest) {
     apiKey: process.env.OPEN_API_KEY // 从环境变量获取API密钥-目前是阿里云
   })
 
-  const mcpClient = await createMCPClient({
-    transport: new StdioMCPTransport({
-      command: 'npx',
-      args: ['-y', '@modelcontextprotocol/server-github'],
-      env: {
-        GITHUB_TOKEN: process.env.GITHUB_TOKEN ?? ''
-      }
-    })
-  })
-
-  const mcpTools = await mcpClient.tools()
+  const githubSearchMcp = await createGithubSearchMcpServer()
 
   const result = streamText({
     model: openai('qwen-turbo-latest'), // 模型名称
     system: '你是一个通用的智能 AI 可以根据用户的输入回答问题', // 设置AI助手的系统角色提示
     messages, // 传入用户消息历史
     tools: {
-      ...mcpTools,
+      ...githubSearchMcp.tools,
       timeTool,
       webReaderTool
     },
-    maxSteps: 2,
+    maxSteps: 5,
     onFinish({ text, usage }) {
       if (userId && conversationId) {
         saveMsg({
@@ -121,7 +102,7 @@ export async function POST(req: NextRequest) {
         })
       }
 
-      mcpClient.close()
+      githubSearchMcp.client.close()
     }
   })
 
