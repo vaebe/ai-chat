@@ -9,7 +9,6 @@ import { NextRequest } from 'next/server'
 import { timeTool, webReaderTool } from './tools'
 import { experimental_createMCPClient as createMCPClient } from 'ai'
 import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdio'
-import path from 'path'
 
 // 允许最多 30 秒的流式响应
 export const maxDuration = 30
@@ -91,10 +90,9 @@ export async function POST(req: NextRequest) {
 
   const mcpClient = await createMCPClient({
     transport: new StdioMCPTransport({
-      command: 'node',
-      args: [path.resolve(process.cwd(), 'public/mcp/githubSearch.mjs')],
+      command: 'npx',
+      args: ['-y', '@modelcontextprotocol/server-github'],
       env: {
-        ...process.env,
         GITHUB_TOKEN: process.env.GITHUB_TOKEN ?? ''
       }
     })
