@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, memo, useMemo } from 'react'
+import { useRef, useEffect, memo, useMemo, useCallback } from 'react'
 import type { Message } from '@ai-sdk/react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card } from '@/components/ui/card'
@@ -57,17 +57,21 @@ interface MessageListProps {
 }
 
 const MessageList = memo(({ messages, isLoading, className }: MessageListProps) => {
-  const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [])
 
   useEffect(() => {
-    const scrollElement = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]')
+    scrollToBottom()
+  }, [scrollToBottom])
 
-    if (!scrollElement) return
-
-    requestAnimationFrame(() => {
-      scrollElement.scrollTop = scrollElement.scrollHeight
-    })
-  }, [messages])
+  useEffect(() => {
+    if (messages.length > 0) {
+      scrollToBottom()
+    }
+  }, [messages, scrollToBottom])
 
   const messageList = useMemo(
     () =>
@@ -79,14 +83,12 @@ const MessageList = memo(({ messages, isLoading, className }: MessageListProps) 
   )
 
   return (
-    <ScrollArea
-      ref={scrollAreaRef}
-      style={{ height: `calc(100vh - 150px)`, width: '100%', overflow: 'hidden' }}
-    >
+    <ScrollArea style={{ height: `calc(100vh - 150px)`, width: '100%', overflow: 'hidden' }}>
       <div className={cn('w-full md:w-10/12 mx-auto p-4 md:p-0', className)}>
         {messageList}
         {isLoading && <LoadingSpinner />}
       </div>
+      <div ref={messagesEndRef} />
     </ScrollArea>
   )
 })
