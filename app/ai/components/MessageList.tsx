@@ -33,25 +33,23 @@ const UserMessage = memo(({ message }: { message: Message }) => {
 })
 UserMessage.displayName = 'UserMessage'
 
-const AssistantMessage = memo(({ message, reload }: { message: Message; reload: () => void }) => {
+const AssistantMessage = memo(({ message }: { message: Message }) => {
   return (
     <div className={`flex items-start space-x-2 mb-4 justify-start`}>
       <MessageAvatar role="assistant" />
-      <div className="w-[88%]">
-        <Card className=" px-4 py-2">
-          <MarkdownRender content={message.content ?? ''} />
-        </Card>
 
-        <div className="flex items-center justify-end mt-1">
-          <div className="cursor-pointer hover:text-gray-400" onClick={reload}>
-            <Icon icon="pepicons-pop:refresh" width={24}></Icon>
-          </div>
-        </div>
-      </div>
+      <Card className="w-[88%] px-4 py-2">
+        <MarkdownRender content={message.content ?? ''} />
+      </Card>
     </div>
   )
 })
 AssistantMessage.displayName = 'AssistantMessage'
+
+interface MessageListProps {
+  className?: string
+  isLoading: boolean
+}
 
 const LoadingSpinner = memo(() => (
   <div className="flex justify-center items-center mt-4">
@@ -59,11 +57,6 @@ const LoadingSpinner = memo(() => (
   </div>
 ))
 LoadingSpinner.displayName = 'LoadingSpinner'
-
-interface MessageListProps {
-  className?: string
-  isLoading: boolean
-}
 
 const MessageList = ({ className, isLoading }: MessageListProps) => {
   const params = useParams<{ id: string }>()
@@ -97,7 +90,27 @@ const MessageList = ({ className, isLoading }: MessageListProps) => {
         {messages.map((message, index) => {
           const MessageComponent = message.role === 'assistant' ? AssistantMessage : UserMessage
 
-          return <MessageComponent key={index} message={message} reload={reload} />
+          const isLast = messages.length === index + 1
+          return (
+            <div key={message.id}>
+              <MessageComponent message={message} />
+
+              <div className="w-[88%] flex items-center justify-end -mt-2 mb-2">
+                {isLast && (
+                  <Icon
+                    icon="pepicons-pop:refresh"
+                    width={24}
+                    className="cursor-pointer  hover:text-gray-400"
+                    onClick={() => reload()}
+                  ></Icon>
+                )}
+
+                {isLoading && isLast && (
+                  <Icon icon="eos-icons:three-dots-loading" width={44}></Icon>
+                )}
+              </div>
+            </div>
+          )
         })}
 
         {/* 发生错误 */}
@@ -110,8 +123,6 @@ const MessageList = ({ className, isLoading }: MessageListProps) => {
             </div>
           </div>
         )}
-
-        {isLoading && <LoadingSpinner />}
       </div>
       <div ref={messagesEndRef} />
     </ScrollArea>
