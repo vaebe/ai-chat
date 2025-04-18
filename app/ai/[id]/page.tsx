@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, use, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { MessageList } from '@/app/ai/components/MessageList'
 import { AiSharedDataContext } from '@/app/ai/components/AiSharedDataContext'
@@ -9,17 +9,19 @@ import { LayoutHeader } from '@/app/ai/components/LayoutHeader'
 import { Sender } from '@/app/ai/components/Sender'
 import { toast } from 'sonner'
 import { AIMessage } from '@prisma/client'
+import { useParams } from 'next/navigation'
 
-export default function AIChatPage(props: { params: Promise<{ id: string }> }) {
-  const params = use(props.params)
-
+export default function AIChatPage() {
+  const params = useParams<{ id: string }>()
   const conversationId = params.id
 
   const { aiSharedData, setAiSharedData } = useContext(AiSharedDataContext)
 
-  const { messages, input, handleSubmit, setInput, status, stop, append, setMessages } = useChat({
+  const { input, handleSubmit, setInput, status, stop, append, setMessages } = useChat({
+    id: conversationId,
     api: '/api/ai/chat',
-    keepLastMessageOnError: true
+    keepLastMessageOnError: true,
+    experimental_throttle: 50
   })
 
   const [isLoading, setIsLoading] = useState(false)
@@ -106,7 +108,7 @@ export default function AIChatPage(props: { params: Promise<{ id: string }> }) {
     <div className="flex flex-col h-screen">
       <LayoutHeader></LayoutHeader>
 
-      <MessageList messages={messages} isLoading={isLoading}></MessageList>
+      <MessageList isLoading={isLoading}></MessageList>
 
       <div className="flex justify-center md:w-10/12 mx-auto pb-6">
         <Sender

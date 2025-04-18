@@ -1,13 +1,15 @@
 'use client'
 
-import { useRef, useEffect, memo, useMemo, useCallback } from 'react'
-import type { Message } from '@ai-sdk/react'
+import { useRef, useEffect, memo, useCallback } from 'react'
+import { useChat, Message } from '@ai-sdk/react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Loader2, User, Bot } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import MarkdownRender from '@/components/MarkdownRender'
+import { Icon } from '@iconify/react'
+import { useParams } from 'next/navigation'
 
 const MessageAvatar = ({ role }: { role: 'user' | 'assistant' }) => (
   <Avatar>
@@ -31,13 +33,21 @@ const UserMessage = memo(({ message }: { message: Message }) => {
 })
 UserMessage.displayName = 'UserMessage'
 
-const AssistantMessage = memo(({ message }: { message: Message }) => {
+const AssistantMessage = memo(({ message, reload }: { message: Message; reload: () => void }) => {
   return (
     <div className={`flex items-start space-x-2 mb-4 justify-start`}>
       <MessageAvatar role="assistant" />
-      <Card className="w-[88%] px-4 py-2">
-        <MarkdownRender content={message.content ?? ''} />
-      </Card>
+      <div className="w-[88%]">
+        <Card className=" px-4 py-2">
+          <MarkdownRender content={message.content ?? ''} />
+        </Card>
+
+        <div className="flex items-center justify-end mt-1">
+          <div className="cursor-pointer hover:text-gray-400" onClick={reload}>
+            <Icon icon="pepicons-pop:refresh" width={24}></Icon>
+          </div>
+        </div>
+      </div>
     </div>
   )
 })
@@ -51,12 +61,20 @@ const LoadingSpinner = memo(() => (
 LoadingSpinner.displayName = 'LoadingSpinner'
 
 interface MessageListProps {
-  messages: Message[]
-  isLoading: boolean
   className?: string
+  isLoading: boolean
 }
 
-const MessageList = memo(({ messages, isLoading, className }: MessageListProps) => {
+const MessageList = ({ className, isLoading }: MessageListProps) => {
+  const params = useParams<{ id: string }>()
+
+  const { messages, reload, error } = useChat({
+    id: params.id,
+    api: '/api/ai/chat',
+    keepLastMessageOnError: true,
+    experimental_throttle: 50
+  })
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = useCallback(() => {
@@ -73,25 +91,31 @@ const MessageList = memo(({ messages, isLoading, className }: MessageListProps) 
     }
   }, [messages, scrollToBottom])
 
-  const messageList = useMemo(
-    () =>
-      messages.map((message, index) => {
-        const MessageComponent = message.role === 'assistant' ? AssistantMessage : UserMessage
-        return <MessageComponent key={index} message={message} />
-      }),
-    [messages]
-  )
-
   return (
     <ScrollArea style={{ height: `calc(100vh - 150px)`, width: '100%', overflow: 'hidden' }}>
       <div className={cn('w-full md:w-10/12 mx-auto p-4 md:p-0', className)}>
-        {messageList}
+        {messages.map((message, index) => {
+          const MessageComponent = message.role === 'assistant' ? AssistantMessage : UserMessage
+
+          return <MessageComponent key={index} message={message} reload={reload} />
+        })}
+
+        {/* 发生错误 */}
+        {error && (
+          <div className="flex items-center space-x-4">
+            <p className="text-red-500">{error?.message}</p>
+
+            <div className="cursor-pointer hover:text-gray-400" onClick={() => reload()}>
+              <Icon icon="pepicons-pop:refresh" width={24}></Icon>
+            </div>
+          </div>
+        )}
+
         {isLoading && <LoadingSpinner />}
       </div>
       <div ref={messagesEndRef} />
     </ScrollArea>
   )
-})
-MessageList.displayName = 'MessageList'
+}
 
 export { MessageList, AssistantMessage, UserMessage }

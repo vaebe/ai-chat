@@ -106,6 +106,9 @@ export async function POST(req: NextRequest) {
     }
   })
 
+  // 即使客户端已经断开连接，onFinish 也会触发
+  result.consumeStream()
+
   // 将结果转换为数据流响应并返回
-  return result.toDataStreamResponse()
+  return result.toDataStreamResponse({ sendReasoning: true, sendSources: true })
 }
