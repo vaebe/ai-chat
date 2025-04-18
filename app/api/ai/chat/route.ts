@@ -6,8 +6,6 @@ import { generateUUID } from '@/lib/utils'
 import { Ratelimit } from '@upstash/ratelimit'
 import { kv } from '@vercel/kv'
 import { NextRequest } from 'next/server'
-import { timeTool, webReaderTool } from './tools'
-import { createGithubSearchMcpServer } from './mcp'
 import { getClientIp } from '@/lib/utils'
 
 // 允许最多 30 秒的流式响应 (免费版最大支持 60s)
@@ -79,17 +77,11 @@ export async function POST(req: NextRequest) {
     apiKey: process.env.OPEN_API_KEY // 从环境变量获取API密钥-目前是阿里云
   })
 
-  const githubSearchMcp = await createGithubSearchMcpServer()
-
   const result = streamText({
     model: openai('qwen-turbo-latest'), // 模型名称
     system: '你是一个通用的智能 AI 可以根据用户的输入回答问题', // 设置AI助手的系统角色提示
     messages, // 传入用户消息历史
-    tools: {
-      ...githubSearchMcp.tools,
-      timeTool,
-      webReaderTool
-    },
+    tools: {},
     maxSteps: 5,
     onFinish({ text, usage }) {
       if (userId && conversationId) {
@@ -101,8 +93,6 @@ export async function POST(req: NextRequest) {
           conversationId: `${conversationId}`
         })
       }
-
-      githubSearchMcp.client.close()
     }
   })
 
