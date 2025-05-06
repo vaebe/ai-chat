@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, memo, useCallback } from 'react'
+import { useEffect, memo } from 'react'
 import { useChat, Message } from '@ai-sdk/react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card } from '@/components/ui/card'
@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 import MarkdownRender from '@/components/MarkdownRender'
 import { Icon } from '@iconify/react'
 import { useParams } from 'next/navigation'
+import { useChatScroll } from '@/hooks/use-chat-scroll'
 
 const MessageAvatar = ({ role }: { role: 'user' | 'assistant' }) => (
   <Avatar>
@@ -68,35 +69,29 @@ const MessageList = ({ className, isLoading }: MessageListProps) => {
     experimental_throttle: 50
   })
 
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [])
-
+  const { containerRef, scrollToBottom } = useChatScroll()
   useEffect(() => {
     scrollToBottom()
-  }, [scrollToBottom])
-
-  useEffect(() => {
-    if (messages.length > 0) {
-      scrollToBottom()
-    }
   }, [messages, scrollToBottom])
 
   return (
-    <ScrollArea style={{ height: `calc(100vh - 150px)`, width: '100%', overflow: 'hidden' }}>
+    <ScrollArea
+      ref={containerRef}
+      style={{ height: `calc(100vh - 150px)`, width: '100%', overflow: 'hidden' }}
+    >
       <div className={cn('w-full md:w-10/12 mx-auto p-4 md:p-0', className)}>
         {messages.map((message, index) => {
           const MessageComponent = message.role === 'assistant' ? AssistantMessage : UserMessage
 
+          const lastMsg = messages[messages.length - 1]
           const isLast = messages.length === index + 1
           return (
             <div key={message.id}>
               <MessageComponent message={message} />
 
-              <div className="w-[88%] flex items-center justify-end -mt-2 mb-2">
-                {isLast && (
+              <div className="w-[92%] h-[30px] flex items-start justify-end -mt-3">
+                {/* 最后一条且是 ai 回复 */}
+                {isLast && lastMsg.role === 'assistant' && !isLoading && (
                   <Icon
                     icon="pepicons-pop:refresh"
                     width={24}
@@ -124,7 +119,6 @@ const MessageList = ({ className, isLoading }: MessageListProps) => {
           </div>
         )}
       </div>
-      <div ref={messagesEndRef} />
     </ScrollArea>
   )
 }

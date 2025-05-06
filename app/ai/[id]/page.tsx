@@ -110,7 +110,7 @@ export default function AIChatPage() {
 
       <MessageList isLoading={isLoading}></MessageList>
 
-      <div className="flex justify-center md:w-10/12 mx-auto pb-6">
+      <div className="flex justify-center w-full px-2 md:px-0 md:w-10/12 mx-auto md:pb-6 ">
         <Sender
           onSubmit={onSubmit}
           input={input}
