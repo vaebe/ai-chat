@@ -89,35 +89,26 @@ const MessageList = ({ className, isLoading }: MessageListProps) => {
             <div key={message.id}>
               <MessageComponent message={message} />
 
-              <div className="w-[92%] h-[30px] flex items-start justify-end -mt-3">
-                {/* 最后一条且是 ai 回复 */}
-                {isLast && lastMsg.role === 'assistant' && !isLoading && (
-                  <Icon
-                    icon="pepicons-pop:refresh"
-                    width={24}
-                    className="cursor-pointer  hover:text-gray-400"
-                    onClick={() => reload()}
-                  ></Icon>
-                )}
+              {isLast && (
+                <div className="w-[92%] h-[30px] flex items-start justify-end -mt-3">
+                  {error && <p className="text-red-500">{error?.message}</p>}
 
-                {isLoading && isLast && (
-                  <Icon icon="eos-icons:three-dots-loading" width={44}></Icon>
-                )}
-              </div>
+                  {/* 最后一条且是 ai 回复 */}
+                  {lastMsg.role === 'assistant' && !isLoading && (
+                    <Icon
+                      icon="pepicons-pop:refresh"
+                      width={24}
+                      className="cursor-pointer  hover:text-gray-400"
+                      onClick={() => reload()}
+                    ></Icon>
+                  )}
+
+                  {isLoading && <Icon icon="eos-icons:three-dots-loading" width={44}></Icon>}
+                </div>
+              )}
             </div>
           )
         })}
-
-        {/* 发生错误 */}
-        {error && (
-          <div className="flex items-center space-x-4">
-            <p className="text-red-500">{error?.message}</p>
-
-            <div className="cursor-pointer hover:text-gray-400" onClick={() => reload()}>
-              <Icon icon="pepicons-pop:refresh" width={24}></Icon>
-            </div>
-          </div>
-        )}
       </div>
     </ScrollArea>
   )
