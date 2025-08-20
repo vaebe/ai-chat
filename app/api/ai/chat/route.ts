@@ -1,7 +1,6 @@
-import { convertToModelMessages, createIdGenerator, ModelMessage, streamText, UIMessage } from 'ai'
+import { convertToModelMessages, createIdGenerator, streamText, UIMessage } from 'ai'
 import { auth } from '@/auth'
 import { prisma } from '@/prisma'
-import { generateUUID } from '@/lib/utils'
 import { Ratelimit } from '@upstash/ratelimit'
 import { kv } from '@vercel/kv'
 import { NextRequest } from 'next/server'
@@ -12,31 +11,34 @@ export const maxDuration = 60
 
 interface SaveMsgProps {
   messages: UIMessage[]
-  usage?: { promptTokens: number; completionTokens: number; totalTokens: number }
   userId: string
-  conversationId: string
+  chatId: string
 }
 
 async function saveMsg(opts: SaveMsgProps) {
-  const { messages, usage, userId, conversationId } = opts
+  const { messages, userId, chatId } = opts
 
-  // const list = [
-  //   { role: 'user', content: userMsg, token: usage.outputTokens },
-  //   { role: 'assistant', content: aiMsg, token: usage.inputTokens }
-  // ]
+  if (!userId || !chatId) {
+    console.warn(`userId-${userId} chatId-${chatId} 不存在无法持久话聊天数据`)
+    return
+  }
 
-  // const messages = list.map((msg) => ({
-  //   id: generateUUID(false),
-  //   conversationId,
-  //   userId,
-  //   ...msg
-  // }))
+  const { id, role, metadata, parts } = messages[0]
 
-  // try {
-  //   await Promise.all(messages.map((item) => prisma.aIMessage.create({ data: item })))
-  // } catch (error) {
-  //   console.error(`保存 AI 对话信息失败:`, error)
-  // }
+  try {
+    await prisma.aIMessage.create({
+      data: {
+        userId,
+        id,
+        conversationId: chatId,
+        role,
+        metadata: JSON.stringify(metadata),
+        parts: JSON.stringify(parts)
+      }
+    })
+  } catch (error) {
+    console.error(`保存 AI 对话信息失败:`, error)
+  }
 }
 
 const ratelimit = new Ratelimit({
@@ -60,27 +62,23 @@ export async function POST(req: NextRequest) {
 
   interface ReqProps {
     messages: UIMessage[]
-    data: Record<string, string | number>
+    id: string
+    trigger: string
   }
 
-  const { messages, data }: ReqProps = await req.json()
-
-  // conversationId 对话id
-  const conversationId = data?.conversationId
+  const { messages, id: chatId }: ReqProps = await req.json()
 
   const result = streamText({
     model: 'openai/gpt-4.1-nano', // 模型名称
     temperature: 0.6,
     system: '你是一个通用的智能 AI 可以根据用户的输入回答问题', // 设置AI助手的系统角色提示
-    messages: convertToModelMessages(messages), // 传入用户消息历史
-    onFinish({ text, usage }) {}
+    messages: convertToModelMessages(messages) // 传入用户消息历史
   })
 
   // 即使客户端已经断开连接，onFinish 也会触发
   result.consumeStream()
 
   // 将结果转换为数据流响应并返回
-
   return result.toUIMessageStreamResponse({
     sendReasoning: true,
     sendSources: true,
@@ -95,15 +93,8 @@ export async function POST(req: NextRequest) {
         }
       }
     },
-    onFinish: ({ messages, responseMessage }) => {
-      console.log(messages, '\r\n')
-      if (userId && conversationId) {
-        saveMsg({
-          messages,
-          userId,
-          conversationId: `${conversationId}`
-        })
-      }
+    onFinish: ({ messages }) => {
+      saveMsg({ messages, userId, chatId })
     }
   })
 }

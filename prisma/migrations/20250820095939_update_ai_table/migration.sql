@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE "user" (
+CREATE TABLE "public"."user" (
     "id" TEXT NOT NULL,
     "name" TEXT,
     "email" TEXT NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE "user" (
 );
 
 -- CreateTable
-CREATE TABLE "account" (
+CREATE TABLE "public"."account" (
     "userId" TEXT NOT NULL,
     "type" TEXT NOT NULL,
     "provider" TEXT NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE "account" (
 );
 
 -- CreateTable
-CREATE TABLE "session" (
+CREATE TABLE "public"."session" (
     "sessionToken" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "expires" TIMESTAMP(3) NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE "session" (
 );
 
 -- CreateTable
-CREATE TABLE "verification_token" (
+CREATE TABLE "public"."verification_token" (
     "identifier" TEXT NOT NULL,
     "token" TEXT NOT NULL,
     "expires" TIMESTAMP(3) NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE "verification_token" (
 );
 
 -- CreateTable
-CREATE TABLE "authenticator" (
+CREATE TABLE "public"."authenticator" (
     "credentialID" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "providerAccountId" TEXT NOT NULL,
@@ -63,7 +63,7 @@ CREATE TABLE "authenticator" (
 );
 
 -- CreateTable
-CREATE TABLE "ai_conversation" (
+CREATE TABLE "public"."ai_conversation" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "desc" TEXT,
@@ -76,16 +76,13 @@ CREATE TABLE "ai_conversation" (
 );
 
 -- CreateTable
-CREATE TABLE "ai_message" (
+CREATE TABLE "public"."ai_message" (
     "id" TEXT NOT NULL,
-    "role" TEXT NOT NULL,
-    "content" TEXT NOT NULL,
-    "token" INTEGER NOT NULL,
     "userId" TEXT NOT NULL,
     "conversationId" TEXT NOT NULL,
-    "experimentalAttachments" JSONB,
-    "toolInvocations" JSONB,
-    "annotations" JSONB,
+    "role" TEXT NOT NULL,
+    "metadata" TEXT,
+    "parts" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -94,28 +91,28 @@ CREATE TABLE "ai_message" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
+CREATE UNIQUE INDEX "user_email_key" ON "public"."user"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "session_sessionToken_key" ON "session"("sessionToken");
+CREATE UNIQUE INDEX "session_sessionToken_key" ON "public"."session"("sessionToken");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "authenticator_credentialID_key" ON "authenticator"("credentialID");
+CREATE UNIQUE INDEX "authenticator_credentialID_key" ON "public"."authenticator"("credentialID");
 
 -- CreateIndex
-CREATE INDEX "ai_conversation_userId_idx" ON "ai_conversation"("userId");
+CREATE INDEX "ai_conversation_userId_idx" ON "public"."ai_conversation"("userId");
 
 -- CreateIndex
-CREATE INDEX "ai_message_userId_conversationId_idx" ON "ai_message"("userId", "conversationId");
+CREATE INDEX "ai_message_userId_conversationId_idx" ON "public"."ai_message"("userId", "conversationId");
 
 -- AddForeignKey
-ALTER TABLE "account" ADD CONSTRAINT "account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."account" ADD CONSTRAINT "account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "session" ADD CONSTRAINT "session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."session" ADD CONSTRAINT "session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "authenticator" ADD CONSTRAINT "authenticator_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."authenticator" ADD CONSTRAINT "authenticator_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ai_message" ADD CONSTRAINT "ai_message_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "ai_conversation"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."ai_message" ADD CONSTRAINT "ai_message_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "public"."ai_conversation"("id") ON DELETE CASCADE ON UPDATE CASCADE;

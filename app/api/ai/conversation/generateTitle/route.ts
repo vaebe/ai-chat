@@ -1,15 +1,22 @@
-import { generateText, ModelMessage } from 'ai'
-import { createOpenAI } from '@ai-sdk/openai'
+import { generateText, ModelMessage, UIMessage } from 'ai'
 import { auth } from '@/auth'
 import { sendJson } from '@/lib/utils'
 import { prisma } from '@/prisma'
 import { AIMessage } from '@prisma/client'
 
 function generatePromptText(list: Array<AIMessage>) {
-  const msg = list.map((item) => ({
-    content: item.content,
-    role: item.role as ModelMessage['role']
-  }))
+  const msg = list.map((item) => {
+    const parts = JSON.parse(item.parts) as UIMessage['parts']
+    const content = parts
+      .filter((s) => s.type === 'text')
+      .map((item) => item.text)
+      .join(',')
+
+    return {
+      content,
+      role: item.role as ModelMessage['role']
+    }
+  })
 
   return `
     根据以下一段对话内容，提取其核心信息，并生成一个标题和描述：
@@ -50,21 +57,12 @@ export async function GET(req: Request) {
       return sendJson({ code: -1, msg: `生成对话名称失败,对话信息不存在!` })
     }
 
-    // 创建AI的客户端实例
-    const openai = createOpenAI({
-      // AI的API基础URL
-      baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-
-      // 从环境变量获取API密钥
-      apiKey: process.env.OPEN_API_KEY
-    })
-
     const result = await generateText({
-      model: openai('qwen-turbo-latest'), // 模型名称
+      model: 'openai/gpt-4.1-nano', // 模型名称
       prompt: generatePromptText(conversationData) // 设置AI助手的系统角色提示
     })
 
-    const info = JSON.parse(result.text.text)
+    const info = JSON.parse(result.text)
 
     // 将数据保存到数据库
     await prisma.aIConversation.update({

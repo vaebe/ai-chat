@@ -43,3 +43,7 @@ npx shadcn@latest add scroll-area
 ```bash
 npx @modelcontextprotocol/inspector node mcp/githubSearch.mjs
 ```
+
+## todo
+
+1. 持久话 用户发送的消息到数据库
