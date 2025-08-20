@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, memo } from 'react'
-import { useChat, Message } from '@ai-sdk/react'
+import { useChat, UIMessage } from '@ai-sdk/react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -11,6 +11,7 @@ import MarkdownRender from '@/components/MarkdownRender'
 import { Icon } from '@iconify/react'
 import { useParams } from 'next/navigation'
 import { useChatScroll } from '@/hooks/use-chat-scroll'
+import { DefaultChatTransport } from 'ai'
 
 const MessageAvatar = ({ role }: { role: 'user' | 'assistant' }) => (
   <Avatar>
@@ -24,23 +25,30 @@ const MessageAvatar = ({ role }: { role: 'user' | 'assistant' }) => (
   </Avatar>
 )
 
-const UserMessage = memo(({ message }: { message: Message }) => {
+const UserMessage = memo(({ message }: { message: UIMessage }) => {
   return (
     <div className={`flex items-start space-x-2 mb-4 justify-end`}>
-      <Card className="max-w-[88%] px-4 py-2">{message.content ?? ''}</Card>
+      <Card className="max-w-[88%] px-4 py-2">
+        {message.parts.map((part, index) =>
+          part.type === 'text' ? <span key={index}>{part.text}</span> : null
+        )}
+      </Card>
       <MessageAvatar role="user" />
     </div>
   )
 })
 UserMessage.displayName = 'UserMessage'
 
-const AssistantMessage = memo(({ message }: { message: Message }) => {
+const AssistantMessage = memo(({ message }: { message: UIMessage }) => {
   return (
     <div className={`flex items-start space-x-2 mb-4 justify-start`}>
       <MessageAvatar role="assistant" />
 
       <Card className="w-[88%] px-4 py-2">
-        <MarkdownRender content={message.content ?? ''} />
+        {message.parts.map((part, index) =>
+          part.type === 'text' ? <span key={index}>{part.text}</span> : null
+        )}
+        {/* <MarkdownRender content={JSON.stringify(message.parts) ?? ''} /> */}
       </Card>
     </div>
   )
@@ -50,6 +58,9 @@ AssistantMessage.displayName = 'AssistantMessage'
 interface MessageListProps {
   className?: string
   isLoading: boolean
+  regenerate: () => void
+  error?: Error
+  messages: UIMessage[]
 }
 
 const LoadingSpinner = memo(() => (
@@ -59,16 +70,7 @@ const LoadingSpinner = memo(() => (
 ))
 LoadingSpinner.displayName = 'LoadingSpinner'
 
-const MessageList = ({ className, isLoading }: MessageListProps) => {
-  const params = useParams<{ id: string }>()
-
-  const { messages, reload, error } = useChat({
-    id: params.id,
-    api: '/api/ai/chat',
-    keepLastMessageOnError: true,
-    experimental_throttle: 50
-  })
-
+const MessageList = ({ className, isLoading, regenerate, messages, error }: MessageListProps) => {
   const { containerRef, scrollToBottom } = useChatScroll()
   useEffect(() => {
     scrollToBottom()
@@ -91,7 +93,7 @@ const MessageList = ({ className, isLoading }: MessageListProps) => {
 
               {isLast && (
                 <div className="w-[92%] h-[30px] flex items-start justify-end -mt-3">
-                  {error && <p className="text-red-500">{error?.message}</p>}
+                  {error && <p className="text-red-500 mr-4">{error?.message}</p>}
 
                   {/* 最后一条且是 ai 回复 */}
                   {lastMsg.role === 'assistant' && !isLoading && (
@@ -99,7 +101,7 @@ const MessageList = ({ className, isLoading }: MessageListProps) => {
                       icon="pepicons-pop:refresh"
                       width={24}
                       className="cursor-pointer  hover:text-gray-400"
-                      onClick={() => reload()}
+                      onClick={() => regenerate()}
                     ></Icon>
                   )}
 

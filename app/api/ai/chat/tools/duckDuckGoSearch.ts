@@ -4,7 +4,7 @@ import { z } from 'zod'
 // todo 未完成 - 无法使用
 export const duckDuckGoSearchTool = tool({
   description: '使用 DuckDuckGo 进行搜索，返回相关摘要信息。',
-  parameters: z.object({
+  inputSchema: z.object({
     query: z.string().describe('要搜索的关键词')
   }),
   execute: async ({ query }) => {

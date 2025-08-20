@@ -1,4 +1,4 @@
-import { generateText, CoreMessage } from 'ai'
+import { generateText, ModelMessage } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
 import { auth } from '@/auth'
 import { sendJson } from '@/lib/utils'
@@ -8,7 +8,7 @@ import { AIMessage } from '@prisma/client'
 function generatePromptText(list: Array<AIMessage>) {
   const msg = list.map((item) => ({
     content: item.content,
-    role: item.role as CoreMessage['role']
+    role: item.role as ModelMessage['role']
   }))
 
   return `
@@ -52,9 +52,11 @@ export async function GET(req: Request) {
 
     // 创建AI的客户端实例
     const openai = createOpenAI({
-      baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1', // AI的API基础URL
-      compatibility: 'strict', // 设置兼容模式为严格模式
-      apiKey: process.env.OPEN_API_KEY // 从环境变量获取API密钥
+      // AI的API基础URL
+      baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+
+      // 从环境变量获取API密钥
+      apiKey: process.env.OPEN_API_KEY
     })
 
     const result = await generateText({
@@ -62,7 +64,7 @@ export async function GET(req: Request) {
       prompt: generatePromptText(conversationData) // 设置AI助手的系统角色提示
     })
 
-    const info = JSON.parse(result.text)
+    const info = JSON.parse(result.text.text)
 
     // 将数据保存到数据库
     await prisma.aIConversation.update({
