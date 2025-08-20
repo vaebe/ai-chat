@@ -4,7 +4,7 @@ import * as cheerio from 'cheerio'
 
 export const webReaderTool = tool({
   description: '从指定网址抓取网页内容，并提取正文信息。',
-  parameters: z.object({
+  inputSchema: z.object({
     url: z.string().url().describe('要读取的网页 URL')
   }),
   execute: async ({ url }) => {

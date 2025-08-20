@@ -10,6 +10,7 @@ import { Sender } from '@/app/ai/components/Sender'
 import { toast } from 'sonner'
 import { AIMessage } from '@prisma/client'
 import { useParams } from 'next/navigation'
+import { DefaultChatTransport } from 'ai'
 
 export default function AIChatPage() {
   const params = useParams<{ id: string }>()
@@ -17,12 +18,21 @@ export default function AIChatPage() {
 
   const { aiSharedData, setAiSharedData } = useContext(AiSharedDataContext)
 
-  const { input, handleSubmit, setInput, status, stop, append, setMessages } = useChat({
+  const { status, stop, setMessages, sendMessage, messages, regenerate, error } = useChat({
     id: conversationId,
-    api: '/api/ai/chat',
-    keepLastMessageOnError: true,
-    experimental_throttle: 50
+    transport: new DefaultChatTransport({
+      api: '/api/ai/chat'
+      // 仅发送最后一条消息
+      // prepareSendMessagesRequest({ messages, id }) {
+      //   return { body: { message: messages[messages.length - 1], id } }
+      // }
+    }),
+    onFinish: () => {
+      console.log(messages, '-=-=-=-=')
+    }
   })
+
+  const [input, setInput] = useState('')
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -81,12 +91,7 @@ export default function AIChatPage() {
 
   useEffect(() => {
     if (aiSharedData.aiFirstMsg) {
-      append(
-        { content: aiSharedData.aiFirstMsg, role: 'user' },
-        {
-          data: { conversationId }
-        }
-      ).then(() => {
+      sendMessage({ text: aiSharedData.aiFirstMsg }).then(() => {
         generateConversationTitle()
 
         setAiSharedData((d) => {
@@ -101,14 +106,20 @@ export default function AIChatPage() {
   }, [])
 
   const onSubmit = () => {
-    handleSubmit(undefined, { data: { conversationId } })
+    sendMessage({ text: input })
+    setInput('')
   }
 
   return (
     <div className="flex flex-col h-screen">
       <LayoutHeader></LayoutHeader>
 
-      <MessageList isLoading={isLoading}></MessageList>
+      <MessageList
+        isLoading={isLoading}
+        regenerate={regenerate}
+        messages={messages}
+        error={error}
+      ></MessageList>
 
       <div className="flex justify-center w-full px-2 md:px-0 md:w-10/12 mx-auto md:pb-6 ">
         <Sender

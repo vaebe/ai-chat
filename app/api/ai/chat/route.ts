@@ -1,5 +1,4 @@
-import { CoreMessage, streamText } from 'ai'
-import { createOpenAI } from '@ai-sdk/openai'
+import { convertToModelMessages, createIdGenerator, ModelMessage, streamText, UIMessage } from 'ai'
 import { auth } from '@/auth'
 import { prisma } from '@/prisma'
 import { generateUUID } from '@/lib/utils'
@@ -12,33 +11,32 @@ import { getClientIp } from '@/lib/utils'
 export const maxDuration = 60
 
 interface SaveMsgProps {
-  aiMsg: string
-  userMsg: string
-  usage: { promptTokens: number; completionTokens: number; totalTokens: number }
+  messages: UIMessage[]
+  usage?: { promptTokens: number; completionTokens: number; totalTokens: number }
   userId: string
   conversationId: string
 }
 
 async function saveMsg(opts: SaveMsgProps) {
-  const { aiMsg, userMsg, usage, userId, conversationId } = opts
+  const { messages, usage, userId, conversationId } = opts
 
-  const list = [
-    { role: 'user', content: userMsg, token: usage.completionTokens },
-    { role: 'assistant', content: aiMsg, token: usage.promptTokens }
-  ]
+  // const list = [
+  //   { role: 'user', content: userMsg, token: usage.outputTokens },
+  //   { role: 'assistant', content: aiMsg, token: usage.inputTokens }
+  // ]
 
-  const messages = list.map((msg) => ({
-    id: generateUUID(false),
-    conversationId,
-    userId,
-    ...msg
-  }))
+  // const messages = list.map((msg) => ({
+  //   id: generateUUID(false),
+  //   conversationId,
+  //   userId,
+  //   ...msg
+  // }))
 
-  try {
-    await Promise.all(messages.map((item) => prisma.aIMessage.create({ data: item })))
-  } catch (error) {
-    console.error(`保存 AI 对话信息失败:`, error)
-  }
+  // try {
+  //   await Promise.all(messages.map((item) => prisma.aIMessage.create({ data: item })))
+  // } catch (error) {
+  //   console.error(`保存 AI 对话信息失败:`, error)
+  // }
 }
 
 const ratelimit = new Ratelimit({
@@ -61,7 +59,7 @@ export async function POST(req: NextRequest) {
   const userId = session?.user?.id ?? ''
 
   interface ReqProps {
-    messages: CoreMessage[]
+    messages: UIMessage[]
     data: Record<string, string | number>
   }
 
@@ -70,35 +68,42 @@ export async function POST(req: NextRequest) {
   // conversationId 对话id
   const conversationId = data?.conversationId
 
-  // 创建AI的客户端实例
-  const openai = createOpenAI({
-    baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1', // AI的API基础URL
-    compatibility: 'strict', // 设置兼容模式为严格模式
-    apiKey: process.env.OPEN_API_KEY // 从环境变量获取API密钥-目前是阿里云
-  })
-
   const result = streamText({
-    model: openai('qwen-turbo-latest'), // 模型名称
+    model: 'openai/gpt-4.1-nano', // 模型名称
+    temperature: 0.6,
     system: '你是一个通用的智能 AI 可以根据用户的输入回答问题', // 设置AI助手的系统角色提示
-    messages, // 传入用户消息历史
-    tools: {},
-    maxSteps: 5,
-    onFinish({ text, usage }) {
-      if (userId && conversationId) {
-        saveMsg({
-          aiMsg: text,
-          userMsg: messages[messages.length - 1].content as string,
-          usage: usage,
-          userId,
-          conversationId: `${conversationId}`
-        })
-      }
-    }
+    messages: convertToModelMessages(messages), // 传入用户消息历史
+    onFinish({ text, usage }) {}
   })
 
   // 即使客户端已经断开连接，onFinish 也会触发
   result.consumeStream()
 
   // 将结果转换为数据流响应并返回
-  return result.toDataStreamResponse({ sendReasoning: true, sendSources: true })
+
+  return result.toUIMessageStreamResponse({
+    sendReasoning: true,
+    sendSources: true,
+    generateMessageId: createIdGenerator({
+      prefix: 'msg',
+      size: 16
+    }),
+    messageMetadata: ({ part }) => {
+      if (part.type === 'finish') {
+        return {
+          totalTokens: part.totalUsage.totalTokens
+        }
+      }
+    },
+    onFinish: ({ messages, responseMessage }) => {
+      console.log(messages, '\r\n')
+      if (userId && conversationId) {
+        saveMsg({
+          messages,
+          userId,
+          conversationId: `${conversationId}`
+        })
+      }
+    }
+  })
 }
