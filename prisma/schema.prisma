@@ -100,18 +100,15 @@ model AIConversation {
 }
 
 model AIMessage {
-  id                      String    @id @default(cuid())
-  role                    String // 'system' | 'user' | 'assistant' | 'data' | 'tool'
-  content                 String    @db.Text
-  token                   Int
-  userId                  String // 所属用户
-  conversationId          String // 所属对话分组
-  experimentalAttachments Json? // experimental_attachments: 存储为 JSON 数据
-  toolInvocations         Json? // 存储 toolInvocations
-  annotations             Json? // 存储额外注释
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @updatedAt
-  deletedAt               DateTime? // 删除时间
+  id             String    @id @default(cuid())
+  userId         String // 所属用户
+  conversationId String // 所属对话分组
+  role           String // 'system' | 'user' | 'assistant'
+  metadata       String? // 元数据 json 字符串 
+  parts          String // 对话数据 json 字符串 
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime? // 删除时间
 
   conversation AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 

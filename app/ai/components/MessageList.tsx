@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, memo } from 'react'
-import { useChat, UIMessage } from '@ai-sdk/react'
+import { UIMessage } from '@ai-sdk/react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -9,9 +9,7 @@ import { Loader2, User, Bot } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import MarkdownRender from '@/components/MarkdownRender'
 import { Icon } from '@iconify/react'
-import { useParams } from 'next/navigation'
 import { useChatScroll } from '@/hooks/use-chat-scroll'
-import { DefaultChatTransport } from 'ai'
 
 const MessageAvatar = ({ role }: { role: 'user' | 'assistant' }) => (
   <Avatar>
@@ -46,9 +44,10 @@ const AssistantMessage = memo(({ message }: { message: UIMessage }) => {
 
       <Card className="w-[88%] px-4 py-2">
         {message.parts.map((part, index) =>
-          part.type === 'text' ? <span key={index}>{part.text}</span> : null
+          part.type === 'text' ? (
+            <MarkdownRender key={index} content={JSON.stringify(part.text) ?? ''} />
+          ) : null
         )}
-        {/* <MarkdownRender content={JSON.stringify(message.parts) ?? ''} /> */}
       </Card>
     </div>
   )

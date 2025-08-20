@@ -53,7 +53,8 @@ export default function AIChatPage() {
       const data = res?.data ?? []
 
       const list = data.map((item: AIMessage) => ({
-        content: item.content,
+        parts: JSON.parse(item.parts),
+        metadata: JSON.parse(item.metadata ?? '{}'),
         role: item.role,
         id: item.id
       }))
