@@ -7,6 +7,7 @@ import { AiSharedDataContext } from './components/AiSharedDataContext'
 import { StartAConversationPrompt } from './components/StartAConversationPrompt'
 import { Sender } from './components/Sender'
 import { generateUUID } from '@/lib/utils'
+import { createAiConversation } from '@/app/actions'
 
 export default function AIChatPage() {
   const { setAiSharedData } = useContext(AiSharedDataContext)
@@ -15,16 +16,6 @@ export default function AIChatPage() {
 
   const router = useRouter()
 
-  function createConversation(uid: string) {
-    fetch('/api/ai/conversation/add', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ name: 'New Chat', uid })
-    })
-  }
-
   const onSubmit = () => {
     if (!input.trim()) {
       return
@@ -32,8 +23,7 @@ export default function AIChatPage() {
 
     const conversationId = generateUUID(false)
 
-    // todo 立即生成本地对话 ID 需要发送请求的时候如何不被用户修改
-    createConversation(conversationId)
+    createAiConversation({ name: 'New Chat', uid: conversationId })
 
     setAiSharedData((d) => {
       d.aiFirstMsg = input

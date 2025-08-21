@@ -1,45 +1,13 @@
 import { convertToModelMessages, createIdGenerator, streamText, UIMessage } from 'ai'
 import { auth } from '@/auth'
-import { prisma } from '@/prisma'
 import { Ratelimit } from '@upstash/ratelimit'
 import { kv } from '@vercel/kv'
 import { NextRequest } from 'next/server'
 import { getClientIp } from '@/lib/utils'
+import { createAiMessage } from '@/lib/ai-message'
 
-// 允许最多 30 秒的流式响应 (免费版最大支持 60s)
+// 允许最多 60 秒的流式响应 (免费版最大支持 60s)
 export const maxDuration = 60
-
-interface SaveMsgProps {
-  messages: UIMessage[]
-  userId: string
-  chatId: string
-}
-
-async function saveMsg(opts: SaveMsgProps) {
-  const { messages, userId, chatId } = opts
-
-  if (!userId || !chatId) {
-    console.warn(`userId-${userId} chatId-${chatId} 不存在无法持久话聊天数据`)
-    return
-  }
-
-  const { id, role, metadata, parts } = messages[0]
-
-  try {
-    await prisma.aIMessage.create({
-      data: {
-        userId,
-        id,
-        conversationId: chatId,
-        role,
-        metadata: JSON.stringify(metadata),
-        parts: JSON.stringify(parts)
-      }
-    })
-  } catch (error) {
-    console.error(`保存 AI 对话信息失败:`, error)
-  }
-}
 
 const ratelimit = new Ratelimit({
   redis: kv,
@@ -94,7 +62,7 @@ export async function POST(req: NextRequest) {
       }
     },
     onFinish: ({ messages }) => {
-      saveMsg({ messages, userId, chatId })
+      createAiMessage({ message: messages[0], userId, chatId })
     }
   })
 }
