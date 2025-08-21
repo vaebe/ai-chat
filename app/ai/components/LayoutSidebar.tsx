@@ -3,7 +3,7 @@ import { OpenOrCloseSiderbarIcon } from './OpenOrCloseSiderbarIcon'
 import { NewChatIcon } from './NewChatIcon'
 import { AiSharedDataContext } from './AiSharedDataContext'
 import { useContext, useEffect, useState } from 'react'
-import { getConversation } from '@/app/ai/lib/api'
+import { getAiConversationList } from '@/app/actions'
 import { useParams, useRouter } from 'next/navigation'
 import {
   DropdownMenu,
@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { removeAiConversation, updateAiConversation } from '@/app/actions'
 
 interface UseShowHideRes {
   hide: () => void
@@ -60,18 +61,13 @@ function RemoveConversation({ info, dialog }: OperateDialogProps) {
   const router = useRouter()
 
   async function remove() {
-    fetch('/api/ai/conversation/delete', {
-      method: 'DELETE',
-      body: JSON.stringify({ id: info.id })
+    removeAiConversation(info.id).then((res) => {
+      if (res.code === 0) {
+        setAiSharedData((d) => {
+          d.conversationList = aiSharedData.conversationList.filter((item) => item.id !== info.id)
+        })
+      }
     })
-      .then((res) => res.json())
-      .then((res) => {
-        if (res.code === 0) {
-          setAiSharedData((d) => {
-            d.conversationList = aiSharedData.conversationList.filter((item) => item.id !== info.id)
-          })
-        }
-      })
 
     dialog.hide()
 
@@ -113,20 +109,17 @@ function EditConversationName({ info, dialog }: OperateDialogProps) {
   const [name, setName] = useState(info.name)
 
   async function save() {
-    const res = await fetch('/api/ai/conversation/update', {
-      method: 'PUT',
-      body: JSON.stringify({ id: info.id, name })
-    }).then((res) => res.json())
+    updateAiConversation({ id: info.id, name }).then((res) => {
+      if (res.code === 0) {
+        dialog.hide()
 
-    if (res.code === 0) {
-      dialog.hide()
-
-      setAiSharedData((d) => {
-        d.conversationList = aiSharedData.conversationList.map((item) => {
-          return item.id === info.id ? { ...item, name } : item
+        setAiSharedData((d) => {
+          d.conversationList = aiSharedData.conversationList.map((item) => {
+            return item.id === info.id ? { ...item, name } : item
+          })
         })
-      })
-    }
+      }
+    })
   }
 
   return (
@@ -224,9 +217,11 @@ function ChatList() {
   const { setAiSharedData, aiSharedData } = useContext(AiSharedDataContext)
 
   useEffect(() => {
-    getConversation().then((res) => {
+    getAiConversationList().then((res) => {
+      const list = res.code === 0 ? res.data?.list || [] : []
+
       setAiSharedData((d) => {
-        d.conversationList = res
+        d.conversationList = list
       })
     })
   }, [setAiSharedData])

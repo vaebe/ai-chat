@@ -10,7 +10,8 @@ import { Sender } from '@/app/ai/components/Sender'
 import { toast } from 'sonner'
 import { AIMessage } from '@prisma/client'
 import { useParams } from 'next/navigation'
-import { DefaultChatTransport } from 'ai'
+import { DefaultChatTransport, UIMessage } from 'ai'
+import { generateAiConversationTitle, getAiMessages } from '@/app/actions'
 
 export default function AIChatPage() {
   const params = useParams<{ id: string }>()
@@ -27,9 +28,7 @@ export default function AIChatPage() {
       //   return { body: { message: messages[messages.length - 1], id } }
       // }
     }),
-    onFinish: () => {
-      console.log(messages, '-=-=-=-=')
-    }
+    onFinish: () => {}
   })
 
   const [input, setInput] = useState('')
@@ -41,64 +40,66 @@ export default function AIChatPage() {
   }, [status])
 
   async function setMsg() {
-    try {
-      const url = `/api/ai/messages/details?id=${conversationId}`
-      const res = await fetch(url).then((res) => res.json())
+    getAiMessages(conversationId)
+      .then((res) => {
+        if (res.code !== 0) {
+          toast('获取对象详情失败!')
+          return
+        }
 
-      if (res.code !== 0) {
+        const data = res?.data ?? []
+
+        const list = data.map((item: AIMessage) => ({
+          parts: JSON.parse(item.parts),
+          metadata: JSON.parse(item.metadata ?? '{}'),
+          role: item.role,
+          id: item.id
+        })) as UIMessage[]
+
+        setMessages(list)
+      })
+      .catch(() => {
         toast('获取对象详情失败!')
-        return
-      }
-
-      const data = res?.data ?? []
-
-      const list = data.map((item: AIMessage) => ({
-        parts: JSON.parse(item.parts),
-        metadata: JSON.parse(item.metadata ?? '{}'),
-        role: item.role,
-        id: item.id
-      }))
-
-      setMessages(list)
-    } catch {
-      toast('获取对象详情失败!')
-    }
+      })
   }
 
   // 生成对话标题
   async function generateConversationTitle() {
-    try {
-      const url = `/api/ai/conversation/generateTitle?conversationId=${conversationId}`
-      const res = await fetch(url).then((res) => res.json())
+    generateAiConversationTitle(conversationId)
+      .then((res) => {
+        console.log('生成对话标题', res)
 
-      if (res.code !== 0) {
-        return
-      }
+        if (res.code === 0) {
+          const conversationName = res.data?.name ?? ''
 
-      const conversationName = res.data?.name
+          setAiSharedData((d) => {
+            d.conversationList = d.conversationList.map((item) => {
+              if (item.id === conversationId && conversationName) {
+                item.name = conversationName
+              }
+              return item
+            })
+          })
+        }
+      })
+      .catch((err) => {
+        console.error('生成对话标题失败!', err)
+      })
+  }
+
+  function firstMsg() {
+    sendMessage({ text: aiSharedData.aiFirstMsg }).then(() => {
+      generateConversationTitle()
 
       setAiSharedData((d) => {
-        d.conversationList = d.conversationList.map((item) => {
-          if (item.id === conversationId && conversationName) {
-            item.name = conversationName
-          }
-          return item
-        })
+        d.aiFirstMsg = ''
       })
-    } catch {
-      console.error('生成对话标题失败!')
-    }
+    })
   }
 
   useEffect(() => {
     if (aiSharedData.aiFirstMsg) {
-      sendMessage({ text: aiSharedData.aiFirstMsg }).then(() => {
-        generateConversationTitle()
-
-        setAiSharedData((d) => {
-          d.aiFirstMsg = ''
-        })
-      })
+      firstMsg()
     } else {
       setMsg()
     }
