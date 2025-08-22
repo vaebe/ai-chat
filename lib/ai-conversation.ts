@@ -1,7 +1,7 @@
 import { ApiRes, PaginationResData } from '@/lib/utils'
 import { auth } from '@/auth'
 import { prisma } from '@/prisma'
-import { AIConversation, AIMessage } from '@prisma/client'
+import { AiConversation, AiMessage } from '@prisma/client'
 import { ModelMessage, UIMessage, generateText } from 'ai'
 import { z } from 'zod'
 
@@ -13,7 +13,7 @@ interface GetAiConversationListProps {
 // 获取用户的对话分组
 export async function getAiConversationList(
   props?: GetAiConversationListProps
-): Promise<PaginationResData<AIConversation>> {
+): Promise<PaginationResData<AiConversation>> {
   const session = await auth()
   if (!session?.user?.id) {
     return { code: 401, msg: `无权限!` }
@@ -24,7 +24,7 @@ export async function getAiConversationList(
 
     const skip = (page - 1) * pageSize
 
-    const list = await prisma.aIConversation.findMany({
+    const list = await prisma.aiConversation.findMany({
       where: {
         userId: session!.user.id,
         deletedAt: null
@@ -34,7 +34,7 @@ export async function getAiConversationList(
       take: pageSize
     })
 
-    const total = await prisma.aIConversation.count({
+    const total = await prisma.aiConversation.count({
       where: {
         userId: session!.user.id
       }
@@ -55,7 +55,7 @@ export async function getAiConversationList(
   }
 }
 
-function generateAiConversationTitlePrompt(list: Array<AIMessage>) {
+function generateAiConversationTitlePrompt(list: Array<AiMessage>) {
   const msg = list.map((item) => {
     const parts = JSON.parse(item.parts) as UIMessage['parts']
     const content = parts
@@ -97,7 +97,7 @@ export async function generateAiConversationTitle(
 
   try {
     // 查询开始对话的两条数据生成标题
-    const list = await prisma.aIMessage.findMany({
+    const list = await prisma.aiMessage.findMany({
       where: { conversationId: id },
       orderBy: { createdAt: 'asc' },
       skip: 0,
@@ -117,7 +117,7 @@ export async function generateAiConversationTitle(
     const info = JSON.parse(result.text)
 
     // 将数据保存到数据库
-    await prisma.aIConversation.update({
+    await prisma.aiConversation.update({
       where: { id },
       data: {
         name: info.name,
@@ -140,7 +140,7 @@ const CreateAiConversationSchema = z.object({
 // 创建 Ai 对话
 export async function createAiConversation(
   props: z.infer<typeof CreateAiConversationSchema>
-): Promise<ApiRes<AIConversation>> {
+): Promise<ApiRes<AiConversation>> {
   const session = await auth()
   if (!session?.user?.id) {
     return { code: 401, msg: '请登录后重试！' }
@@ -159,7 +159,7 @@ export async function createAiConversation(
     // 解构验证后的数据
     const { name, uid } = parsed.data
 
-    const info = await prisma.aIConversation.create({
+    const info = await prisma.aiConversation.create({
       data: {
         id: uid,
         name,
@@ -180,7 +180,7 @@ export async function removeAiConversation(id: string): Promise<ApiRes> {
   }
 
   try {
-    await prisma.aIConversation.update({
+    await prisma.aiConversation.update({
       where: { id },
       data: {
         deletedAt: new Date(),
@@ -208,7 +208,7 @@ const UpdateAiConversationSchema = z.object({
 // 更新 Ai 对话
 export async function updateAiConversation(
   props: z.infer<typeof UpdateAiConversationSchema>
-): Promise<ApiRes<AIConversation>> {
+): Promise<ApiRes<AiConversation>> {
   const session = await auth()
   if (!session?.user?.id) {
     return { code: 401, msg: '请登录后重试！' }
@@ -217,7 +217,7 @@ export async function updateAiConversation(
   try {
     const { id, name, desc } = UpdateAiConversationSchema.parse(props)
 
-    const data = await prisma.aIConversation.update({
+    const data = await prisma.aiConversation.update({
       where: { id },
       data: {
         name,

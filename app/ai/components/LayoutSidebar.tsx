@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Icon } from '@iconify/react'
-import { AIConversation } from '@prisma/client'
+import { AiConversation } from '@prisma/client'
 import {
   Dialog,
   DialogContent,
@@ -50,7 +50,7 @@ export function useShowHide(defaultVisible = false) {
 }
 
 interface OperateDialogProps {
-  info: AIConversation
+  info: AiConversation
   dialog: UseShowHideRes
 }
 
@@ -150,7 +150,7 @@ function EditConversationName({ info, dialog }: OperateDialogProps) {
   )
 }
 
-function Operate({ info }: { info: AIConversation }) {
+function Operate({ info }: { info: AiConversation }) {
   const deleteDialog = useShowHide()
   const editDialog = useShowHide()
 
@@ -185,7 +185,7 @@ function Operate({ info }: { info: AIConversation }) {
   )
 }
 
-function ChatListItem({ item }: { item: AIConversation }) {
+function ChatListItem({ item }: { item: AiConversation }) {
   const { id } = useParams()
   const router = useRouter()
   function switchConversation(curId: string) {
