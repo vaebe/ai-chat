@@ -2,7 +2,7 @@ import { UIMessage } from 'ai'
 import { prisma } from '@/prisma'
 import { ApiRes } from '@/lib/utils'
 import { auth } from '@/auth'
-import { AIMessage } from '@prisma/client'
+import { AiMessage } from '@prisma/client'
 
 interface CreateAiMessageProps {
   message: UIMessage
@@ -27,7 +27,7 @@ export async function createAiMessage(opts: CreateAiMessageProps): Promise<ApiRe
   const { id, role, metadata, parts } = message
 
   try {
-    await prisma.aIMessage.upsert({
+    await prisma.aiMessage.upsert({
       where: { id: id }, // 查找条件
       update: {
         // 如果记录存在，更新这些字段
@@ -57,7 +57,7 @@ export async function createAiMessage(opts: CreateAiMessageProps): Promise<ApiRe
 }
 
 // 获取 AI 消息详情
-export async function getAiMessages(id: string): Promise<ApiRes<AIMessage[]>> {
+export async function getAiMessages(id: string): Promise<ApiRes<AiMessage[]>> {
   const session = await auth()
   if (!session?.user?.id) {
     return { code: 401, msg: `无权限!` }
@@ -68,7 +68,7 @@ export async function getAiMessages(id: string): Promise<ApiRes<AIMessage[]>> {
   }
 
   try {
-    const list = await prisma.aIMessage.findMany({
+    const list = await prisma.aiMessage.findMany({
       where: {
         conversationId: id,
         userId: session.user.id
@@ -82,7 +82,7 @@ export async function getAiMessages(id: string): Promise<ApiRes<AIMessage[]>> {
   }
 }
 
-export async function removeAiMessage(id: string): Promise<ApiRes<AIMessage>> {
+export async function removeAiMessage(id: string): Promise<ApiRes<AiMessage>> {
   const session = await auth()
   if (!session?.user?.id) {
     return { code: 401, msg: `无权限!` }
@@ -93,7 +93,7 @@ export async function removeAiMessage(id: string): Promise<ApiRes<AIMessage>> {
   }
 
   try {
-    const deleted = await prisma.aIMessage.delete({
+    const deleted = await prisma.aiMessage.delete({
       where: {
         id,
         userId: session.user.id

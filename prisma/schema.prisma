@@ -84,7 +84,7 @@ model Authenticator {
 }
 
 // =============================== AI 对话 ===============================
-model AIConversation {
+model AiConversation {
   id        String    @id @default(cuid())
   name      String // 对话名称，可选
   desc      String? // 对话描述
@@ -93,13 +93,13 @@ model AIConversation {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime? // 删除时间
 
-  messages AIMessage[] // 关联的消息
+  messages AiMessage[] // 关联的消息
 
   @@index([userId])
   @@map("ai_conversation")
 }
 
-model AIMessage {
+model AiMessage {
   id             String    @id @default(cuid())
   userId         String // 所属用户
   conversationId String // 所属对话分组
@@ -110,7 +110,7 @@ model AIMessage {
   updatedAt      DateTime  @updatedAt
   deletedAt      DateTime? // 删除时间
 
-  conversation AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@index([userId, conversationId])
   @@map("ai_message")

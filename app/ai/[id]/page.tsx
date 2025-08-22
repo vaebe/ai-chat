@@ -8,7 +8,7 @@ import { useContext } from 'react'
 import { LayoutHeader } from '@/app/ai/components/LayoutHeader'
 import { Sender } from '@/app/ai/components/Sender'
 import { toast } from 'sonner'
-import { AIMessage } from '@prisma/client'
+import { AiMessage } from '@prisma/client'
 import { useParams } from 'next/navigation'
 import { DefaultChatTransport, UIMessage } from 'ai'
 import { generateAiConversationTitle, getAiMessages } from '@/app/actions'
@@ -55,7 +55,7 @@ export default function AIChatPage() {
 
         const data = res?.data ?? []
 
-        const list = data.map((item: AIMessage) => ({
+        const list = data.map((item: AiMessage) => ({
           parts: JSON.parse(item.parts),
           metadata: JSON.parse(item.metadata ?? '{}'),
           role: item.role,

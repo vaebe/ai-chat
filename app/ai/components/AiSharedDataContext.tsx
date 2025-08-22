@@ -1,13 +1,13 @@
 import { createContext } from 'react'
 import type { Updater } from 'use-immer'
-import { AIConversation } from '@prisma/client'
+import { AiConversation } from '@prisma/client'
 
 // 定义数据类型
 export interface AiSharedData {
   layoutSidebar: boolean // 对话侧边栏展开状态
   curConversationId: string // 当前对话 id
   aiFirstMsg: string // 首次发送给 ai 的文本
-  conversationList: Array<AIConversation>
+  conversationList: Array<AiConversation>
 }
 
 // 定义 Context 类型
