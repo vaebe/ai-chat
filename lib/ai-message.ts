@@ -27,8 +27,19 @@ export async function createAiMessage(opts: CreateAiMessageProps): Promise<ApiRe
   const { id, role, metadata, parts } = message
 
   try {
-    await prisma.aIMessage.create({
-      data: {
+    await prisma.aIMessage.upsert({
+      where: { id: id }, // 查找条件
+      update: {
+        // 如果记录存在，更新这些字段
+        role,
+        metadata: JSON.stringify(metadata),
+        parts: JSON.stringify(parts),
+        userId, // 确保 userId 也更新（如果需要的话）
+        conversationId: chatId,
+        updatedAt: new Date() // 更新时间戳
+      },
+      create: {
+        // 如果记录不存在，创建新记录
         userId,
         id,
         conversationId: chatId,
