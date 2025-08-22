@@ -19,16 +19,22 @@ export default function AIChatPage() {
 
   const { aiSharedData, setAiSharedData } = useContext(AiSharedDataContext)
 
+  const [lastAiMsgId, setLastAiMsgId] = useState('')
+
   const { status, stop, setMessages, sendMessage, messages, regenerate, error } = useChat({
     id: conversationId,
     transport: new DefaultChatTransport({
       api: '/api/ai/chat',
       // 仅发送最后一条消息
-      prepareSendMessagesRequest({ messages, id, trigger, ...data }) {
-        console.log('prepareSendMessagesRequest', { messages, id, trigger, data })
-        return { body: { message: messages[messages.length - 1], id, trigger } }
+      prepareSendMessagesRequest({ messages, id, trigger }) {
+        const lastMessage = messages[messages.length - 1]
+        console.log('prepareSendMessagesRequest', { lastMessage, id, trigger, lastAiMsgId })
+        return { body: { message: lastMessage, id, trigger, lastAiMsgId } }
       }
-    })
+    }),
+    onFinish: ({ message }) => {
+      setLastAiMsgId(message.id)
+    }
   })
 
   const [input, setInput] = useState('')

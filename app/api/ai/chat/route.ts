@@ -4,7 +4,7 @@ import { Ratelimit } from '@upstash/ratelimit'
 import { kv } from '@vercel/kv'
 import { NextRequest } from 'next/server'
 import { getClientIp } from '@/lib/utils'
-import { createAiMessage, getAiMessages } from '@/lib/ai-message'
+import { createAiMessage, getAiMessages, removeAiMessage } from '@/lib/ai-message'
 
 // 允许最多 60 秒的流式响应 (免费版最大支持 60s)
 export const maxDuration = 60
@@ -19,7 +19,8 @@ const ratelimit = new Ratelimit({
 interface ReqProps {
   message: UIMessage
   id: string
-  trigger: string
+  trigger: 'submit-message' | 'regenerate-message'
+  lastAiMsgId: string
 }
 
 export async function POST(req: NextRequest) {
@@ -35,14 +36,16 @@ export async function POST(req: NextRequest) {
     return new Response('无权限!', { status: 401 })
   }
 
-  const { message, id: chatId }: ReqProps = await req.json()
+  const { message, id: chatId, trigger, lastAiMsgId }: ReqProps = await req.json()
 
-  console.log('收到用户消息', message)
+  console.log('收到用户消息', { message, trigger, lastAiMsgId })
+
+  if (trigger === 'regenerate-message') {
+    removeAiMessage(lastAiMsgId)
+  }
 
   // 保存用户发送的消息
-  createAiMessage({ message, userId: session.user.id, chatId }).catch((error) => {
-    console.error(`保存 AI 对话用户信息失败:`, error)
-  })
+  createAiMessage({ message, userId: session.user.id, chatId })
 
   const oldMessagesRes = await getAiMessages(chatId)
   if (oldMessagesRes.code !== 0) {
@@ -61,8 +64,7 @@ export async function POST(req: NextRequest) {
 
   const aiModelName = 'openai/gpt-4.1-nano'
   const result = streamText({
-    model: aiModelName, // 模型名称
-    temperature: 0.6,
+    model: aiModelName,
     system: '你是一个通用的智能 AI 可以根据用户的输入回答问题', // 设置AI助手的系统角色提示
     messages: convertToModelMessages([...oldMessages, message]), // 传入用户消息历史
     experimental_transform: smoothStream({
