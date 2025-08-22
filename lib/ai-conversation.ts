@@ -174,6 +174,11 @@ export async function createAiConversation(
 
 // 删除 Ai 对话
 export async function removeAiConversation(id: string): Promise<ApiRes> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { code: 401, msg: '请登录后重试！' }
+  }
+
   try {
     await prisma.aIConversation.update({
       where: { id },
@@ -204,6 +209,11 @@ const UpdateAiConversationSchema = z.object({
 export async function updateAiConversation(
   props: z.infer<typeof UpdateAiConversationSchema>
 ): Promise<ApiRes<AIConversation>> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { code: 401, msg: '请登录后重试！' }
+  }
+
   try {
     const { id, name, desc } = UpdateAiConversationSchema.parse(props)
 

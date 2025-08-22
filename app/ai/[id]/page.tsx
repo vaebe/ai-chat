@@ -22,11 +22,11 @@ export default function AIChatPage() {
   const { status, stop, setMessages, sendMessage, messages, regenerate, error } = useChat({
     id: conversationId,
     transport: new DefaultChatTransport({
-      api: '/api/ai/chat'
+      api: '/api/ai/chat',
       // 仅发送最后一条消息
-      // prepareSendMessagesRequest({ messages, id }) {
-      //   return { body: { message: messages[messages.length - 1], id } }
-      // }
+      prepareSendMessagesRequest({ messages, id }) {
+        return { body: { message: messages[messages.length - 1], id } }
+      }
     }),
     onFinish: () => {}
   })
