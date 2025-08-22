@@ -97,21 +97,21 @@ export async function generateAiConversationTitle(
 
   try {
     // 查询开始对话的两条数据生成标题
-    const conversationData = await prisma.aIMessage.findMany({
-      where: { id },
+    const list = await prisma.aIMessage.findMany({
+      where: { conversationId: id },
       orderBy: { createdAt: 'asc' },
       skip: 0,
       take: 2
     })
 
-    if (!conversationData.length) {
+    if (!list.length) {
       console.warn(`对话信息不存在,无法生成标题!`)
       return { code: -1, msg: `对话信息不存在,无法生成标题!` }
     }
 
     const result = await generateText({
       model: 'openai/gpt-4.1-nano', // 模型名称
-      prompt: generateAiConversationTitlePrompt(conversationData) // 设置AI助手的系统角色提示
+      prompt: generateAiConversationTitlePrompt(list) // 设置AI助手的系统角色提示
     })
 
     const info = JSON.parse(result.text)

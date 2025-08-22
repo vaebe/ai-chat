@@ -81,3 +81,32 @@ export async function getAiMessages(id: string): Promise<ApiRes<AIMessage[]>> {
     return { code: -1, msg: `获取AI消息详情失败: ${error}` }
   }
 }
+
+export async function removeAiMessage(id: string): Promise<ApiRes<AIMessage>> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { code: 401, msg: `无权限!` }
+  }
+
+  if (!id) {
+    return { code: 400, msg: `参数不正确!` }
+  }
+
+  try {
+    const deleted = await prisma.aIMessage.delete({
+      where: {
+        id,
+        userId: session.user.id
+      }
+    })
+
+    // 确保只能删除当前用户的消息
+    if (deleted.userId !== session.user.id) {
+      return { code: 403, msg: `无权删除该消息!` }
+    }
+
+    return { code: 0, msg: `删除AI消息成功`, data: deleted }
+  } catch (error) {
+    return { code: -1, msg: `删除AI消息失败: ${error}` }
+  }
+}
