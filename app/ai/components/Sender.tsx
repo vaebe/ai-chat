@@ -44,7 +44,7 @@ function Sender({ onSubmit, input, setInput, isLoading, stop, className }: Sende
 
     setTimeout(() => {
       adjustHeight()
-    }, 0)
+    }, 100)
   }
 
   return (

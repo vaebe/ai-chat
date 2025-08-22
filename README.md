@@ -46,4 +46,5 @@ npx @modelcontextprotocol/inspector node mcp/githubSearch.mjs
 
 ## todo
 
-1. 持久话 用户发送的消息到数据库
+1. 生成对话标题
+2. 重新生成对话后，ai 消息存储了两条
