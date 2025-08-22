@@ -44,9 +44,7 @@ const AssistantMessage = memo(({ message }: { message: UIMessage }) => {
 
       <Card className="w-[88%] px-4 py-2">
         {message.parts.map((part, index) =>
-          part.type === 'text' ? (
-            <MarkdownRender key={index} content={JSON.stringify(part.text) ?? ''} />
-          ) : null
+          part.type === 'text' ? <MarkdownRender key={index} content={part.text ?? ''} /> : null
         )}
       </Card>
     </div>
