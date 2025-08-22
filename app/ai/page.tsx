@@ -13,13 +13,16 @@ export default function AIChatPage() {
   const { setAiSharedData } = useContext(AiSharedDataContext)
 
   const [input, setInput] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   const router = useRouter()
 
   const onSubmit = () => {
-    if (!input.trim()) {
+    if (isLoading) {
       return
     }
+
+    setIsLoading(true)
 
     const conversationId = generateUUID(false)
 
