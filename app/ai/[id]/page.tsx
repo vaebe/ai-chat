@@ -62,6 +62,8 @@ export default function AIChatPage() {
           id: item.id
         })) as UIMessage[]
 
+        console.log(list, '-=-=-=-=-')
+
         setMessages(list)
       })
       .catch(() => {

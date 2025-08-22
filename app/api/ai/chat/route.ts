@@ -5,6 +5,7 @@ import { kv } from '@vercel/kv'
 import { NextRequest } from 'next/server'
 import { getClientIp } from '@/lib/utils'
 import { createAiMessage, getAiMessages, removeAiMessage } from '@/lib/ai-message'
+import { createDuckDuckGoMcpServer, createGithubSearchMcpServer } from './mcp'
 
 // 允许最多 n 秒的流式响应
 export const maxDuration = 300
@@ -38,8 +39,6 @@ export async function POST(req: NextRequest) {
 
   const { message, id: chatId, trigger, lastAiMsgId }: ReqProps = await req.json()
 
-  console.log('收到用户消息', { message, trigger, lastAiMsgId })
-
   if (trigger === 'regenerate-message') {
     removeAiMessage(lastAiMsgId)
   }
@@ -62,15 +61,28 @@ export async function POST(req: NextRequest) {
       } as UIMessage
     }) ?? []
 
+  const duckDuckGoMcp = await createDuckDuckGoMcpServer()
+  const githubSearchMcp = await createGithubSearchMcpServer()
+
   const aiModelName = 'openai/gpt-4.1-nano'
   const result = streamText({
     model: aiModelName,
-    system: '你是一个通用的智能 AI 可以根据用户的输入回答问题', // 设置AI助手的系统角色提示
+    system:
+      '你是一个通用的智能 AI 可以根据用户的输入回答问题，在没有被用户要求时使用中文回答问题。', // 设置AI助手的系统角色提示
     messages: convertToModelMessages([...oldMessages, message]), // 传入用户消息历史
     experimental_transform: smoothStream({
       // 平滑文本流 https://ai-sdk.dev/docs/reference/ai-sdk-core/smooth-stream#word-chunking-caveats-with-non-latin-languages
       chunking: /[\u4E00-\u9FFF]|\S+\s+/
-    })
+    }),
+    tools: {
+      ...githubSearchMcp.tools,
+      ...duckDuckGoMcp.tools
+    },
+    toolChoice: 'auto', // 自动选择工具
+    onFinish: () => {
+      githubSearchMcp.client.close()
+      duckDuckGoMcp.client.close()
+    }
   })
 
   // 即使客户端已经断开连接，onFinish 也会触发

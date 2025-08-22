@@ -27,10 +27,32 @@ const UserMessage = memo(({ message }: MessageProps) => {
 })
 UserMessage.displayName = 'UserMessage'
 
+/** 规范化 parts，支持 dynamic-tool / structuredContent */
+function normalizeParts(parts: any[]) {
+  const normalized: { type: string; text?: string }[] = []
+
+  for (const part of parts) {
+    if (part.type === 'text' && part.text) {
+      normalized.push({ type: 'text', text: part.text })
+    } else if (part.type === 'dynamic-tool' && part.state === 'output-available') {
+      const text =
+        part.output?.structuredContent?.result ||
+        part.output?.content
+          ?.filter((p: any) => p.type === 'text')
+          .map((p: any) => p.text)
+          .join('\n')
+      if (text) normalized.push({ type: 'text', text })
+    }
+  }
+
+  return normalized
+}
+
 const AssistantMessage = memo(({ message }: MessageProps) => {
+  const parts = normalizeParts(message.parts)
   return (
     <div className="mb-10">
-      {message.parts.map((part, index) =>
+      {parts.map((part, index) =>
         part.type === 'text' ? <MarkdownRender key={index} content={part.text ?? ''} /> : null
       )}
     </div>
