@@ -6,8 +6,8 @@ import { NextRequest } from 'next/server'
 import { getClientIp } from '@/lib/utils'
 import { createAiMessage, getAiMessages, removeAiMessage } from '@/lib/ai-message'
 
-// 允许最多 60 秒的流式响应 (免费版最大支持 60s)
-export const maxDuration = 60
+// 允许最多 n 秒的流式响应
+export const maxDuration = 300
 
 const ratelimit = new Ratelimit({
   redis: kv,
