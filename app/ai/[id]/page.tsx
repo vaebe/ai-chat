@@ -24,11 +24,11 @@ export default function AIChatPage() {
     transport: new DefaultChatTransport({
       api: '/api/ai/chat',
       // 仅发送最后一条消息
-      prepareSendMessagesRequest({ messages, id }) {
-        return { body: { message: messages[messages.length - 1], id } }
+      prepareSendMessagesRequest({ messages, id, trigger, ...data }) {
+        console.log('prepareSendMessagesRequest', { messages, id, trigger, data })
+        return { body: { message: messages[messages.length - 1], id, trigger } }
       }
-    }),
-    onFinish: () => {}
+    })
   })
 
   const [input, setInput] = useState('')
