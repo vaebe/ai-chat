@@ -1,4 +1,4 @@
-import { convertToModelMessages, createIdGenerator, streamText, UIMessage } from 'ai'
+import { convertToModelMessages, createIdGenerator, streamText, UIMessage, smoothStream } from 'ai'
 import { auth } from '@/auth'
 import { Ratelimit } from '@upstash/ratelimit'
 import { kv } from '@vercel/kv'
@@ -59,11 +59,16 @@ export async function POST(req: NextRequest) {
       } as UIMessage
     }) ?? []
 
+  const aiModelName = 'openai/gpt-4.1-nano'
   const result = streamText({
-    model: 'openai/gpt-4.1-nano', // 模型名称
+    model: aiModelName, // 模型名称
     temperature: 0.6,
     system: '你是一个通用的智能 AI 可以根据用户的输入回答问题', // 设置AI助手的系统角色提示
-    messages: convertToModelMessages([...oldMessages, message]) // 传入用户消息历史
+    messages: convertToModelMessages([...oldMessages, message]), // 传入用户消息历史
+    experimental_transform: smoothStream({
+      // 平滑文本流 https://ai-sdk.dev/docs/reference/ai-sdk-core/smooth-stream#word-chunking-caveats-with-non-latin-languages
+      chunking: /[\u4E00-\u9FFF]|\S+\s+/
+    })
   })
 
   // 即使客户端已经断开连接，onFinish 也会触发
@@ -78,6 +83,13 @@ export async function POST(req: NextRequest) {
       size: 16
     }),
     messageMetadata: ({ part }) => {
+      if (part.type === 'start') {
+        return {
+          createdAt: Date.now(),
+          model: aiModelName
+        }
+      }
+
       if (part.type === 'finish') {
         return {
           totalTokens: part.totalUsage.totalTokens
