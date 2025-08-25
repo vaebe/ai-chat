@@ -27,19 +27,26 @@ const UserMessage = memo(({ message }: MessageProps) => {
 })
 UserMessage.displayName = 'UserMessage'
 
+interface PartOutput {
+  structuredContent?: { result?: string }
+  content?: { type: string; text: string }[]
+}
+
 /** 规范化 parts，支持 dynamic-tool / structuredContent */
-function normalizeParts(parts: any[]) {
+function normalizeParts(parts: UIMessage['parts']) {
   const normalized: { type: string; text?: string }[] = []
 
   for (const part of parts) {
     if (part.type === 'text' && part.text) {
       normalized.push({ type: 'text', text: part.text })
     } else if (part.type === 'dynamic-tool' && part.state === 'output-available') {
+      const output = part.output as PartOutput
+
       const text =
-        part.output?.structuredContent?.result ||
-        part.output?.content
-          ?.filter((p: any) => p.type === 'text')
-          .map((p: any) => p.text)
+        output?.structuredContent?.result ||
+        output?.content
+          ?.filter((p) => p.type === 'text')
+          .map((p) => p.text)
           .join('\n')
       if (text) normalized.push({ type: 'text', text })
     }
