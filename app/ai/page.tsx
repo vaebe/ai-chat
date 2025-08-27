@@ -4,7 +4,6 @@ import { useState, useContext } from 'react'
 import { LayoutHeader } from './components/LayoutHeader'
 import { useRouter } from 'next/navigation'
 import { AiSharedDataContext } from './components/AiSharedDataContext'
-import { StartAConversationPrompt } from './components/StartAConversationPrompt'
 import { Sender } from './components/Sender'
 import { generateUUID } from '@/lib/utils'
 import { createAiConversation } from '@/app/actions'
@@ -52,7 +51,7 @@ export default function AIChatPage() {
       <LayoutHeader></LayoutHeader>
 
       <div className="w-full h-full flex flex-col items-center justify-center">
-        <StartAConversationPrompt chatStarted={false}></StartAConversationPrompt>
+        <div className="text-4xl font-bold mb-10 text-center">有什么可以帮忙的？</div>
 
         <div className="flex justify-center p-2 md:w-8/12 mx-auto">
           <Sender onSubmit={onSubmit} input={input} setInput={setInput}></Sender>
