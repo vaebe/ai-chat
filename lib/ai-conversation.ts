@@ -1,5 +1,5 @@
 import { ApiRes, PaginationResData } from '@/lib/utils'
-import { auth } from '@/auth'
+import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/prisma'
 import { AiConversation, AiMessage } from '@prisma/client'
 import { ModelMessage, UIMessage, generateText } from 'ai'
@@ -14,8 +14,8 @@ interface GetAiConversationListProps {
 export async function getAiConversationList(
   props?: GetAiConversationListProps
 ): Promise<PaginationResData<AiConversation>> {
-  const session = await auth()
-  if (!session?.user?.id) {
+  const { userId } = await auth()
+  if (!userId) {
     return { code: 401, msg: `无权限!` }
   }
 
@@ -26,7 +26,7 @@ export async function getAiConversationList(
 
     const list = await prisma.aiConversation.findMany({
       where: {
-        userId: session!.user.id,
+        userId,
         deletedAt: null
       },
       orderBy: { createdAt: 'desc' },
@@ -36,7 +36,7 @@ export async function getAiConversationList(
 
     const total = await prisma.aiConversation.count({
       where: {
-        userId: session!.user.id
+        userId
       }
     })
 
@@ -86,8 +86,8 @@ function generateAiConversationTitlePrompt(list: Array<AiMessage>) {
 export async function generateAiConversationTitle(
   id: string
 ): Promise<ApiRes<{ name: string; desc: string }>> {
-  const session = await auth()
-  if (!session?.user) {
+  const { userId } = await auth()
+  if (!userId) {
     return { code: 401, msg: `无权限!` }
   }
 
@@ -141,9 +141,9 @@ const CreateAiConversationSchema = z.object({
 export async function createAiConversation(
   props: z.infer<typeof CreateAiConversationSchema>
 ): Promise<ApiRes<AiConversation>> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { code: 401, msg: '请登录后重试！' }
+  const { userId } = await auth()
+  if (!userId) {
+    return { code: 401, msg: `无权限!` }
   }
 
   // 对请求体进行验证
@@ -163,7 +163,7 @@ export async function createAiConversation(
       data: {
         id: uid,
         name,
-        userId: session.user.id
+        userId
       }
     })
     return { code: 0, msg: '创建对话成功', data: info }
@@ -174,9 +174,9 @@ export async function createAiConversation(
 
 // 删除 Ai 对话
 export async function removeAiConversation(id: string): Promise<ApiRes> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { code: 401, msg: '请登录后重试！' }
+  const { userId } = await auth()
+  if (!userId) {
+    return { code: 401, msg: `无权限!` }
   }
 
   try {
@@ -209,9 +209,9 @@ const UpdateAiConversationSchema = z.object({
 export async function updateAiConversation(
   props: z.infer<typeof UpdateAiConversationSchema>
 ): Promise<ApiRes<AiConversation>> {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return { code: 401, msg: '请登录后重试！' }
+  const { userId } = await auth()
+  if (!userId) {
+    return { code: 401, msg: `无权限!` }
   }
 
   try {

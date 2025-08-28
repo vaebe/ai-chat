@@ -3,15 +3,22 @@
 import '@/lib/date'
 import { ThemeProvider } from 'next-themes'
 import { Toaster } from '@/components/ui/sonner'
-import { SessionProvider } from 'next-auth/react'
+import {
+  ClerkProvider,
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton
+} from '@clerk/nextjs'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
+    <ClerkProvider>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         {children}
         <Toaster position="top-center" />
       </ThemeProvider>
-    </SessionProvider>
+    </ClerkProvider>
   )
 }

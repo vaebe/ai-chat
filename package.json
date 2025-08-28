@@ -13,7 +13,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^2.0.22",
     "@ai-sdk/react": "^2.0.26",
-    "@auth/prisma-adapter": "2.7.3",
+    "@clerk/nextjs": "^6.31.6",
     "@iconify/react": "^6.0.0",
     "@prisma/client": "^6.15.0",
     "@radix-ui/react-avatar": "^1.1.10",
@@ -33,7 +33,6 @@
     "katex": "^0.16.22",
     "lucide-react": "^0.542.0",
     "next": "^15.5.2",
-    "next-auth": "^5.0.0-beta.29",
     "next-themes": "^0.4.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -80,6 +79,7 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@clerk/shared",
       "@prisma/client",
       "@tailwindcss/oxide",
       "sharp",

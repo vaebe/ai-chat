@@ -1,23 +1,22 @@
 import { UIMessage } from 'ai'
 import { prisma } from '@/prisma'
 import { ApiRes } from '@/lib/utils'
-import { auth } from '@/auth'
+import { auth } from '@clerk/nextjs/server'
 import { AiMessage } from '@prisma/client'
 
 interface CreateAiMessageProps {
   message: UIMessage
-  userId: string
   chatId: string
 }
 
 // 创建 ai 消息
 export async function createAiMessage(opts: CreateAiMessageProps): Promise<ApiRes> {
-  const session = await auth()
-  if (!session?.user?.id) {
+  const { userId } = await auth()
+  if (!userId) {
     return { code: 401, msg: `无权限!` }
   }
 
-  const { message, userId, chatId } = opts
+  const { message, chatId } = opts
 
   if (!userId || !chatId) {
     console.warn(`userId-${userId} chatId-${chatId} 不存在无法持久话聊天数据`)
@@ -58,8 +57,8 @@ export async function createAiMessage(opts: CreateAiMessageProps): Promise<ApiRe
 
 // 获取 AI 消息详情
 export async function getAiMessages(id: string): Promise<ApiRes<AiMessage[]>> {
-  const session = await auth()
-  if (!session?.user?.id) {
+  const { userId } = await auth()
+  if (!userId) {
     return { code: 401, msg: `无权限!` }
   }
 
@@ -71,7 +70,7 @@ export async function getAiMessages(id: string): Promise<ApiRes<AiMessage[]>> {
     const list = await prisma.aiMessage.findMany({
       where: {
         conversationId: id,
-        userId: session.user.id
+        userId
       },
       orderBy: { createdAt: 'asc' }
     })
@@ -83,8 +82,8 @@ export async function getAiMessages(id: string): Promise<ApiRes<AiMessage[]>> {
 }
 
 export async function removeAiMessage(id: string): Promise<ApiRes<AiMessage>> {
-  const session = await auth()
-  if (!session?.user?.id) {
+  const { userId } = await auth()
+  if (!userId) {
     return { code: 401, msg: `无权限!` }
   }
 
@@ -96,12 +95,12 @@ export async function removeAiMessage(id: string): Promise<ApiRes<AiMessage>> {
     const deleted = await prisma.aiMessage.delete({
       where: {
         id,
-        userId: session.user.id
+        userId
       }
     })
 
     // 确保只能删除当前用户的消息
-    if (deleted.userId !== session.user.id) {
+    if (deleted.userId !== userId) {
       return { code: 403, msg: `无权删除该消息!` }
     }
 
