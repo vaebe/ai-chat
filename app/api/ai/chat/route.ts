@@ -5,7 +5,7 @@ import { kv } from '@vercel/kv'
 import { NextRequest } from 'next/server'
 import { getClientIp } from '@/lib/utils'
 import { createAiMessage, getAiMessages, removeAiMessage } from '@/lib/ai-message'
-import { createDuckDuckGoMcpServer, createGithubSearchMcpServer } from './mcp'
+import { createGithubSearchMcpServer } from './mcp'
 
 // 允许最多 n 秒的流式响应
 export const maxDuration = 300
@@ -61,7 +61,6 @@ export async function POST(req: NextRequest) {
       } as UIMessage
     }) ?? []
 
-  // const duckDuckGoMcp = await createDuckDuckGoMcpServer()
   const githubSearchMcp = await createGithubSearchMcpServer()
 
   const aiModelName = 'openai/gpt-4.1-nano'
@@ -76,12 +75,10 @@ export async function POST(req: NextRequest) {
     }),
     tools: {
       ...githubSearchMcp.tools
-      // ...duckDuckGoMcp.tools
     },
     toolChoice: 'auto', // 自动选择工具
     onFinish: () => {
       githubSearchMcp.client.close()
-      // duckDuckGoMcp.client.close()
     }
   })
 
