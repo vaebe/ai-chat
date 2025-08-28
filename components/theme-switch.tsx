@@ -6,7 +6,7 @@ import { Switch } from '@/components/ui/switch'
 import { useEffect, useState } from 'react'
 
 export function ThemeSwitch() {
-  const { theme, setTheme, resolvedTheme } = useTheme()
+  const { setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
