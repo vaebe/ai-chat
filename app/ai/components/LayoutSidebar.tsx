@@ -198,7 +198,7 @@ function ChatListItem({ item }: { item: AiConversation }) {
 
   return (
     <div
-      className={`flex items-center justify-between p-2 min-h-10 cursor-pointer rounded dark:text-white  hover:bg-black/10 dark:hover:bg-white/10 ${id === item.id ? 'bg-black/10 dark:bg-white/10' : ''}`}
+      className={`flex items-center justify-between px-2 py-1 text-14 cursor-pointer rounded-lg dark:text-white  hover:bg-black/10 dark:hover:bg-white/10 ${id === item.id ? 'bg-black/10 dark:bg-white/10' : ''}`}
       style={{ boxSizing: 'border-box' }}
     >
       <p
@@ -206,7 +206,7 @@ function ChatListItem({ item }: { item: AiConversation }) {
         style={{ width: `calc(100% - 30px)` }}
         onClick={() => switchConversation(item.id)}
       >
-        {item.name}
+        {item.name}212121
       </p>
       <Operate info={item}></Operate>
     </div>
