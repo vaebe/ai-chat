@@ -3,11 +3,22 @@
 import { useTheme } from 'next-themes'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { useEffect, useState } from 'react'
 
 export function ThemeSwitch() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, resolvedTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
-  const isDark = theme === 'dark'
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    // 避免 hydration mismatch
+    return null
+  }
+
+  const isDark = resolvedTheme === 'dark'
 
   function themeChange(checked: boolean) {
     setTheme(checked ? 'dark' : 'light')
