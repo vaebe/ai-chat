@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-
+@import '@clerk/themes/shadcn.css';
 @plugin "tailwindcss-animate";
 
 @custom-variant dark (&:is(.dark *));

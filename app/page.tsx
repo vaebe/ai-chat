@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { KeySquare, Key } from 'lucide-react'
+import { ThemeSwitch } from '@/components/theme-switch'
 
 export default function Home() {
   return (
@@ -8,7 +9,9 @@ export default function Home() {
       <header className="flex items-center justify-between px-6 py-2">
         <div className="text-3xl font-bold">AI Chat</div>
 
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-2">
+          <ThemeSwitch></ThemeSwitch>
+
           <Link href="/sign-up">
             <Button className="cursor-pointer" variant="outline" size="sm">
               <Key />
