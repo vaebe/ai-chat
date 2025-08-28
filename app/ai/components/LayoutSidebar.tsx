@@ -206,7 +206,7 @@ function ChatListItem({ item }: { item: AiConversation }) {
         style={{ width: `calc(100% - 30px)` }}
         onClick={() => switchConversation(item.id)}
       >
-        {item.name}212121
+        {item.name}
       </p>
       <Operate info={item}></Operate>
     </div>
