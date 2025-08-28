@@ -1,5 +1,5 @@
 import { convertToModelMessages, createIdGenerator, streamText, UIMessage, smoothStream } from 'ai'
-import { auth } from '@/auth'
+import { auth } from '@clerk/nextjs/server'
 import { Ratelimit } from '@upstash/ratelimit'
 import { kv } from '@vercel/kv'
 import { NextRequest } from 'next/server'
@@ -32,8 +32,8 @@ export async function POST(req: NextRequest) {
   }
 
   // 未登录返回 null
-  const session = await auth()
-  if (!session?.user?.id) {
+  const { userId } = await auth()
+  if (!userId) {
     return new Response('无权限!', { status: 401 })
   }
 
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
   }
 
   // 保存用户发送的消息
-  createAiMessage({ message, userId: session.user.id, chatId })
+  createAiMessage({ message, chatId })
 
   const oldMessagesRes = await getAiMessages(chatId)
   if (oldMessagesRes.code !== 0) {
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       } as UIMessage
     }) ?? []
 
-  const duckDuckGoMcp = await createDuckDuckGoMcpServer()
+  // const duckDuckGoMcp = await createDuckDuckGoMcpServer()
   const githubSearchMcp = await createGithubSearchMcpServer()
 
   const aiModelName = 'openai/gpt-4.1-nano'
@@ -75,13 +75,13 @@ export async function POST(req: NextRequest) {
       chunking: /[\u4E00-\u9FFF]|\S+\s+/
     }),
     tools: {
-      ...githubSearchMcp.tools,
-      ...duckDuckGoMcp.tools
+      ...githubSearchMcp.tools
+      // ...duckDuckGoMcp.tools
     },
     toolChoice: 'auto', // 自动选择工具
     onFinish: () => {
       githubSearchMcp.client.close()
-      duckDuckGoMcp.client.close()
+      // duckDuckGoMcp.client.close()
     }
   })
 
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
       }
     },
     onFinish: ({ messages }) => {
-      createAiMessage({ message: messages[0], userId: session?.user?.id ?? '', chatId })
+      createAiMessage({ message: messages[0], chatId })
     }
   })
 }

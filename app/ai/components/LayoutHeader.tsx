@@ -1,7 +1,7 @@
 import { OpenOrCloseSiderbarIcon } from './OpenOrCloseSiderbarIcon'
 import { NewChatIcon } from './NewChatIcon'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useSession, signOut } from 'next-auth/react'
+import { useAuth, useUser } from '@clerk/nextjs'
 import { Icon } from '@iconify/react'
 import { AiSharedDataContext } from './AiSharedDataContext'
 import { useContext } from 'react'
@@ -15,30 +15,31 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 function UserAvatar() {
-  const { data: session } = useSession()
+  const { user } = useUser()
+  const { signOut } = useAuth()
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className="flex items-center space-x-2 cursor-pointer">
           <Avatar className="w-8 h-8">
-            <AvatarImage src={session?.user?.image ?? ''} alt="user" />
-            <AvatarFallback>{session?.user?.name ?? 'll'}</AvatarFallback>
+            {user?.imageUrl ? (
+              <AvatarImage src={user?.imageUrl} alt="user" />
+            ) : (
+              <AvatarFallback>{user?.username ?? 'ai'}</AvatarFallback>
+            )}
           </Avatar>
 
-          <span>{session?.user?.name ?? 'll'}</span>
+          <span>{user?.username ?? 'ai'}</span>
         </div>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>{session?.user?.email}</DropdownMenuLabel>
+        <DropdownMenuLabel>{user?.primaryEmailAddress?.emailAddress ?? ''}</DropdownMenuLabel>
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem
-          className="cursor-pointer"
-          onClick={() => signOut({ redirectTo: '/login' })}
-        >
+        <DropdownMenuItem className="cursor-pointer" onClick={() => signOut({ redirectUrl: '/' })}>
           <div className="flex items-center">
             <Icon icon="lucide:log-out" className="w-5 h-5 mx-2" />
             <span>退出登录</span>
