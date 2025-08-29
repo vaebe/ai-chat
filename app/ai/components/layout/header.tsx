@@ -24,6 +24,9 @@ function LayoutHeader() {
       </div>
 
       <div className="flex items-center space-x-4">
+        <a className="text-sm text-muted-foreground hover:underline" href="/ai/settings">
+          AI 设置
+        </a>
         <ThemeSwitch></ThemeSwitch>
         <UserButton />
       </div>

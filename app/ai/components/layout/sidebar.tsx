@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Icon } from '@iconify/react'
 import { AiConversation } from '@prisma/client'
+import Link from 'next/link'
 import {
   Dialog,
   DialogContent,

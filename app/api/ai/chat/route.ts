@@ -6,6 +6,7 @@ import { NextRequest } from 'next/server'
 import { getClientIp } from '@/lib/utils'
 import { createAiMessage, getAiMessages, removeAiMessage } from '@/lib/ai-message'
 import { createGithubSearchMcpServer } from './mcp'
+import { getUserDefaultProviderModel } from '@/lib/ai-provider'
 
 // 允许最多 n 秒的流式响应
 export const maxDuration = 300
@@ -71,9 +72,11 @@ export async function POST(req: NextRequest) {
 
   const githubSearchMcp = await createGithubSearchMcpServer()
 
-  const aiModelName = 'deepseek/deepseek-v3.1'
+  const userModel = await getUserDefaultProviderModel()
+  const modelInput = userModel?.modelInput ?? 'deepseek/deepseek-v3.1'
+  const modelLabel = userModel?.label ?? 'deepseek/deepseek-v3.1'
   const result = streamText({
-    model: aiModelName,
+    model: modelInput,
     system: systemPrompt, // 设置AI助手的系统角色提示
     messages: convertToModelMessages([...oldMessages, message]), // 传入用户消息历史
     experimental_transform: smoothStream({
@@ -104,7 +107,7 @@ export async function POST(req: NextRequest) {
       if (part.type === 'start') {
         return {
           createdAt: Date.now(),
-          model: aiModelName
+          model: modelLabel
         }
       }
 

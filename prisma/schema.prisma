@@ -38,3 +38,38 @@ model AiMessage {
   @@index([userId, conversationId])
   @@map("ai_message")
 }
+
+model AiProviderConfig {
+  id          String   @id @default(cuid())
+  userId      String   // 所属用户
+  provider    String   // 如 'openai' | 'anthropic' | 'deepseek' | 'google'
+  model       String   // 模型名称，如 'gpt-4o-mini'
+  apiKeyEnc   String   // 加密存储后的 API Key（密文）
+  baseURL     String?  // 可选自定义网关
+  isDefault   Boolean  @default(false) // 是否默认使用
+  modelType   String?  // 模型类型，如 'chat' | 'reasoning' | 'multimodal'
+  capabilities String? // 模型能力 JSON：{ reasoning, multimodal, vision, tools, streaming }
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  @@index([userId, provider])
+  @@map("ai_provider_config")
+}
+
+model AiModel {
+  id           String   @id @default(cuid())
+  provider     String   // 提供商：openai / deepseek / google / anthropic ...
+  model        String   // 模型名称：gpt-4o-mini / deepseek-reasoner ...
+  displayName  String   // 展示名称
+  type         String   // chat | reasoning | multimodal
+  capabilities String   // 能力 JSON：{ reasoning, multimodal, vision, tools, streaming }
+  recommended  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  @@unique([provider, model])
+  @@index([provider])
+  @@map("ai_model")
+}
