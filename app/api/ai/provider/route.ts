@@ -8,13 +8,13 @@ export async function GET() {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ code: 401, msg: '无权限!' }, { status: 401 })
 
-  const list = await (prisma as any).aiProviderConfig.findMany({
+  const list = await prisma.aiProviderConfig.findMany({
     where: { userId, deletedAt: null },
     orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }]
   })
 
   // 屏蔽密钥
-  const safe = (list as any[]).map((i: any) => ({ ...i, apiKeyEnc: undefined }))
+  const safe = list.map((i) => ({ ...i, apiKeyEnc: undefined }))
   return NextResponse.json({ code: 0, msg: 'ok', data: safe })
 }
 
@@ -28,20 +28,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ code: 400, msg: '参数不正确!' }, { status: 400 })
   }
 
-  const modelInfo = await (prisma as any).aiModel.findFirst({
+  const modelInfo = await prisma.aiModel.findFirst({
     where: { provider, model, deletedAt: null }
   })
   const modelType = modelInfo?.type
   const capabilities = modelInfo?.capabilities
 
   if (isDefault) {
-    await (prisma as any).aiProviderConfig.updateMany({
+    await prisma.aiProviderConfig.updateMany({
       where: { userId },
       data: { isDefault: false }
     })
   }
 
-  const data = await (prisma as any).aiProviderConfig.create({
+  const data = await prisma.aiProviderConfig.create({
     data: {
       userId,
       provider,
@@ -65,7 +65,7 @@ export async function PATCH(req: NextRequest) {
   if (!id) return NextResponse.json({ code: 400, msg: '参数不正确!' }, { status: 400 })
 
   if (isDefault) {
-    await (prisma as any).aiProviderConfig.updateMany({
+    await prisma.aiProviderConfig.updateMany({
       where: { userId },
       data: { isDefault: false }
     })
@@ -74,14 +74,14 @@ export async function PATCH(req: NextRequest) {
   let modelType: string | undefined
   let capabilities: string | undefined
   if (provider && model) {
-    const row = await (prisma as any).aiModel.findFirst({
+    const row = await prisma.aiModel.findFirst({
       where: { provider, model, deletedAt: null }
     })
     modelType = row?.type
     capabilities = row?.capabilities
   }
 
-  const data = await (prisma as any).aiProviderConfig.update({
+  const data = await prisma.aiProviderConfig.update({
     where: { id },
     data: {
       ...(provider ? { provider } : {}),
@@ -103,6 +103,6 @@ export async function DELETE(req: NextRequest) {
   const id = searchParams.get('id')
   if (!id) return NextResponse.json({ code: 400, msg: '参数不正确!' }, { status: 400 })
 
-  await (prisma as any).aiProviderConfig.update({ where: { id }, data: { deletedAt: new Date() } })
+  await prisma.aiProviderConfig.update({ where: { id }, data: { deletedAt: new Date() } })
   return NextResponse.json({ code: 0, msg: '删除成功' })
 }

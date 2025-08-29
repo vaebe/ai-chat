@@ -4,7 +4,7 @@ import { prisma } from '@/prisma'
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const provider = searchParams.get('provider') || undefined
-  const list = await (prisma as any).aiModel.findMany({
+  const list = await prisma.aiModel.findMany({
     where: {
       deletedAt: null,
       ...(provider ? { provider } : {})
@@ -26,13 +26,14 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const data = await (prisma as any).aiModel.create({
+    const data = await prisma.aiModel.create({
       data: {
         provider,
         model,
         displayName,
         type,
-        capabilities: typeof capabilities === 'string' ? capabilities : JSON.stringify(capabilities),
+        capabilities:
+          typeof capabilities === 'string' ? capabilities : JSON.stringify(capabilities),
         recommended: !!recommended
       }
     })
@@ -48,7 +49,7 @@ export async function PATCH(req: NextRequest) {
   if (!id) return NextResponse.json({ code: 400, msg: '参数不正确!' }, { status: 400 })
 
   try {
-    const data = await (prisma as any).aiModel.update({
+    const data = await prisma.aiModel.update({
       where: { id },
       data: {
         ...(provider ? { provider } : {}),
@@ -56,7 +57,12 @@ export async function PATCH(req: NextRequest) {
         ...(displayName ? { displayName } : {}),
         ...(type ? { type } : {}),
         ...(typeof recommended === 'boolean' ? { recommended } : {}),
-        ...(capabilities ? { capabilities: typeof capabilities === 'string' ? capabilities : JSON.stringify(capabilities) } : {})
+        ...(capabilities
+          ? {
+              capabilities:
+                typeof capabilities === 'string' ? capabilities : JSON.stringify(capabilities)
+            }
+          : {})
       }
     })
     return NextResponse.json({ code: 0, msg: '更新成功', data })
@@ -71,7 +77,7 @@ export async function DELETE(req: NextRequest) {
   if (!id) return NextResponse.json({ code: 400, msg: '参数不正确!' }, { status: 400 })
 
   try {
-    await (prisma as any).aiModel.update({ where: { id }, data: { deletedAt: new Date() } })
+    await prisma.aiModel.update({ where: { id }, data: { deletedAt: new Date() } })
     return NextResponse.json({ code: 0, msg: '删除成功' })
   } catch (e) {
     return NextResponse.json({ code: -1, msg: String(e) }, { status: 500 })

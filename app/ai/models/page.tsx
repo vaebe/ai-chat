@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
+import { saListModels, saCreateModel, saUpdateModel, saDeleteModel } from '@/app/actions'
 
 type ModelRow = {
   id: string
@@ -35,12 +36,15 @@ export default function AiModelsPage() {
   const [recommended, setRecommended] = useState(false)
 
   async function fetchList() {
-    setLoading(true)
-    const res = await fetch('/api/ai/models')
-    const data = await res.json()
-    setLoading(false)
-    if (data.code === 0) setList(data.data)
-    else toast.error(data.msg || '获取失败')
+    try {
+      setLoading(true)
+      const data = await saListModels()
+      setList(data as any)
+    } catch (e) {
+      toast.error('获取失败')
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -67,7 +71,8 @@ export default function AiModelsPage() {
     setModel(row.model)
     setDisplayName(row.displayName)
     setType(row.type as any)
-    const caps = typeof row.capabilities === 'string' ? JSON.parse(row.capabilities) : row.capabilities
+    const caps =
+      typeof row.capabilities === 'string' ? JSON.parse(row.capabilities) : row.capabilities
     setCapReasoning(!!caps?.reasoning)
     setCapMultimodal(!!caps?.multimodal)
     setCapVision(!!caps?.vision)
@@ -92,27 +97,26 @@ export default function AiModelsPage() {
       recommended
     }
 
-    const res = await fetch('/api/ai/models', {
-      method: id ? 'PATCH' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(id ? { id, ...payload } : payload)
-    })
-    const data = await res.json()
-    if (data.code === 0) {
+    try {
+      if (id) await saUpdateModel({ id, ...payload })
+      else await saCreateModel(payload as any)
       toast.success(id ? '更新成功' : '创建成功')
       resetForm()
       fetchList()
-    } else toast.error(data.msg || '保存失败')
+    } catch (e) {
+      toast.error('保存失败')
+    }
   }
 
   async function onDelete(rid: string) {
-    const res = await fetch(`/api/ai/models?id=${rid}`, { method: 'DELETE' })
-    const data = await res.json()
-    if (data.code === 0) {
+    try {
+      await saDeleteModel(rid)
       toast.success('已删除')
       if (rid === id) resetForm()
       fetchList()
-    } else toast.error(data.msg || '删除失败')
+    } catch (e) {
+      toast.error('删除失败')
+    }
   }
 
   return (
@@ -126,19 +130,35 @@ export default function AiModelsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label>Provider</Label>
-              <Input value={provider} onChange={(e) => setProvider(e.target.value)} placeholder="openai" />
+              <Input
+                value={provider}
+                onChange={(e) => setProvider(e.target.value)}
+                placeholder="openai"
+              />
             </div>
             <div>
               <Label>Model</Label>
-              <Input value={model} onChange={(e) => setModel(e.target.value)} placeholder="gpt-4o-mini" />
+              <Input
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                placeholder="gpt-4o-mini"
+              />
             </div>
             <div>
               <Label>显示名称</Label>
-              <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="OpenAI - GPT-4o mini" />
+              <Input
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="OpenAI - GPT-4o mini"
+              />
             </div>
             <div>
               <Label>类型</Label>
-              <select className="w-full h-9 rounded border bg-background px-3 text-sm" value={type} onChange={(e) => setType(e.target.value as any)}>
+              <select
+                className="w-full h-9 rounded border bg-background px-3 text-sm"
+                value={type}
+                onChange={(e) => setType(e.target.value as any)}
+              >
                 <option value="chat">chat</option>
                 <option value="reasoning">reasoning</option>
                 <option value="multimodal">multimodal</option>
@@ -149,7 +169,11 @@ export default function AiModelsPage() {
               <Label htmlFor="capReasoning">推理</Label>
             </div>
             <div className="flex items-center gap-2">
-              <Switch checked={capMultimodal} onCheckedChange={setCapMultimodal} id="capMultimodal" />
+              <Switch
+                checked={capMultimodal}
+                onCheckedChange={setCapMultimodal}
+                id="capMultimodal"
+              />
               <Label htmlFor="capMultimodal">多模态</Label>
             </div>
             <div className="flex items-center gap-2">
@@ -172,7 +196,9 @@ export default function AiModelsPage() {
           <div className="flex items-center gap-2">
             <Button onClick={onSave}>{id ? '保存修改' : '创建'}</Button>
             {id && (
-              <Button variant="secondary" onClick={resetForm}>取消编辑</Button>
+              <Button variant="secondary" onClick={resetForm}>
+                取消编辑
+              </Button>
             )}
           </div>
         </CardContent>
@@ -193,10 +219,15 @@ export default function AiModelsPage() {
                 <div key={item.id} className="flex items-center justify-between rounded border p-3">
                   <div className="text-sm">
                     <div className="font-medium">{item.displayName}</div>
-                    <div className="text-muted-foreground">{item.provider} / {item.model} / {item.type}</div>
+                    <div className="text-muted-foreground">
+                      {item.provider} / {item.model} / {item.type}
+                    </div>
                     <div className="text-muted-foreground text-xs">
                       {(() => {
-                        const caps = typeof item.capabilities === 'string' ? JSON.parse(item.capabilities) : item.capabilities
+                        const caps =
+                          typeof item.capabilities === 'string'
+                            ? JSON.parse(item.capabilities)
+                            : item.capabilities
                         const tags = [
                           caps?.reasoning ? '推理' : null,
                           caps?.multimodal ? '多模态' : null,
@@ -209,13 +240,23 @@ export default function AiModelsPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {item.recommended && <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">推荐</span>}
-                    <Button size="sm" variant="secondary" onClick={() => fillForm(item)}>编辑</Button>
-                    <Button size="sm" variant="destructive" onClick={() => onDelete(item.id)}>删除</Button>
+                    {item.recommended && (
+                      <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">
+                        推荐
+                      </span>
+                    )}
+                    <Button size="sm" variant="secondary" onClick={() => fillForm(item)}>
+                      编辑
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={() => onDelete(item.id)}>
+                      删除
+                    </Button>
                   </div>
                 </div>
               ))}
-              {list.length === 0 && <div className="text-sm text-muted-foreground">暂无模型数据</div>}
+              {list.length === 0 && (
+                <div className="text-sm text-muted-foreground">暂无模型数据</div>
+              )}
             </div>
           )}
         </CardContent>
@@ -223,5 +264,3 @@ export default function AiModelsPage() {
     </div>
   )
 }
-
-
