@@ -25,12 +25,12 @@ const CodeBlock: Components['code'] = ({ children, className, ...rest }) => {
 
   return match ? (
     <div className="w-full rounded overflow-hidden my-4">
-      <div className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 p-2 flex justify-between items-center">
-        <span className="text-sm font-mono">{match?.[1]}</span>
+      <div className="bg-gray-100 text-gray-800 dark:bg-[#171717] dark:text-gray-200 p-2 flex justify-between items-center">
+        <span className="text-xs">{match?.[1]}</span>
 
         <button
           onClick={handleCopy}
-          className="text-xs px-2 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+          className="text-xs px-2 py-0.5 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors cursor-pointer"
         >
           {copied ? 'copied!' : 'copy'}
         </button>
@@ -52,14 +52,14 @@ const CodeBlock: Components['code'] = ({ children, className, ...rest }) => {
   )
 }
 
-// const ImageRenderer: Components['img'] = ({ src, alt, ...props }) => {
-//   return (
-//     <div className="flex flex-col items-center my-4">
-//       <img src={src} alt={alt} className="max-w-full rounded shadow-md" loading="lazy" {...props} />
-//       {alt && <span className="text-sm text-gray-500 mt-2">{alt}</span>}
-//     </div>
-//   )
-// }
+const ImageRenderer: Components['img'] = ({ src, alt, ...props }) => {
+  return (
+    <div className="flex flex-col items-center my-4">
+      <img src={src} alt={alt} className="max-w-full rounded shadow-md" loading="lazy" {...props} />
+      {alt && <span className="text-sm text-gray-500 mt-2">{alt}</span>}
+    </div>
+  )
+}
 
 const LinkRenderer: Components['a'] = ({ href, children, ...props }) => {
   const isExternal = href?.startsWith('http')
@@ -83,7 +83,7 @@ function MarkdownRender({ content }: { content: string }) {
       <ReactMarkdown
         components={{
           code: CodeBlock,
-          // img: ImageRenderer,
+          img: ImageRenderer,
           a: LinkRenderer,
           h1: (props) => <h1 className="text-2xl font-bold mt-6 mb-4" {...props} />,
           h2: (props) => <h2 className="text-xl font-bold mt-5 mb-3" {...props} />,
