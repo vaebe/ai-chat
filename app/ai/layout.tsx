@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { LayoutSidebar } from './components/LayoutSidebar'
+import { LayoutSidebar } from './components/layout/sidebar'
 import { AiSharedDataContext, defaultAiSharedData } from './components/AiSharedDataContext'
 import type { AiSharedData } from './components/AiSharedDataContext'
 import { useImmer } from 'use-immer'
