@@ -17,6 +17,14 @@ const ratelimit = new Ratelimit({
   prefix: 'ai_chat'
 })
 
+const systemPrompt = `
+行为要求：
+1. 必须使用 **Markdown 格式** 输出答案，严格遵循语法。
+   - 代码必须使用正确的语法高亮，例如 \`\`\`ts、\`\`\`bash 等。
+   - 支持 **remarkGfm**（表格、任务列表等）、**remarkMath/rehypeKatex**（数学公式）。
+2. 保持专业但不过度啰嗦；确保内容准确，不编造。
+`
+
 interface ReqProps {
   message: UIMessage
   id: string
@@ -63,11 +71,10 @@ export async function POST(req: NextRequest) {
 
   const githubSearchMcp = await createGithubSearchMcpServer()
 
-  const aiModelName = 'openai/gpt-4.1-nano'
+  const aiModelName = 'deepseek/deepseek-v3.1'
   const result = streamText({
     model: aiModelName,
-    system:
-      '你是一个通用的智能 AI 可以根据用户的输入回答问题，在没有被用户要求时使用中文回答问题。', // 设置AI助手的系统角色提示
+    system: systemPrompt, // 设置AI助手的系统角色提示
     messages: convertToModelMessages([...oldMessages, message]), // 传入用户消息历史
     experimental_transform: smoothStream({
       // 平滑文本流 https://ai-sdk.dev/docs/reference/ai-sdk-core/smooth-stream#word-chunking-caveats-with-non-latin-languages

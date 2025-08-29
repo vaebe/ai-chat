@@ -110,8 +110,8 @@ export async function generateAiConversationTitle(
     }
 
     const result = await generateText({
-      model: 'openai/gpt-4.1-nano', // 模型名称
-      prompt: generateAiConversationTitlePrompt(list) // 设置AI助手的系统角色提示
+      model: 'google/gemini-2.5-flash-lite', // 模型名称
+      prompt: generateAiConversationTitlePrompt(list)
     })
 
     const info = JSON.parse(result.text)

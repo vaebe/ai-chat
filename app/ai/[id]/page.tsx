@@ -62,7 +62,7 @@ export default function AIChatPage() {
           id: item.id
         })) as UIMessage[]
 
-        console.log(list, '-=-=-=-=-')
+        console.log('历史消息', list)
 
         setMessages(list)
       })
@@ -75,8 +75,6 @@ export default function AIChatPage() {
   async function generateConversationTitle() {
     generateAiConversationTitle(conversationId)
       .then((res) => {
-        console.log('生成对话标题', res)
-
         if (res.code === 0) {
           const conversationName = res.data?.name ?? ''
 
