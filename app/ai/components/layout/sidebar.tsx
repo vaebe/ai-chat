@@ -239,7 +239,7 @@ function ChatList() {
 
 function LayoutSidebar() {
   return (
-    <div className="w-64 border-r bg-background">
+    <div className="w-64 border-r bg-white dark:bg-black">
       <div className="p-2 flex justify-between">
         <SidebarToggleIcon state={false}></SidebarToggleIcon>
         <NewChatIcon></NewChatIcon>
