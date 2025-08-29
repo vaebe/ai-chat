@@ -76,6 +76,7 @@ interface MessageListProps {
 }
 
 const MessageList = ({ className, isLoading, regenerate, messages, error }: MessageListProps) => {
+  // todo 用户手动滚动后本条消息不自动滚动，避免打断用户阅读，当用户再次发送消息后恢复自动滚动
   const { containerRef, scrollToBottom } = useChatScroll()
   useEffect(() => {
     scrollToBottom()

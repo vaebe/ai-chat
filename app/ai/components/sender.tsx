@@ -73,12 +73,24 @@ function Sender({ onSubmit, input, setInput, isLoading, stop, className }: Sende
       />
 
       <div className="absolute bottom-1 right-1">
-        <Button size="sm" disabled={isLoading || !input.trim()} onClick={sendMsg}>
+        <Button
+          size="sm"
+          disabled={isLoading || !input.trim()}
+          variant="outline"
+          className="cursor-pointer"
+          onClick={sendMsg}
+        >
           <ArrowUpIcon size={18} />
         </Button>
 
         {isLoading && (
-          <Button type="button" size="sm" variant="outline" onClick={stop}>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="cursor-pointer"
+            onClick={stop}
+          >
             <StopCircle size={18} />
           </Button>
         )}
