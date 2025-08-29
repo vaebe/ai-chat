@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Icon } from '@iconify/react'
-import { AiSharedDataContext } from './AiSharedDataContext'
+import { AiSharedDataContext } from '@/app/ai/components/AiSharedDataContext'
 import { useContext } from 'react'
 
-function OpenOrCloseSiderbarIcon({ state }: { state: boolean }) {
+function SidebarToggleIcon({ state }: { state: boolean }) {
   const { setAiSharedData } = useContext(AiSharedDataContext)
 
   function handleClick() {
@@ -29,5 +29,5 @@ function OpenOrCloseSiderbarIcon({ state }: { state: boolean }) {
   )
 }
 
-export { OpenOrCloseSiderbarIcon }
-export default OpenOrCloseSiderbarIcon
+export { SidebarToggleIcon }
+export default SidebarToggleIcon

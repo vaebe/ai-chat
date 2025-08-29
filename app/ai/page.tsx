@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useContext } from 'react'
-import { LayoutHeader } from './components/LayoutHeader'
+import { LayoutHeader } from './components/layout/header'
 import { useRouter } from 'next/navigation'
 import { AiSharedDataContext } from './components/AiSharedDataContext'
-import { Sender } from './components/Sender'
+import { Sender } from '@/app/ai/components/sender'
 import { generateUUID } from '@/lib/utils'
 import { createAiConversation } from '@/app/actions'
 

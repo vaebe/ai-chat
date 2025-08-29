@@ -1,7 +1,7 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { OpenOrCloseSiderbarIcon } from './OpenOrCloseSiderbarIcon'
-import { NewChatIcon } from './NewChatIcon'
-import { AiSharedDataContext } from './AiSharedDataContext'
+import { SidebarToggleIcon } from '@/app/ai/components/icon/sidebar-toggle'
+import { NewChatIcon } from '@/app/ai/components/icon/new-chat'
+import { AiSharedDataContext } from '@/app/ai/components/AiSharedDataContext'
 import { useContext, useEffect, useState } from 'react'
 import { getAiConversationList } from '@/app/actions'
 import { useParams, useRouter } from 'next/navigation'
@@ -198,7 +198,7 @@ function ChatListItem({ item }: { item: AiConversation }) {
 
   return (
     <div
-      className={`flex items-center justify-between px-2 py-1 text-14 cursor-pointer rounded-lg dark:text-white  hover:bg-black/10 dark:hover:bg-white/10 ${id === item.id ? 'bg-black/10 dark:bg-white/10' : ''}`}
+      className={`flex items-center justify-between p-2 text-sm cursor-pointer rounded-lg dark:text-white  hover:bg-black/10 dark:hover:bg-white/10 ${id === item.id ? 'bg-black/10 dark:bg-white/10' : ''}`}
       style={{ boxSizing: 'border-box' }}
     >
       <p
@@ -241,7 +241,7 @@ function LayoutSidebar() {
   return (
     <div className="w-64 border-r bg-background">
       <div className="p-2 flex justify-between">
-        <OpenOrCloseSiderbarIcon state={false}></OpenOrCloseSiderbarIcon>
+        <SidebarToggleIcon state={false}></SidebarToggleIcon>
         <NewChatIcon></NewChatIcon>
       </div>
 

@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card } from '@/components/ui/card'
 import { Loader } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import MarkdownRender from '@/components/MarkdownRender'
+import MarkdownRender from '@/components/markdown-render'
 import { Icon } from '@iconify/react'
 import { useChatScroll } from '@/hooks/use-chat-scroll'
 

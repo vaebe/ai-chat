@@ -1,6 +1,6 @@
-import { OpenOrCloseSiderbarIcon } from './OpenOrCloseSiderbarIcon'
-import { NewChatIcon } from './NewChatIcon'
-import { AiSharedDataContext } from './AiSharedDataContext'
+import { SidebarToggleIcon } from '@/app/ai/components/icon/sidebar-toggle'
+import { NewChatIcon } from '@/app/ai/components/icon/new-chat'
+import { AiSharedDataContext } from '@/app/ai/components/AiSharedDataContext'
 import { useContext } from 'react'
 import { UserButton } from '@clerk/nextjs'
 import { ThemeSwitch } from '@/components/theme-switch'
@@ -15,7 +15,7 @@ function LayoutHeader() {
       <div className="flex items-center">
         {!aiSharedData.layoutSidebar && (
           <div>
-            <OpenOrCloseSiderbarIcon state={true}></OpenOrCloseSiderbarIcon>
+            <SidebarToggleIcon state={true}></SidebarToggleIcon>
             <NewChatIcon className="ml-4"></NewChatIcon>
           </div>
         )}
