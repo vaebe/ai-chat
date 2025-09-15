@@ -21,7 +21,7 @@ import {
   PromptInputToolbar,
   PromptInputTools
 } from '@/components/ai-elements/prompt-input'
-import { GlobeIcon } from 'lucide-react'
+import { GlobeIcon, RefreshCcwIcon, CopyIcon } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { useParams } from 'next/navigation'
@@ -33,12 +33,14 @@ import {
 import { Message, MessageContent } from '@/components/ai-elements/message'
 import { Response } from '@/components/ai-elements/response'
 import { AiSharedDataContext } from '@/app/ai/components/AiSharedDataContext'
-import { useContext } from 'react'
+import { useContext, Fragment } from 'react'
 import { toast } from 'sonner'
 import { AiMessage } from '@prisma/client'
 import { DefaultChatTransport, UIMessage } from 'ai'
 import { generateAiConversationTitle, getAiMessages } from '@/app/actions'
 import { LayoutHeader } from '@/app/ai/components/layout/header'
+import { Loader } from '@/components/ai-elements/loader'
+import { Actions, Action } from '@/components/ai-elements/actions'
 
 const models = [
   { id: 'gpt-4o', name: 'GPT-4o' },
@@ -57,7 +59,7 @@ export default function Page() {
 
   const [lastAiMsgId, setLastAiMsgId] = useState('')
 
-  const { status, stop, setMessages, sendMessage, messages, regenerate, error } = useChat({
+  const { status, stop, setMessages, sendMessage, messages, regenerate } = useChat({
     id: conversationId,
     transport: new DefaultChatTransport({
       api: '/api/ai/chat',
@@ -72,14 +74,6 @@ export default function Page() {
       setLastAiMsgId(message.id)
     }
   })
-
-  const [input, setInput] = useState('')
-
-  const [isLoading, setIsLoading] = useState(false)
-
-  useEffect(() => {
-    setIsLoading(['submitted', 'streaming'].includes(status))
-  }, [status])
 
   async function setMsg() {
     getAiMessages(conversationId)
@@ -176,21 +170,44 @@ export default function Page() {
     <div className="flex flex-col h-screen">
       <LayoutHeader></LayoutHeader>
       <Conversation>
-        <ConversationContent className=" max-w-10/12 mx-auto">
-          {messages.map((message) => (
-            <Message from={message.role} key={message.id}>
-              <MessageContent>
-                {message.parts.map((part, i) => {
-                  switch (part.type) {
-                    case 'text':
-                      return <Response key={`${message.id}-${i}`}>{part.text}</Response>
-                    default:
-                      return null
-                  }
-                })}
-              </MessageContent>
-            </Message>
+        <ConversationContent className="max-w-10/12 mx-auto">
+          {messages.map((message, messageIndex) => (
+            <Fragment key={message.id}>
+              {message.parts.map((part, i) => {
+                switch (part.type) {
+                  case 'text':
+                    const isLastMessage = messageIndex === messages.length - 1
+
+                    return (
+                      <Fragment key={`${message.id}-${i}`}>
+                        <Message from={message.role}>
+                          <MessageContent>
+                            <Response>{part.text}</Response>
+                          </MessageContent>
+                        </Message>
+                        {message.role === 'assistant' && isLastMessage && (
+                          <Actions>
+                            <Action onClick={() => regenerate()} label="Retry">
+                              <RefreshCcwIcon className="size-3" />
+                            </Action>
+                            <Action
+                              onClick={() => navigator.clipboard.writeText(part.text)}
+                              label="Copy"
+                            >
+                              <CopyIcon className="size-3" />
+                            </Action>
+                          </Actions>
+                        )}
+                      </Fragment>
+                    )
+                  default:
+                    return null
+                }
+              })}
+            </Fragment>
           ))}
+
+          {status === 'submitted' && <Loader />}
         </ConversationContent>
         <ConversationScrollButton />
       </Conversation>
@@ -200,7 +217,11 @@ export default function Page() {
           <PromptInputAttachments>
             {(attachment) => <PromptInputAttachment data={attachment} />}
           </PromptInputAttachments>
-          <PromptInputTextarea onChange={(e) => setText(e.target.value)} value={text} />
+          <PromptInputTextarea
+            onChange={(e) => setText(e.target.value)}
+            value={text}
+            placeholder="询问任何问题？"
+          />
         </PromptInputBody>
         <PromptInputToolbar>
           <PromptInputTools>
@@ -235,7 +256,8 @@ export default function Page() {
               </PromptInputModelSelectContent>
             </PromptInputModelSelect>
           </PromptInputTools>
-          <PromptInputSubmit disabled={!text && !status} status={status} />
+
+          <PromptInputSubmit disabled={!text && !status} status={status} onClick={stop} />
         </PromptInputToolbar>
       </PromptInput>
     </div>
