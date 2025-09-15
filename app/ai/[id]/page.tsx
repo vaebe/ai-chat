@@ -1,21 +1,57 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import {
+  PromptInput,
+  PromptInputActionAddAttachments,
+  PromptInputActionMenu,
+  PromptInputActionMenuContent,
+  PromptInputActionMenuTrigger,
+  PromptInputAttachment,
+  PromptInputAttachments,
+  PromptInputBody,
+  PromptInputButton,
+  type PromptInputMessage,
+  PromptInputModelSelect,
+  PromptInputModelSelectContent,
+  PromptInputModelSelectItem,
+  PromptInputModelSelectTrigger,
+  PromptInputModelSelectValue,
+  PromptInputSubmit,
+  PromptInputTextarea,
+  PromptInputToolbar,
+  PromptInputTools
+} from '@/components/ai-elements/prompt-input'
+import { GlobeIcon } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { useChat } from '@ai-sdk/react'
-import { MessageList } from '@/app/ai/components/message-list'
+import { useParams } from 'next/navigation'
+import {
+  Conversation,
+  ConversationContent,
+  ConversationScrollButton
+} from '@/components/ai-elements/conversation'
+import { Message, MessageContent } from '@/components/ai-elements/message'
+import { Response } from '@/components/ai-elements/response'
 import { AiSharedDataContext } from '@/app/ai/components/AiSharedDataContext'
 import { useContext } from 'react'
-import { LayoutHeader } from '@/app/ai/components/layout/header'
-import { Sender } from '@/app/ai/components/sender'
 import { toast } from 'sonner'
 import { AiMessage } from '@prisma/client'
-import { useParams } from 'next/navigation'
 import { DefaultChatTransport, UIMessage } from 'ai'
 import { generateAiConversationTitle, getAiMessages } from '@/app/actions'
+import { LayoutHeader } from '@/app/ai/components/layout/header'
 
-export default function AIChatPage() {
+const models = [
+  { id: 'gpt-4o', name: 'GPT-4o' },
+  { id: 'claude-opus-4-20250514', name: 'Claude 4 Opus' }
+]
+
+export default function Page() {
   const params = useParams<{ id: string }>()
   const conversationId = params.id
+
+  const [text, setText] = useState<string>('')
+  const [model, setModel] = useState<string>(models[0].id)
+  const [useWebSearch, setUseWebSearch] = useState<boolean>(false)
 
   const { aiSharedData, setAiSharedData } = useContext(AiSharedDataContext)
 
@@ -113,31 +149,95 @@ export default function AIChatPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const onSubmit = () => {
-    sendMessage({ text: input })
-    setInput('')
+  const handleSubmit = (message: PromptInputMessage) => {
+    const hasText = Boolean(message.text)
+    const hasAttachments = Boolean(message.files?.length)
+
+    if (!(hasText || hasAttachments)) {
+      return
+    }
+
+    sendMessage(
+      {
+        text: message.text || 'Sent with attachments',
+        files: message.files
+      },
+      {
+        body: {
+          model: model,
+          webSearch: useWebSearch
+        }
+      }
+    )
+    setText('')
   }
 
   return (
     <div className="flex flex-col h-screen">
       <LayoutHeader></LayoutHeader>
+      <Conversation>
+        <ConversationContent className=" max-w-10/12 mx-auto">
+          {messages.map((message) => (
+            <Message from={message.role} key={message.id}>
+              <MessageContent>
+                {message.parts.map((part, i) => {
+                  switch (part.type) {
+                    case 'text':
+                      return <Response key={`${message.id}-${i}`}>{part.text}</Response>
+                    default:
+                      return null
+                  }
+                })}
+              </MessageContent>
+            </Message>
+          ))}
+        </ConversationContent>
+        <ConversationScrollButton />
+      </Conversation>
 
-      <MessageList
-        isLoading={isLoading}
-        regenerate={regenerate}
-        messages={messages}
-        error={error}
-      ></MessageList>
-
-      <div className="flex justify-center w-full px-2 md:px-0 md:w-10/12 mx-auto md:pb-6 ">
-        <Sender
-          onSubmit={onSubmit}
-          input={input}
-          isLoading={isLoading}
-          stop={stop}
-          setInput={setInput}
-        ></Sender>
-      </div>
+      <PromptInput onSubmit={handleSubmit} className="my-4 w-10/12 mx-auto" globalDrop multiple>
+        <PromptInputBody>
+          <PromptInputAttachments>
+            {(attachment) => <PromptInputAttachment data={attachment} />}
+          </PromptInputAttachments>
+          <PromptInputTextarea onChange={(e) => setText(e.target.value)} value={text} />
+        </PromptInputBody>
+        <PromptInputToolbar>
+          <PromptInputTools>
+            <PromptInputActionMenu>
+              <PromptInputActionMenuTrigger />
+              <PromptInputActionMenuContent>
+                <PromptInputActionAddAttachments />
+              </PromptInputActionMenuContent>
+            </PromptInputActionMenu>
+            <PromptInputButton
+              onClick={() => setUseWebSearch(!useWebSearch)}
+              variant={useWebSearch ? 'default' : 'ghost'}
+            >
+              <GlobeIcon size={16} />
+              <span>搜索</span>
+            </PromptInputButton>
+            <PromptInputModelSelect
+              onValueChange={(value) => {
+                setModel(value)
+              }}
+              value={model}
+            >
+              <PromptInputModelSelectTrigger>
+                <PromptInputModelSelectValue />
+              </PromptInputModelSelectTrigger>
+              <PromptInputModelSelectContent>
+                {models.map((model) => (
+                  <PromptInputModelSelectItem key={model.id} value={model.id}>
+                    {model.name}
+                  </PromptInputModelSelectItem>
+                ))}
+              </PromptInputModelSelectContent>
+            </PromptInputModelSelect>
+          </PromptInputTools>
+          <PromptInputSubmit disabled={!text && !status} status={status} />
+        </PromptInputToolbar>
+      </PromptInput>
     </div>
   )
 }

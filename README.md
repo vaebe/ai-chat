@@ -12,6 +12,12 @@
 
 prisma 仅支持 `.env` 文件配置的环境变量
 
+### 重置数据库
+
+```bash
+prisma migrate reset
+```
+
 ### 生成数据库迁移
 
 ```bash
