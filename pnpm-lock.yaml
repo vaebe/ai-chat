@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@ai-sdk/openai':
-        specifier: ^2.0.22
-        version: 2.0.22(zod@4.1.4)
+        specifier: ^2.0.32
+        version: 2.0.32(zod@4.1.4)
       '@ai-sdk/react':
         specifier: ^2.0.26
         version: 2.0.26(react@19.1.1)(zod@4.1.4)
@@ -122,6 +122,9 @@ importers:
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
+      zhipu-ai-provider:
+        specifier: ^0.2.0-beta.1
+        version: 0.2.0-beta.1(zod@4.1.4)
       zod:
         specifier: ^4.1.4
         version: 4.1.4
@@ -183,8 +186,14 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4
 
-  '@ai-sdk/openai@2.0.22':
-    resolution: {integrity: sha512-qjSIPL5+LNM9flcBPeR64ZWeAZdYg4XWkAK34H3FaY61dSbuIaeqFPSzmQUrxotVcphAzgfL5tuYRqRYP2ZYyg==}
+  '@ai-sdk/openai@2.0.32':
+    resolution: {integrity: sha512-p7giSkCs66Q1qYO/NPYI41CrSg65mcm8R2uAdF86+Y1D1/q4mUrWMyf5UTOJ0bx/z4jIPiNgGDCg2Kabi5zrKQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4
+
+  '@ai-sdk/provider-utils@3.0.0-beta.5':
+    resolution: {integrity: sha512-4Dv/wiGZrvO6fI7P0yMLa4XZru0XW8LPibTObbkHBdweLUVGIze7aCfxxQeY44Uqcbl/h6/yBTkx2XmPtwf/Ow==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4
@@ -195,8 +204,18 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4
 
+  '@ai-sdk/provider-utils@3.0.9':
+    resolution: {integrity: sha512-Pm571x5efqaI4hf9yW4KsVlDBDme8++UepZRnq+kqVBWWjgvGhQlzU8glaFq0YJEB9kkxZHbRRyVeHoV2sRYaQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4
+
   '@ai-sdk/provider@2.0.0':
     resolution: {integrity: sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA==}
+    engines: {node: '>=18'}
+
+  '@ai-sdk/provider@2.0.0-beta.1':
+    resolution: {integrity: sha512-Z8SPncMtS3RsoXITmT7NVwrAq6M44dmw0DoUOYJqNNtCu8iMWuxB8Nxsoqpa0uEEy9R1V1ZThJAXTYgjTUxl3w==}
     engines: {node: '>=18'}
 
   '@ai-sdk/react@2.0.26':
@@ -3979,6 +3998,15 @@ packages:
     resolution: {integrity: sha512-b4JR1PFR10y1mKjhHY9LaGo6tmrgjit7hxVIeAmyMw3jegXR4dhYqLaQF5zMXZxY7tLpMyJeLjr1C4rLmkVe8g==}
     engines: {node: '>=12.20'}
 
+  zhipu-ai-provider@0.2.0-beta.1:
+    resolution: {integrity: sha512-vprY/g5A2fPcNtXar7o3vTfJN64rseTg2Y1l/LAqmGTxOoKM3mz9ilyQFzZfJ5LuWNY99tv+WUOKKBpC3dsydA==}
+    engines: {node: '>=18'}
+
+  zod-to-json-schema@3.24.6:
+    resolution: {integrity: sha512-h/z3PKvcTcTetyjl1fkj79MHNEjm+HpD6NXheWjzOekY7kV+lwDYnHw+ivHkijnCSMz1yJaWBD9vu/Fcmk+vEg==}
+    peerDependencies:
+      zod: ^3.24.1
+
   zod@4.1.4:
     resolution: {integrity: sha512-2YqJuWkU6IIK9qcE4k1lLLhyZ6zFw7XVRdQGpV97jEIZwTrscUw+DY31Xczd8nwaoksyJUIxCojZXwckJovWxA==}
 
@@ -3993,11 +4021,19 @@ snapshots:
       '@ai-sdk/provider-utils': 3.0.7(zod@4.1.4)
       zod: 4.1.4
 
-  '@ai-sdk/openai@2.0.22(zod@4.1.4)':
+  '@ai-sdk/openai@2.0.32(zod@4.1.4)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.7(zod@4.1.4)
+      '@ai-sdk/provider-utils': 3.0.9(zod@4.1.4)
       zod: 4.1.4
+
+  '@ai-sdk/provider-utils@3.0.0-beta.5(zod@4.1.4)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0-beta.1
+      '@standard-schema/spec': 1.0.0
+      eventsource-parser: 3.0.5
+      zod: 4.1.4
+      zod-to-json-schema: 3.24.6(zod@4.1.4)
 
   '@ai-sdk/provider-utils@3.0.7(zod@4.1.4)':
     dependencies:
@@ -4006,7 +4042,18 @@ snapshots:
       eventsource-parser: 3.0.5
       zod: 4.1.4
 
+  '@ai-sdk/provider-utils@3.0.9(zod@4.1.4)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@standard-schema/spec': 1.0.0
+      eventsource-parser: 3.0.5
+      zod: 4.1.4
+
   '@ai-sdk/provider@2.0.0':
+    dependencies:
+      json-schema: 0.4.0
+
+  '@ai-sdk/provider@2.0.0-beta.1':
     dependencies:
       json-schema: 0.4.0
 
@@ -8445,6 +8492,18 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   yocto-queue@1.1.1: {}
+
+  zhipu-ai-provider@0.2.0-beta.1(zod@4.1.4):
+    dependencies:
+      '@ai-sdk/provider': 2.0.0-beta.1
+      '@ai-sdk/provider-utils': 3.0.0-beta.5(zod@4.1.4)
+      zhipu-ai-provider: link:../../Library/pnpm/global/5/node_modules/zhipu-ai-provider
+    transitivePeerDependencies:
+      - zod
+
+  zod-to-json-schema@3.24.6(zod@4.1.4):
+    dependencies:
+      zod: 4.1.4
 
   zod@4.1.4: {}
 

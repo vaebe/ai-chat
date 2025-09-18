@@ -11,7 +11,7 @@
     "prepare": "npx simple-git-hooks"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^2.0.22",
+    "@ai-sdk/openai": "^2.0.32",
     "@ai-sdk/react": "^2.0.26",
     "@clerk/nextjs": "^6.31.6",
     "@clerk/themes": "^2.4.15",
@@ -49,6 +49,7 @@
     "use-immer": "^0.11.0",
     "use-stick-to-bottom": "^1.1.1",
     "uuid": "^11.1.0",
+    "zhipu-ai-provider": "^0.2.0-beta.1",
     "zod": "^4.1.4"
   },
   "devDependencies": {
