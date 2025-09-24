@@ -97,19 +97,9 @@ export async function POST(req: NextRequest) {
           usage: step.usage
         })
       },
-      // 准备下一步的回调
-      prepareStep: ({ stepNumber, steps }) => {
-        // 对于长对话，可以进行消息压缩
-        if (stepNumber > 5) {
-          console.log(
-            `Long conversation detected at step ${stepNumber}, consider message compression`
-          )
-        }
-        // 可以根据步骤数量动态调整参数
-        return {
-          // 例如：在后续步骤中降低温度以提高一致性
-          // temperature: stepNumber > 3 ? 0.3 : 0.7
-        }
+      prepareStep: async ({ messages, stepNumber }) => {
+        console.log('\r\n', messages, stepNumber, '\r\n')
+        return {}
       },
       // 流程完成时的回调
       onFinish: async (finishResult) => {
@@ -118,6 +108,9 @@ export async function POST(req: NextRequest) {
           totalUsage: finishResult.usage,
           steps: finishResult.steps?.length || 1
         })
+
+        console.log('\r\n', 'ok')
+
         await toolManager.closeAll()
       }
     })
@@ -145,8 +138,7 @@ export async function POST(req: NextRequest) {
 
         if (part.type === 'finish') {
           return {
-            totalTokens: part.totalUsage.totalTokens,
-            steps: 1 // 在v5中，steps信息在onFinish回调中获取
+            totalTokens: part.totalUsage.totalTokens
           }
         }
       },

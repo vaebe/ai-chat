@@ -21,26 +21,18 @@ import {
   PromptInputToolbar,
   PromptInputTools
 } from '@/components/ai-elements/prompt-input'
-import { GlobeIcon, RefreshCcwIcon, CopyIcon } from 'lucide-react'
+import { GlobeIcon } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { useParams } from 'next/navigation'
-import {
-  Conversation,
-  ConversationContent,
-  ConversationScrollButton
-} from '@/components/ai-elements/conversation'
-import { Message, MessageContent } from '@/components/ai-elements/message'
-import { Response } from '@/components/ai-elements/response'
 import { AiSharedDataContext } from '@/app/ai/components/AiSharedDataContext'
-import { useContext, Fragment } from 'react'
+import { useContext } from 'react'
 import { toast } from 'sonner'
 import { AiMessage } from '@prisma/client'
 import { DefaultChatTransport, UIMessage } from 'ai'
 import { generateAiConversationTitle, getAiMessages } from '@/app/actions'
 import { LayoutHeader } from '@/app/ai/components/layout/header'
-import { Loader } from '@/components/ai-elements/loader'
-import { Actions, Action } from '@/components/ai-elements/actions'
+import { MessageList } from '../components/message-list'
 
 const models = [{ id: 'deepseek-chat', name: 'deepseek-chat' }]
 
@@ -53,8 +45,6 @@ export default function Page() {
   const [useWebSearch, setUseWebSearch] = useState<boolean>(false)
 
   const { aiSharedData, setAiSharedData } = useContext(AiSharedDataContext)
-
-  const [lastAiMsgId, setLastAiMsgId] = useState('')
 
   const { status, stop, setMessages, sendMessage, messages } = useChat({
     id: conversationId,
@@ -161,46 +151,8 @@ export default function Page() {
   return (
     <div className="flex flex-col h-screen">
       <LayoutHeader></LayoutHeader>
-      <Conversation>
-        <ConversationContent className="max-w-10/12 mx-auto">
-          {messages.map((message, messageIndex) => (
-            <Fragment key={message.id}>
-              {message.parts.map((part, i) => {
-                switch (part.type) {
-                  case 'text':
-                    const isLastMessage = messageIndex === messages.length - 1
 
-                    return (
-                      <Fragment key={`${message.id}-${i}`}>
-                        <Message from={message.role}>
-                          <MessageContent>
-                            <Response>{part.text}</Response>
-                          </MessageContent>
-                        </Message>
-
-                        {message.role === 'assistant' && isLastMessage && (
-                          <Actions>
-                            <Action
-                              onClick={() => navigator.clipboard.writeText(part.text)}
-                              label="Copy"
-                            >
-                              <CopyIcon className="size-4" />
-                            </Action>
-                          </Actions>
-                        )}
-                      </Fragment>
-                    )
-                  default:
-                    return null
-                }
-              })}
-            </Fragment>
-          ))}
-
-          {status === 'submitted' && <Loader />}
-        </ConversationContent>
-        <ConversationScrollButton />
-      </Conversation>
+      <MessageList messages={messages} status={status}></MessageList>
 
       <PromptInput onSubmit={handleSubmit} className="my-4 w-10/12 mx-auto" globalDrop multiple>
         <PromptInputBody>
