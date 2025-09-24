@@ -11,9 +11,10 @@ import { Ratelimit } from '@upstash/ratelimit'
 import { kv } from '@vercel/kv'
 import { NextRequest } from 'next/server'
 import { getClientIp } from '@/lib/utils'
-import { createAiMessage, getAiMessages, removeAiMessage } from '@/lib/ai-message'
+import { createAiMessage, getAiMessages } from '@/lib/ai-message'
 import { ToolManager } from './tools/tool-manager'
 import { deepSeekProvider } from './providers/deepseek'
+import { createSystemPrompt } from './utils'
 
 // 允许最多 n 秒的流式响应
 export const maxDuration = 300
@@ -25,46 +26,12 @@ const ratelimit = new Ratelimit({
   prefix: 'ai_chat'
 })
 
-const createSystemPrompt = (toolsDescription: string, enabledTools: string[]) => `
-你是一个智能助手，拥有多种工具来帮助用户解决问题。
-
-${toolsDescription}
-
-## 工具使用策略：
-
-### AI 自主工具（你可以自由决定何时使用）：
-- **GitHub 搜索**：当需要代码示例、开源项目信息或技术文档时主动使用
-- 根据问题的技术性质和复杂度，智能判断是否需要搜索相关代码或项目
-
-### 用户控制工具（仅在用户明确需要时使用）：
-${enabledTools.includes('web_search') ? '- **网络搜索**：用户已启用，可用于搜索最新信息、新闻、资料等' : ''}
-${enabledTools.includes('filesystem_read_file') ? '- **文件系统**：用户已启用，可用于文件操作（请谨慎使用）' : ''}
-
-## 行为准则：
-1. **智能工具选择**：
-   - 对于编程、技术问题，主动使用 GitHub 搜索查找相关代码和项目
-   - 对于需要最新信息的问题，如果用户启用了网络搜索，可以使用
-   - 明确告知用户正在使用哪些工具以及为什么使用
-
-2. **Markdown 格式**：严格使用 Markdown 格式输出，包括：
-   - 代码块使用正确的语法高亮 (\`\`\`ts、\`\`\`bash 等)
-   - 支持表格、任务列表、数学公式
-
-3. **信息来源标注**：使用工具获取信息时，明确标注信息来源和获取时间
-
-4. **用户引导**：如果问题需要某个未启用的用户控制工具，可以建议用户启用该工具
-
-请根据问题类型和用户需求，合理使用可用工具提供准确、有用的回答。`
-
 interface ReqProps {
   message: UIMessage
   id: string
-  trigger: 'submit-message' | 'regenerate-message'
-  lastAiMsgId: string
   // 仅包含用户控制的工具
   userTools?: {
     enableWebSearch?: boolean
-    enableFilesystem?: boolean
   }
 }
 
@@ -80,11 +47,7 @@ export async function POST(req: NextRequest) {
     return new Response('无权限!', { status: 401 })
   }
 
-  const { message, id: chatId, trigger, lastAiMsgId, userTools }: ReqProps = await req.json()
-
-  if (trigger === 'regenerate-message') {
-    removeAiMessage(lastAiMsgId)
-  }
+  const { message, id: chatId, userTools }: ReqProps = await req.json()
 
   // 保存用户发送的消息
   createAiMessage({ message, chatId })
@@ -120,12 +83,9 @@ export async function POST(req: NextRequest) {
       model: deepSeekProvider(aiModelName),
       system: createSystemPrompt(toolsDescription, enabledToolNames),
       messages: convertToModelMessages([...oldMessages, message]),
-      experimental_transform: smoothStream({
-        chunking: /[\u4E00-\u9FFF]|\S+\s+/
-      }),
+      experimental_transform: smoothStream({ chunking: /[\u4E00-\u9FFF]|\S+\s+/ }),
       tools: allTools,
       toolChoice: 'auto',
-      // 使用 AI SDK v5 的多步骤工具调用
       stopWhen: stepCountIs(10), // 最多 10 步
       // 每步完成后的回调
       onStepFinish: (step) => {
@@ -173,10 +133,7 @@ export async function POST(req: NextRequest) {
     return result.toUIMessageStreamResponse({
       sendReasoning: true,
       sendSources: true,
-      generateMessageId: createIdGenerator({
-        prefix: 'msg',
-        size: 16
-      }),
+      generateMessageId: createIdGenerator({ prefix: 'msg', size: 16 }),
       messageMetadata: ({ part }) => {
         if (part.type === 'start') {
           return {
