@@ -1,7 +1,9 @@
 import { experimental_createMCPClient as createMCPClient } from 'ai'
 import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdio'
-import { tool } from 'ai'
+import { tool, Tool } from 'ai'
 import { z } from 'zod'
+
+type MCPClient = Awaited<ReturnType<typeof createMCPClient>>
 
 export interface ToolsConfig {
   // 用户控制的工具
@@ -10,8 +12,8 @@ export interface ToolsConfig {
 }
 
 export class ToolManager {
-  private mcpClients: Array<{ client: any; name: string }> = []
-  private allTools: Record<string, any> = {}
+  private mcpClients: Array<{ client: MCPClient; name: string }> = []
+  private allTools: Record<string, Tool> = {}
 
   async initialize(userControlledTools: ToolsConfig = {}) {
     try {
@@ -80,15 +82,19 @@ export class ToolManager {
 
           const data = await response.json()
 
-          return {
-            success: true,
-            results:
-              data.results?.map((result: any) => ({
+          const results =
+            data.results?.map(
+              (result: { title: string; url: string; snippet: string; date: string }) => ({
                 title: result.title,
                 url: result.url,
                 snippet: result.snippet,
                 published_date: result.date
-              })) || [],
+              })
+            ) || []
+
+          return {
+            success: true,
+            results,
             query
           }
         } catch (error) {
@@ -105,11 +111,11 @@ export class ToolManager {
     console.log('✅ 网络搜索工具已启用')
   }
 
-  getAllTools(): Record<string, any> {
+  getAllTools() {
     return this.allTools
   }
 
-  getEnabledToolNames(): string[] {
+  getEnabledToolNames() {
     return Object.keys(this.allTools)
   }
 
@@ -125,7 +131,7 @@ export class ToolManager {
   }
 
   // 获取工具分类信息，用于系统提示
-  getToolsDescription(): string {
+  getToolsDescription() {
     const toolNames = Object.keys(this.allTools)
     const aiControlledTools = toolNames.filter((name) => name.startsWith('github_'))
     const userControlledTools = toolNames.filter((name) => !name.startsWith('github_'))

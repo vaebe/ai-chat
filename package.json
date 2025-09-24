@@ -1,6 +1,6 @@
 {
   "name": "ai-chat",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
@@ -13,7 +13,7 @@
   "dependencies": {
     "@ai-sdk/deepseek": "^1.0.19",
     "@ai-sdk/openai": "^2.0.32",
-    "@ai-sdk/react": "^2.0.26",
+    "@ai-sdk/react": "^2.0.51",
     "@clerk/nextjs": "^6.31.6",
     "@clerk/themes": "^2.4.15",
     "@iconify/react": "^6.0.0",
@@ -30,7 +30,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@upstash/ratelimit": "^2.0.6",
     "@vercel/kv": "^3.0.0",
-    "ai": "^5.0.26",
+    "ai": "^5.0.51",
     "cheerio": "^1.1.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -52,7 +52,6 @@
     "use-immer": "^0.11.0",
     "use-stick-to-bottom": "^1.1.1",
     "uuid": "^11.1.0",
-    "zhipu-ai-provider": "^0.2.0-beta.1",
     "zod": "^4.1.4"
   },
   "devDependencies": {
