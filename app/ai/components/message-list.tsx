@@ -26,6 +26,8 @@ interface MessageListProps {
 }
 
 export function MessageList({ messages, status }: MessageListProps) {
+  const isDone = !['submitted', 'streaming'].includes(status)
+
   return (
     <Conversation>
       <ConversationContent className="max-w-10/12 mx-auto">
@@ -38,12 +40,13 @@ export function MessageList({ messages, status }: MessageListProps) {
                 message={message}
                 messageIndex={messageIndex}
                 messagesLen={messages.length}
+                isDone={isDone}
               ></IMessage>
             </div>
           )
         })}
 
-        {status === 'submitted' && <Loader />}
+        {!isDone && <Loader />}
       </ConversationContent>
       <ConversationScrollButton />
     </Conversation>
@@ -54,40 +57,51 @@ interface IMessageProps {
   message: UIMessage
   messageIndex: number
   messagesLen: number
+  isDone: boolean
 }
 
-function IMessage({ message, messageIndex, messagesLen }: IMessageProps) {
-  return (
-    <Fragment>
-      {message.parts.map((part, i) => {
-        switch (part.type) {
-          case 'text':
-            const isLastMessage = messageIndex === messagesLen - 1
+function IMessage({ message, messageIndex, messagesLen, isDone }: IMessageProps) {
+  const part = message.parts[message.parts.length - 1]
 
-            return (
-              <Fragment key={`${message.id}-${i}`}>
-                <Message from={message.role}>
-                  <MessageContent>
-                    <Response>{part.text}</Response>
-                  </MessageContent>
-                </Message>
+  if (!part) {
+    return null
+  }
 
-                {message.role === 'assistant' && isLastMessage && (
-                  <Actions>
-                    <Action onClick={() => navigator.clipboard.writeText(part.text)} label="Copy">
-                      <CopyIcon className="size-4" />
-                    </Action>
-                  </Actions>
-                )}
-              </Fragment>
-            )
+  const isLastMessage = messageIndex === messagesLen - 1
 
-          default:
-            return null
-        }
-      })}
-    </Fragment>
-  )
+  const showActions = message.role === 'assistant' && isLastMessage && isDone
+
+  if (part.type === 'text') {
+    return (
+      <Fragment>
+        <Message from={message.role}>
+          <MessageContent>
+            <Response>{part.text}</Response>
+          </MessageContent>
+        </Message>
+
+        {showActions && (
+          <Actions>
+            <Action onClick={() => navigator.clipboard.writeText(part.text)} label="Copy">
+              <CopyIcon className="size-4" />
+            </Action>
+          </Actions>
+        )}
+      </Fragment>
+    )
+  }
+
+  if (part.type === 'dynamic-tool') {
+    return (
+      <div className="flex items-center justify-between">
+        <p className="text-gray-600">{part.toolName}</p>
+
+        {getStatusBadge(part.state)}
+      </div>
+    )
+  }
+
+  return <Response>{part.type}</Response>
 }
 
 interface ToolsInfoProps {
