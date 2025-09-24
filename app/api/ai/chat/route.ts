@@ -29,6 +29,8 @@ const ratelimit = new Ratelimit({
 interface ReqProps {
   message: UIMessage
   id: string
+  timestamp: number
+  date: string
   // 仅包含用户控制的工具
   userTools?: {
     enableWebSearch?: boolean
@@ -47,7 +49,7 @@ export async function POST(req: NextRequest) {
     return new Response('无权限!', { status: 401 })
   }
 
-  const { message, id: chatId, userTools }: ReqProps = await req.json()
+  const { message, id: chatId, userTools, timestamp, date }: ReqProps = await req.json()
 
   // 保存用户发送的消息
   createAiMessage({ message, chatId })
@@ -78,10 +80,17 @@ export async function POST(req: NextRequest) {
   // const aiModelName = 'deepseek/deepseek-v3.1'
   const aiModelName = 'deepseek-chat'
 
+  const systemPrompt = createSystemPrompt({
+    toolsDescription,
+    enabledTools: enabledToolNames,
+    timestamp,
+    date
+  })
+
   try {
     const result = streamText({
       model: deepSeekProvider(aiModelName),
-      system: createSystemPrompt(toolsDescription, enabledToolNames),
+      system: systemPrompt,
       messages: convertToModelMessages([...oldMessages, message]),
       experimental_transform: smoothStream({ chunking: /[\u4E00-\u9FFF]|\S+\s+/ }),
       tools: allTools,
@@ -97,8 +106,15 @@ export async function POST(req: NextRequest) {
           usage: step.usage
         })
       },
-      prepareStep: async ({ messages, stepNumber }) => {
-        console.log('\r\n', messages, stepNumber, '\r\n')
+      prepareStep: async ({ messages }) => {
+        if (messages.length > 10) {
+          return {
+            messages: [
+              messages[0], // Keep system message
+              ...messages.slice(-5) // Keep last 10 messages
+            ]
+          }
+        }
         return {}
       },
       // 流程完成时的回调
@@ -108,8 +124,6 @@ export async function POST(req: NextRequest) {
           totalUsage: finishResult.usage,
           steps: finishResult.steps?.length || 1
         })
-
-        console.log('\r\n', 'ok')
 
         await toolManager.closeAll()
       }

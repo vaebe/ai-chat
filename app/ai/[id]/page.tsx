@@ -33,6 +33,7 @@ import { DefaultChatTransport, UIMessage } from 'ai'
 import { generateAiConversationTitle, getAiMessages } from '@/app/actions'
 import { LayoutHeader } from '@/app/ai/components/layout/header'
 import { MessageList } from '../components/message-list'
+import dayjs from 'dayjs'
 
 const models = [{ id: 'deepseek-chat', name: 'deepseek-chat' }]
 
@@ -52,7 +53,16 @@ export default function Page() {
       api: '/api/ai/chat',
       // 仅发送最后一条消息
       prepareSendMessagesRequest({ messages, id }) {
-        return { body: { message: messages[messages.length - 1], id } }
+        const day = dayjs()
+
+        return {
+          body: {
+            message: messages[messages.length - 1],
+            id,
+            timestamp: day.unix(),
+            date: day.format('YYYY-MM-DD HH:mm:ss')
+          }
+        }
       }
     })
   })
