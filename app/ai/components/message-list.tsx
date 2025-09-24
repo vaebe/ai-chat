@@ -118,7 +118,7 @@ function ToolsInfo({ message }: ToolsInfoProps) {
   }
 
   return (
-    <Tool defaultOpen={false}>
+    <Tool defaultOpen={false} className="mb-0">
       <ToolHeader type={`tool-${lastTool.toolName}`} state={lastTool.state} />
       <ToolContent>
         <ul>
