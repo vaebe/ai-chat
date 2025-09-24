@@ -13,7 +13,7 @@ import { NextRequest } from 'next/server'
 import { getClientIp } from '@/lib/utils'
 import { createAiMessage, getAiMessages, removeAiMessage } from '@/lib/ai-message'
 import { ToolManager } from './tools/tool-manager'
-import { zhipuProvider } from './providers/zhipu'
+import { deepSeekProvider } from './providers/deepseek'
 
 // 允许最多 n 秒的流式响应
 export const maxDuration = 300
@@ -113,11 +113,11 @@ export async function POST(req: NextRequest) {
   console.log('Available tools:', enabledToolNames)
 
   // const aiModelName = 'deepseek/deepseek-v3.1'
-  const aiModelName = 'glm-4.5'
+  const aiModelName = 'deepseek-chat'
 
   try {
     const result = streamText({
-      model: zhipuProvider(aiModelName),
+      model: deepSeekProvider(aiModelName),
       system: createSystemPrompt(toolsDescription, enabledToolNames),
       messages: convertToModelMessages([...oldMessages, message]),
       experimental_transform: smoothStream({

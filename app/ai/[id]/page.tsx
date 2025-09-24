@@ -42,10 +42,7 @@ import { LayoutHeader } from '@/app/ai/components/layout/header'
 import { Loader } from '@/components/ai-elements/loader'
 import { Actions, Action } from '@/components/ai-elements/actions'
 
-const models = [
-  { id: 'gpt-4o', name: 'GPT-4o' },
-  { id: 'claude-opus-4-20250514', name: 'Claude 4 Opus' }
-]
+const models = [{ id: 'deepseek-chat', name: 'deepseek-chat' }]
 
 export default function Page() {
   const params = useParams<{ id: string }>()
@@ -59,20 +56,15 @@ export default function Page() {
 
   const [lastAiMsgId, setLastAiMsgId] = useState('')
 
-  const { status, stop, setMessages, sendMessage, messages, regenerate } = useChat({
+  const { status, stop, setMessages, sendMessage, messages } = useChat({
     id: conversationId,
     transport: new DefaultChatTransport({
       api: '/api/ai/chat',
       // 仅发送最后一条消息
-      prepareSendMessagesRequest({ messages, id, trigger }) {
-        const lastMessage = messages[messages.length - 1]
-        console.log('prepareSendMessagesRequest', { lastMessage, id, trigger, lastAiMsgId })
-        return { body: { message: lastMessage, id, trigger, lastAiMsgId } }
+      prepareSendMessagesRequest({ messages, id }) {
+        return { body: { message: messages[messages.length - 1], id } }
       }
-    }),
-    onFinish: ({ message }) => {
-      setLastAiMsgId(message.id)
-    }
+    })
   })
 
   async function setMsg() {
@@ -185,16 +177,14 @@ export default function Page() {
                             <Response>{part.text}</Response>
                           </MessageContent>
                         </Message>
+
                         {message.role === 'assistant' && isLastMessage && (
                           <Actions>
-                            <Action onClick={() => regenerate()} label="Retry">
-                              <RefreshCcwIcon className="size-3" />
-                            </Action>
                             <Action
                               onClick={() => navigator.clipboard.writeText(part.text)}
                               label="Copy"
                             >
-                              <CopyIcon className="size-3" />
+                              <CopyIcon className="size-4" />
                             </Action>
                           </Actions>
                         )}
