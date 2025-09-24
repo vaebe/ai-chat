@@ -5,7 +5,7 @@ import * as cheerio from 'cheerio'
 export const webReaderTool = tool({
   description: '从指定网址抓取网页内容，并提取正文信息。',
   inputSchema: z.object({
-    url: z.string().url().describe('要读取的网页 URL')
+    url: z.url().describe('要读取的网页 URL')
   }),
   execute: async ({ url }) => {
     // todo 由免费 ai 生成回答后吐给 运行的 ai 进行回答
