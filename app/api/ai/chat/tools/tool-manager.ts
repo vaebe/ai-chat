@@ -1,14 +1,30 @@
 import { experimental_createMCPClient as createMCPClient } from 'ai'
-import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdio'
 import { tool, Tool } from 'ai'
 import { z } from 'zod'
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
+
+const ignoreGithubTools = [
+  'copilot',
+  'team',
+  'create',
+  'add',
+  'delete',
+  'update',
+  'notification',
+  'workflow',
+  'fork',
+  'job',
+  'push',
+  'pull',
+  'dependabot',
+  'unstar',
+  'security'
+]
 
 type MCPClient = Awaited<ReturnType<typeof createMCPClient>>
 
 export interface ToolsConfig {
-  // 用户控制的工具
   enableWebSearch?: boolean
-  enableFilesystem?: boolean
 }
 
 export class ToolManager {
@@ -35,13 +51,13 @@ export class ToolManager {
 
   private async initializeGithubMCP() {
     try {
-      // 尝试连接 GitHub MCP 服务器
+      const mcpUrl = new URL('https://api.githubcopilot.com/mcp/')
       const mcpClient = await createMCPClient({
-        transport: new StdioMCPTransport({
-          command: 'npx',
-          args: ['-y', '@modelcontextprotocol/server-github'],
-          env: {
-            GITHUB_TOKEN: process.env.GITHUB_TOKEN ?? ''
+        transport: new StreamableHTTPClientTransport(mcpUrl, {
+          requestInit: {
+            headers: {
+              Authorization: `Bearer ${process.env.GITHUB_TOKEN ?? ''}`
+            }
           }
         })
       })
@@ -53,6 +69,10 @@ export class ToolManager {
 
       // 将 GitHub 工具添加到总工具集合中，添加前缀避免冲突
       Object.entries(githubTools).forEach(([name, tool]) => {
+        if (ignoreGithubTools.some((item) => name.toLowerCase().includes(item))) {
+          return
+        }
+
         this.allTools[`github_${name}`] = tool
       })
 
