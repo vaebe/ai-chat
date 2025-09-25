@@ -60,7 +60,8 @@ export default function Page() {
             message: messages[messages.length - 1],
             id,
             timestamp: day.unix(),
-            date: day.format('YYYY-MM-DD HH:mm:ss')
+            date: day.format('YYYY-MM-DD HH:mm:ss'),
+            userTools: {}
           }
         }
       }

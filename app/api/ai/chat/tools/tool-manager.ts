@@ -2,6 +2,8 @@ import { experimental_createMCPClient as createMCPClient } from 'ai'
 import { tool, Tool } from 'ai'
 import { z } from 'zod'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
+import Exa from 'exa-js'
+import { WebSearchResult } from '@/types'
 
 const ignoreGithubTools = [
   'copilot',
@@ -23,6 +25,8 @@ const ignoreGithubTools = [
 
 type MCPClient = Awaited<ReturnType<typeof createMCPClient>>
 
+const exa = new Exa(process.env.EXA_API_KEY)
+
 export interface ToolsConfig {
   enableWebSearch?: boolean
 }
@@ -37,7 +41,7 @@ export class ToolManager {
       await this.initializeGithubMCP()
 
       // 用户控制的工具
-      if (userControlledTools.enableWebSearch && process.env.SEARCH_API_KEY) {
+      if (userControlledTools.enableWebSearch) {
         await this.initializeWebSearchTools()
       }
 
@@ -84,46 +88,24 @@ export class ToolManager {
 
   private async initializeWebSearchTools() {
     const webSearchTool = tool({
-      description: '在网络上搜索信息',
+      description: 'Search the web for up-to-date information',
       inputSchema: z.object({
-        query: z.string().describe('搜索查询'),
-        max_results: z.number().default(5).describe('最大结果数量')
+        query: z.string().min(1).max(100).describe('The search query')
       }),
-      execute: async ({ query, max_results }) => {
-        try {
-          // 这里使用实际的搜索 API
-          const searchUrl = `https://api.search-provider.com/search?q=${encodeURIComponent(query)}&limit=${max_results}`
+      execute: async ({ query }) => {
+        const { results } = await exa.searchAndContents(query, {
+          livecrawl: 'always',
+          numResults: 3
+        })
 
-          const response = await fetch(searchUrl, {
-            headers: {
-              Authorization: `Bearer ${process.env.SEARCH_API_KEY}`
-            }
-          })
+        const list: WebSearchResult[] = results.map((result) => ({
+          title: result.title,
+          url: result.url,
+          content: result.text.slice(0, 1000), // take just the first 1000 characters
+          publishedDate: result.publishedDate
+        }))
 
-          const data = await response.json()
-
-          const results =
-            data.results?.map(
-              (result: { title: string; url: string; snippet: string; date: string }) => ({
-                title: result.title,
-                url: result.url,
-                snippet: result.snippet,
-                published_date: result.date
-              })
-            ) || []
-
-          return {
-            success: true,
-            results,
-            query
-          }
-        } catch (error) {
-          return {
-            success: false,
-            error: `网络搜索失败: ${error}`,
-            query
-          }
-        }
+        return list
       }
     })
 
