@@ -19,6 +19,8 @@ import {
   ToolInput,
   getStatusBadge
 } from '@/components/ai-elements/tool'
+import { Source, Sources, SourcesContent, SourcesTrigger } from '@/components/ai-elements/sources'
+import { WebSearchResult } from '@/types'
 
 interface MessageListProps {
   messages: UIMessage[]
@@ -35,6 +37,8 @@ export function MessageList({ messages, status }: MessageListProps) {
           return (
             <div key={message.id}>
               <ToolsInfo message={message}></ToolsInfo>
+
+              <WebSearchInfo message={message}></WebSearchInfo>
 
               <IMessage
                 message={message}
@@ -63,7 +67,7 @@ interface IMessageProps {
 function IMessage({ message, messageIndex, messagesLen, isDone }: IMessageProps) {
   const part = message.parts[message.parts.length - 1]
 
-  if (!part || part.type === 'dynamic-tool') {
+  if (!part || ['dynamic-tool', 'tool-web_search'].includes(part.type)) {
     return null
   }
 
@@ -98,6 +102,33 @@ interface ToolsInfoProps {
   message: UIMessage
 }
 
+function WebSearchInfo({ message }: ToolsInfoProps) {
+  const parts = message.parts.filter((item) => item.type === 'tool-web_search') as Array<{
+    output: WebSearchResult[]
+  }>
+
+  const outputs: WebSearchResult[] = []
+
+  parts.map((part) => {
+    outputs.push(...(part?.output as WebSearchResult[]))
+  })
+
+  if (outputs.length === 0) {
+    return null
+  }
+
+  return (
+    <Sources>
+      <SourcesTrigger count={outputs.length} />
+      <SourcesContent>
+        {outputs.map((item, index) => (
+          <Source href={item.url} title={item.title ?? ''} key={index} />
+        ))}
+      </SourcesContent>
+    </Sources>
+  )
+}
+
 function ToolsInfo({ message }: ToolsInfoProps) {
   const tools = message.parts.filter((item) => item.type === 'dynamic-tool')
 
@@ -108,7 +139,7 @@ function ToolsInfo({ message }: ToolsInfoProps) {
   }
 
   return (
-    <Tool defaultOpen={false} className="mb-0">
+    <Tool defaultOpen={false}>
       <ToolHeader type={`tool-${lastTool.toolName}`} state={lastTool.state} />
       <ToolContent>
         <ul>
