@@ -63,7 +63,7 @@ interface IMessageProps {
 function IMessage({ message, messageIndex, messagesLen, isDone }: IMessageProps) {
   const part = message.parts[message.parts.length - 1]
 
-  if (!part) {
+  if (!part || part.type === 'dynamic-tool') {
     return null
   }
 
@@ -88,16 +88,6 @@ function IMessage({ message, messageIndex, messagesLen, isDone }: IMessageProps)
           </Actions>
         )}
       </Fragment>
-    )
-  }
-
-  if (part.type === 'dynamic-tool') {
-    return (
-      <div className="flex items-center justify-between">
-        <p className="text-gray-600">{part.toolName}</p>
-
-        {getStatusBadge(part.state)}
-      </div>
     )
   }
 

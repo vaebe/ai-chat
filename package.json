@@ -17,6 +17,7 @@
     "@clerk/nextjs": "^6.31.6",
     "@clerk/themes": "^2.4.15",
     "@iconify/react": "^6.0.0",
+    "@modelcontextprotocol/sdk": "^1.18.1",
     "@prisma/client": "^6.15.0",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-collapsible": "^1.1.12",
