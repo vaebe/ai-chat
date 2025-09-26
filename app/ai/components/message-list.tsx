@@ -12,6 +12,7 @@ import { Fragment } from 'react'
 import { ChatStatus, UIMessage } from 'ai'
 import { Loader } from '@/components/ai-elements/loader'
 import { Actions, Action } from '@/components/ai-elements/actions'
+import { Loading } from '@/components/ui/loading'
 import {
   Tool,
   ToolContent,
@@ -25,32 +26,37 @@ import { WebSearchResult } from '@/types'
 interface MessageListProps {
   messages: UIMessage[]
   status: ChatStatus
+  loading?: boolean
 }
 
-export function MessageList({ messages, status }: MessageListProps) {
+export function MessageList({ messages, status, loading = false }: MessageListProps) {
   const isDone = !['submitted', 'streaming'].includes(status)
 
   return (
     <Conversation>
       <ConversationContent className="max-w-10/12 mx-auto">
-        {messages.map((message, messageIndex) => {
-          return (
-            <div key={message.id}>
-              <ToolsInfo message={message}></ToolsInfo>
+        {loading ? (
+          <Loading text="加载消息中..." size="lg" className="p-8" />
+        ) : (
+          messages.map((message, messageIndex) => {
+            return (
+              <div key={message.id}>
+                <ToolsInfo message={message}></ToolsInfo>
 
-              <WebSearchInfo message={message}></WebSearchInfo>
+                <WebSearchInfo message={message}></WebSearchInfo>
 
-              <IMessage
-                message={message}
-                messageIndex={messageIndex}
-                messagesLen={messages.length}
-                isDone={isDone}
-              ></IMessage>
-            </div>
-          )
-        })}
+                <IMessage
+                  message={message}
+                  messageIndex={messageIndex}
+                  messagesLen={messages.length}
+                  isDone={isDone}
+                ></IMessage>
+              </div>
+            )
+          })
+        )}
 
-        {!isDone && <Loader />}
+        {!isDone && !loading && <Loader />}
       </ConversationContent>
       <ConversationScrollButton />
     </Conversation>

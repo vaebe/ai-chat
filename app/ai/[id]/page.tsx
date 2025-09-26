@@ -9,7 +9,7 @@ import { useAiStore } from '@/app/ai/store/aiStore'
 import { toast } from 'sonner'
 import { AiMessage } from '@prisma/client'
 import { DefaultChatTransport, UIMessage } from 'ai'
-import { generateAiConversationTitle, getAiMessages } from '@/app/actions'
+import { generateAiConversationTitle } from '@/app/actions'
 import { LayoutHeader } from '@/app/ai/components/layout/header'
 import { MessageList } from '../components/message-list'
 import dayjs from 'dayjs'
@@ -32,6 +32,8 @@ export default function Page() {
   const aiFirstMsg = useAiStore((state) => state.aiSharedData.aiFirstMsg)
   const setAiFirstMsg = useAiStore((state) => state.setAiFirstMsg)
   const updateConversationList = useAiStore((state) => state.updateConversationList)
+  const messagesLoading = useAiStore((state) => state.aiSharedData.messagesLoading)
+  const fetchMessages = useAiStore((state) => state.fetchMessages)
 
   const { status, stop, setMessages, sendMessage, messages } = useChat({
     id: conversationId,
@@ -57,29 +59,29 @@ export default function Page() {
   })
 
   async function setMsg() {
-    getAiMessages(conversationId)
-      .then((res) => {
-        if (res.code !== 0) {
-          toast('获取对象详情失败!')
-          return
-        }
+    try {
+      const res = await fetchMessages(conversationId)
 
-        const data = res?.data ?? []
-
-        const list = data.map((item: AiMessage) => ({
-          parts: JSON.parse(item.parts),
-          metadata: JSON.parse(item.metadata ?? '{}'),
-          role: item.role,
-          id: item.id
-        })) as UIMessage[]
-
-        console.log('历史消息', list)
-
-        setMessages(list)
-      })
-      .catch(() => {
+      if (res.code !== 0) {
         toast('获取对象详情失败!')
-      })
+        return
+      }
+
+      const data = res?.data ?? []
+
+      const list = data.map((item: AiMessage) => ({
+        parts: JSON.parse(item.parts),
+        metadata: JSON.parse(item.metadata ?? '{}'),
+        role: item.role,
+        id: item.id
+      })) as UIMessage[]
+
+      console.log('历史消息', list)
+
+      setMessages(list)
+    } catch (error) {
+      toast('获取对象详情失败!')
+    }
   }
 
   // 生成对话标题
@@ -149,7 +151,7 @@ export default function Page() {
     <div className="flex flex-col h-screen">
       <LayoutHeader></LayoutHeader>
 
-      <MessageList messages={messages} status={status}></MessageList>
+      <MessageList messages={messages} status={status} loading={messagesLoading}></MessageList>
 
       <AiPromptInput
         onSubmit={handleSubmit}

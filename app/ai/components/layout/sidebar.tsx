@@ -3,8 +3,8 @@ import { SidebarToggleIcon } from '@/app/ai/components/icon/sidebar-toggle'
 import { NewChatIcon } from '@/app/ai/components/icon/new-chat'
 import { useAiStore } from '@/app/ai/store/aiStore'
 import { useEffect, useState } from 'react'
-import { getAiConversationList } from '@/app/actions'
 import { useParams, useRouter } from 'next/navigation'
+import { Loading } from '@/components/ui/loading'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -211,21 +211,21 @@ function ChatListItem({ item }: { item: AiConversation }) {
 
 function ChatList() {
   const conversationList = useAiStore((state) => state.aiSharedData.conversationList)
-  const setConversationList = useAiStore((state) => state.setConversationList)
+  const conversationListLoading = useAiStore((state) => state.aiSharedData.conversationListLoading)
+  const fetchConversationList = useAiStore((state) => state.fetchConversationList)
 
   useEffect(() => {
-    getAiConversationList().then((res) => {
-      const list = res.code === 0 ? res.data?.list || [] : []
-      setConversationList(list)
-    })
-  }, [setConversationList])
+    fetchConversationList()
+  }, [fetchConversationList])
 
   return (
     <ScrollArea className="h-[92vh]">
       <div className="w-64 p-2 space-y-1">
-        {conversationList.map((item) => (
-          <ChatListItem item={item} key={item.id}></ChatListItem>
-        ))}
+        {conversationListLoading ? (
+          <Loading text="加载列表中..." className="p-4" />
+        ) : (
+          conversationList.map((item) => <ChatListItem item={item} key={item.id}></ChatListItem>)
+        )}
       </div>
     </ScrollArea>
   )
