@@ -13,10 +13,10 @@ export default function AIChatPage() {
   const updateConversationList = useAiStore((state) => state.updateConversationList)
 
   // 从状态管理获取输入框状态
-  const inputText = useAiStore((state) => state.aiSharedData.inputText)
-  const selectedModel = useAiStore((state) => state.aiSharedData.selectedModel)
-  const useWebSearch = useAiStore((state) => state.aiSharedData.useWebSearch)
-  const models = useAiStore((state) => state.aiSharedData.models)
+  const inputText = useAiStore((state) => state.inputText)
+  const selectedModel = useAiStore((state) => state.selectedModel)
+  const useWebSearch = useAiStore((state) => state.useWebSearch)
+  const models = useAiStore((state) => state.models)
 
   // 状态管理方法
   const setInputText = useAiStore((state) => state.setInputText)

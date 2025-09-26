@@ -7,7 +7,7 @@ import { ThemeSwitch } from '@/components/theme-switch'
 function LayoutHeader() {
   const title = `AI Chat`
 
-  const layoutSidebar = useAiStore((state) => state.aiSharedData.layoutSidebar)
+  const layoutSidebar = useAiStore((state) => state.layoutSidebar)
 
   return (
     <div className="w-full flex items-center justify-between py-2 pl-2 pr-8">

@@ -2,7 +2,7 @@
 
 import { AiPromptInput } from '@/app/ai/components/ai-prompt-input'
 import { type PromptInputMessage } from '@/components/ai-elements/prompt-input'
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { useParams } from 'next/navigation'
 import { useAiStore } from '@/app/ai/store/aiStore'
@@ -19,20 +19,20 @@ export default function Page() {
   const conversationId = params.id
 
   // 从状态管理获取输入框状态
-  const inputText = useAiStore((state) => state.aiSharedData.inputText)
-  const selectedModel = useAiStore((state) => state.aiSharedData.selectedModel)
-  const useWebSearch = useAiStore((state) => state.aiSharedData.useWebSearch)
-  const models = useAiStore((state) => state.aiSharedData.models)
+  const inputText = useAiStore((state) => state.inputText)
+  const selectedModel = useAiStore((state) => state.selectedModel)
+  const useWebSearch = useAiStore((state) => state.useWebSearch)
+  const models = useAiStore((state) => state.models)
 
   // 状态管理方法
   const setInputText = useAiStore((state) => state.setInputText)
   const setSelectedModel = useAiStore((state) => state.setSelectedModel)
   const setUseWebSearch = useAiStore((state) => state.setUseWebSearch)
 
-  const aiFirstMsg = useAiStore((state) => state.aiSharedData.aiFirstMsg)
+  const aiFirstMsg = useAiStore((state) => state.aiFirstMsg)
   const setAiFirstMsg = useAiStore((state) => state.setAiFirstMsg)
   const updateConversationList = useAiStore((state) => state.updateConversationList)
-  const messagesLoading = useAiStore((state) => state.aiSharedData.messagesLoading)
+  const messagesLoading = useAiStore((state) => state.messagesLoading)
   const fetchMessages = useAiStore((state) => state.fetchMessages)
 
   const { status, stop, setMessages, sendMessage, messages } = useChat({
@@ -58,7 +58,7 @@ export default function Page() {
     })
   })
 
-  async function setMsg() {
+  const setMsg = useCallback(async () => {
     try {
       const res = await fetchMessages(conversationId)
 
@@ -79,13 +79,13 @@ export default function Page() {
       console.log('历史消息', list)
 
       setMessages(list)
-    } catch (error) {
+    } catch {
       toast('获取对象详情失败!')
     }
-  }
+  }, [conversationId, fetchMessages, setMessages])
 
   // 生成对话标题
-  async function generateConversationTitle() {
+  const generateConversationTitle = useCallback(() => {
     generateAiConversationTitle(conversationId)
       .then((res) => {
         if (res.code === 0) {
@@ -103,24 +103,36 @@ export default function Page() {
       .catch((err) => {
         console.error('生成对话标题失败!', err)
       })
-  }
+  }, [conversationId, updateConversationList])
 
-  function firstMsg() {
+  const firstMsg = useCallback(() => {
     sendMessage({ text: aiFirstMsg }).then(() => {
       generateConversationTitle()
       setAiFirstMsg('')
     })
-  }
+  }, [aiFirstMsg, sendMessage, setAiFirstMsg, generateConversationTitle])
 
   useEffect(() => {
-    if (aiFirstMsg) {
-      firstMsg()
-    } else {
-      setMsg()
+    let isMounted = true
+
+    const initializeMessages = async () => {
+      if (aiFirstMsg) {
+        if (isMounted) {
+          firstMsg()
+        }
+      } else {
+        if (isMounted) {
+          await setMsg()
+        }
+      }
     }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    initializeMessages()
+
+    return () => {
+      isMounted = false
+    }
+  }, [aiFirstMsg, conversationId, firstMsg, setMsg])
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text)
