@@ -1,27 +1,7 @@
 'use client'
 
-import {
-  PromptInput,
-  PromptInputActionAddAttachments,
-  PromptInputActionMenu,
-  PromptInputActionMenuContent,
-  PromptInputActionMenuTrigger,
-  PromptInputAttachment,
-  PromptInputAttachments,
-  PromptInputBody,
-  PromptInputButton,
-  type PromptInputMessage,
-  PromptInputModelSelect,
-  PromptInputModelSelectContent,
-  PromptInputModelSelectItem,
-  PromptInputModelSelectTrigger,
-  PromptInputModelSelectValue,
-  PromptInputSubmit,
-  PromptInputTextarea,
-  PromptInputToolbar,
-  PromptInputTools
-} from '@/components/ai-elements/prompt-input'
-import { GlobeIcon } from 'lucide-react'
+import { AiPromptInput } from '@/app/ai/components/ai-prompt-input'
+import { type PromptInputMessage } from '@/components/ai-elements/prompt-input'
 import { useState, useEffect } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { useParams } from 'next/navigation'
@@ -62,7 +42,9 @@ export default function Page() {
             id,
             timestamp: day.unix(),
             date: day.format('YYYY-MM-DD HH:mm:ss'),
-            userTools: {}
+            userTools: {
+              enableWebSearch: useWebSearch
+            }
           }
         }
       }
@@ -149,7 +131,9 @@ export default function Page() {
       {
         body: {
           model: model,
-          webSearch: useWebSearch
+          userTools: {
+            enableWebSearch: useWebSearch
+          }
         }
       }
     )
@@ -162,54 +146,21 @@ export default function Page() {
 
       <MessageList messages={messages} status={status}></MessageList>
 
-      <PromptInput onSubmit={handleSubmit} className="my-4 w-10/12 mx-auto" globalDrop multiple>
-        <PromptInputBody>
-          <PromptInputAttachments>
-            {(attachment) => <PromptInputAttachment data={attachment} />}
-          </PromptInputAttachments>
-          <PromptInputTextarea
-            onChange={(e) => setText(e.target.value)}
-            value={text}
-            placeholder="询问任何问题？"
-          />
-        </PromptInputBody>
-        <PromptInputToolbar>
-          <PromptInputTools>
-            <PromptInputActionMenu>
-              <PromptInputActionMenuTrigger />
-              <PromptInputActionMenuContent>
-                <PromptInputActionAddAttachments />
-              </PromptInputActionMenuContent>
-            </PromptInputActionMenu>
-            <PromptInputButton
-              onClick={() => setUseWebSearch(!useWebSearch)}
-              variant={useWebSearch ? 'default' : 'ghost'}
-            >
-              <GlobeIcon size={16} />
-              <span>搜索</span>
-            </PromptInputButton>
-            <PromptInputModelSelect
-              onValueChange={(value) => {
-                setModel(value)
-              }}
-              value={model}
-            >
-              <PromptInputModelSelectTrigger>
-                <PromptInputModelSelectValue />
-              </PromptInputModelSelectTrigger>
-              <PromptInputModelSelectContent>
-                {models.map((model) => (
-                  <PromptInputModelSelectItem key={model.id} value={model.id}>
-                    {model.name}
-                  </PromptInputModelSelectItem>
-                ))}
-              </PromptInputModelSelectContent>
-            </PromptInputModelSelect>
-          </PromptInputTools>
-
-          <PromptInputSubmit disabled={!text && !status} status={status} onClick={stop} />
-        </PromptInputToolbar>
-      </PromptInput>
+      <AiPromptInput
+        onSubmit={handleSubmit}
+        text={text}
+        setText={setText}
+        model={model}
+        setModel={setModel}
+        useWebSearch={useWebSearch}
+        setUseWebSearch={setUseWebSearch}
+        models={models}
+        disabled={!text && !status}
+        status={status}
+        onStop={stop}
+        className="my-4 w-10/12 mx-auto"
+        placeholder="询问任何问题？"
+      />
     </div>
   )
 }
