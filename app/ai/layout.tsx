@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { LayoutSidebar } from './components/layout/sidebar'
-import { useUIStore } from './store/uiStore'
+import { useUIStore } from './store/ui-store'
 
 export default function AiLayout({ children }: { children: React.ReactNode }) {
   const layoutSidebar = useUIStore((state) => state.layoutSidebar)

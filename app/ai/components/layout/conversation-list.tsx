@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Loading } from '@/components/ui/loading'
-import { useConversationStore } from '../../store/conversationStore'
-import { ConversationItem } from './ConversationItem'
+import { useConversationStore } from '../../store/conversation-store'
+import { ConversationItem } from './conversation-item'
 import { useParams } from 'next/navigation'
 
 export const ConversationList = React.memo(() => {

@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
-import { useConversationStore } from '../store/conversationStore'
-import { useUIStore } from '../store/uiStore'
+import { useConversationStore } from '../store/conversation-store'
+import { useUIStore } from '../store/ui-store'
 import { getAiMessages } from '@/app/actions'
 import { generateAiConversationTitle } from '@/app/actions'
 import { UseMessageOperationsReturn, ApiResponse } from '@/types/ai'

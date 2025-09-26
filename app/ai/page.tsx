@@ -2,9 +2,9 @@
 
 import { LayoutHeader } from './components/layout/header'
 import { useRouter } from 'next/navigation'
-import { useAiStore } from './store/aiStore'
-import { useInputStore } from './store/inputStore'
-import { AiPromptInput } from './components/ai-prompt-input'
+import { useAiStore } from './store/ai-store'
+import { useInputStore } from './store/input-store'
+import { AiPromptInput } from './components/prompt-input'
 import { type PromptInputMessage } from '@/components/ai-elements/prompt-input'
 import { generateUUID } from '@/lib/utils'
 import { createAiConversation } from '@/app/actions'

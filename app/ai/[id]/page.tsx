@@ -1,12 +1,12 @@
 'use client'
 
-import { AiPromptInput } from '@/app/ai/components/ai-prompt-input'
+import { AiPromptInput } from '@/app/ai/components/prompt-input'
 import { type PromptInputMessage } from '@/components/ai-elements/prompt-input'
 import { useCallback, useEffect } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { useParams } from 'next/navigation'
-import { useAiStore } from '@/app/ai/store/aiStore'
-import { useInputStore } from '@/app/ai/store/inputStore'
+import { useAiStore } from '@/app/ai/store/ai-store'
+import { useInputStore } from '@/app/ai/store/input-store'
 import { toast } from 'sonner'
 import { AiMessage } from '@prisma/client'
 import { DefaultChatTransport, UIMessage } from 'ai'
@@ -14,7 +14,7 @@ import { generateAiConversationTitle } from '@/app/actions'
 import { LayoutHeader } from '@/app/ai/components/layout/header'
 import { MessageList } from '../components/message-list'
 import dayjs from 'dayjs'
-import { useUIStore } from '@/app/ai/store/uiStore'
+import { useUIStore } from '@/app/ai/store/ui-store'
 
 export default function Page() {
   const params = useParams<{ id: string }>()

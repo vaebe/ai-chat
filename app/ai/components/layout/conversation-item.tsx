@@ -1,7 +1,7 @@
 import React from 'react'
 import { AiConversation } from '@prisma/client'
-import { useConversationOperations } from '../../hooks/useConversationOperations'
-import { ConversationOperations } from './ConversationOperations'
+import { useConversationOperations } from '../../hooks/use-conversation-operations'
+import { ConversationOperations } from './conversation-operations'
 
 interface ConversationItemProps {
   item: AiConversation

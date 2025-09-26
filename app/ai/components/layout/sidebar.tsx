@@ -1,6 +1,6 @@
 import { SidebarToggleIcon } from '@/app/ai/components/icon/sidebar-toggle'
 import { NewChatIcon } from '@/app/ai/components/icon/new-chat'
-import { ConversationList } from './ConversationList'
+import { ConversationList } from './conversation-list'
 
 function LayoutSidebar() {
   return (

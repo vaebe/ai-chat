@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { AiConversation } from '@prisma/client'
-import { useConversationOperations } from '../../hooks/useConversationOperations'
+import { useConversationOperations } from '../../hooks/use-conversation-operations'
 import {
   DropdownMenu,
   DropdownMenuContent,

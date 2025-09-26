@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Icon } from '@iconify/react'
-import { useUIStore } from '@/app/ai/store/uiStore'
+import { useUIStore } from '@/app/ai/store/ui-store'
 
 function SidebarToggleIcon({ state }: { state: boolean }) {
   const setLayoutSidebar = useUIStore((state) => state.setLayoutSidebar)

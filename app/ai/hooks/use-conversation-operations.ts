@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { useConversationStore } from '../store/conversationStore'
+import { useConversationStore } from '../store/conversation-store'
 import { removeAiConversation, updateAiConversation } from '@/app/actions'
 import { UseConversationOperationsReturn, AiConversation } from '@/types/ai'
 

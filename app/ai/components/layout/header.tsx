@@ -1,6 +1,6 @@
 import { SidebarToggleIcon } from '@/app/ai/components/icon/sidebar-toggle'
 import { NewChatIcon } from '@/app/ai/components/icon/new-chat'
-import { useUIStore } from '@/app/ai/store/uiStore'
+import { useUIStore } from '@/app/ai/store/ui-store'
 import { UserButton } from '@clerk/nextjs'
 import { ThemeSwitch } from '@/components/theme-switch'
 

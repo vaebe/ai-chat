@@ -1,8 +1,8 @@
 import { create } from 'zustand'
 import { getAiMessages } from '@/app/actions'
-import { useConversationStore } from './conversationStore'
-import { useInputStore } from './inputStore'
-import { useUIStore } from './uiStore'
+import { useConversationStore } from './conversation-store'
+import { useInputStore } from './input-store'
+import { useUIStore } from './ui-store'
 import { AiConversation, AiMessage } from '@prisma/client'
 import { ApiRes } from '@/lib/utils'
 
