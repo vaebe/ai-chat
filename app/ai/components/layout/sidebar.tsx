@@ -1,8 +1,8 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { SidebarToggleIcon } from '@/app/ai/components/icon/sidebar-toggle'
 import { NewChatIcon } from '@/app/ai/components/icon/new-chat'
-import { AiSharedDataContext } from '@/app/ai/components/AiSharedDataContext'
-import { useContext, useEffect, useState } from 'react'
+import { useAiStore } from '@/app/ai/store/aiStore'
+import { useEffect, useState } from 'react'
 import { getAiConversationList } from '@/app/actions'
 import { useParams, useRouter } from 'next/navigation'
 import {
@@ -55,7 +55,7 @@ interface OperateDialogProps {
 }
 
 function RemoveConversation({ info, dialog }: OperateDialogProps) {
-  const { setAiSharedData, aiSharedData } = useContext(AiSharedDataContext)
+  const updateConversationList = useAiStore((state) => state.updateConversationList)
 
   const { id } = useParams()
   const router = useRouter()
@@ -63,9 +63,7 @@ function RemoveConversation({ info, dialog }: OperateDialogProps) {
   async function remove() {
     removeAiConversation(info.id).then((res) => {
       if (res.code === 0) {
-        setAiSharedData((d) => {
-          d.conversationList = aiSharedData.conversationList.filter((item) => item.id !== info.id)
-        })
+        updateConversationList((list) => list.filter((item) => item.id !== info.id))
       }
     })
 
@@ -104,7 +102,7 @@ function RemoveConversation({ info, dialog }: OperateDialogProps) {
 }
 
 function EditConversationName({ info, dialog }: OperateDialogProps) {
-  const { setAiSharedData, aiSharedData } = useContext(AiSharedDataContext)
+  const updateConversationList = useAiStore((state) => state.updateConversationList)
 
   const [name, setName] = useState(info.name)
 
@@ -113,11 +111,9 @@ function EditConversationName({ info, dialog }: OperateDialogProps) {
       if (res.code === 0) {
         dialog.hide()
 
-        setAiSharedData((d) => {
-          d.conversationList = aiSharedData.conversationList.map((item) => {
-            return item.id === info.id ? { ...item, name } : item
-          })
-        })
+        updateConversationList((list) =>
+          list.map((item) => (item.id === info.id ? { ...item, name } : item))
+        )
       }
     })
   }
@@ -214,22 +210,20 @@ function ChatListItem({ item }: { item: AiConversation }) {
 }
 
 function ChatList() {
-  const { setAiSharedData, aiSharedData } = useContext(AiSharedDataContext)
+  const conversationList = useAiStore((state) => state.aiSharedData.conversationList)
+  const setConversationList = useAiStore((state) => state.setConversationList)
 
   useEffect(() => {
     getAiConversationList().then((res) => {
       const list = res.code === 0 ? res.data?.list || [] : []
-
-      setAiSharedData((d) => {
-        d.conversationList = list
-      })
+      setConversationList(list)
     })
-  }, [setAiSharedData])
+  }, [setConversationList])
 
   return (
     <ScrollArea className="h-[92vh]">
       <div className="w-64 p-2 space-y-1">
-        {aiSharedData.conversationList.map((item) => (
+        {conversationList.map((item) => (
           <ChatListItem item={item} key={item.id}></ChatListItem>
         ))}
       </div>

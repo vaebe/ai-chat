@@ -25,8 +25,7 @@ import { GlobeIcon } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { useParams } from 'next/navigation'
-import { AiSharedDataContext } from '@/app/ai/components/AiSharedDataContext'
-import { useContext } from 'react'
+import { useAiStore } from '@/app/ai/store/aiStore'
 import { toast } from 'sonner'
 import { AiMessage } from '@prisma/client'
 import { DefaultChatTransport, UIMessage } from 'ai'
@@ -45,7 +44,9 @@ export default function Page() {
   const [model, setModel] = useState<string>(models[0].id)
   const [useWebSearch, setUseWebSearch] = useState<boolean>(false)
 
-  const { aiSharedData, setAiSharedData } = useContext(AiSharedDataContext)
+  const aiFirstMsg = useAiStore((state) => state.aiSharedData.aiFirstMsg)
+  const setAiFirstMsg = useAiStore((state) => state.setAiFirstMsg)
+  const updateConversationList = useAiStore((state) => state.updateConversationList)
 
   const { status, stop, setMessages, sendMessage, messages } = useChat({
     id: conversationId,
@@ -101,14 +102,13 @@ export default function Page() {
         if (res.code === 0) {
           const conversationName = res.data?.name ?? ''
 
-          setAiSharedData((d) => {
-            d.conversationList = d.conversationList.map((item) => {
-              if (item.id === conversationId && conversationName) {
-                item.name = conversationName
-              }
-              return item
-            })
-          })
+          updateConversationList((list) =>
+            list.map((item) =>
+              item.id === conversationId && conversationName
+                ? { ...item, name: conversationName }
+                : item
+            )
+          )
         }
       })
       .catch((err) => {
@@ -117,17 +117,14 @@ export default function Page() {
   }
 
   function firstMsg() {
-    sendMessage({ text: aiSharedData.aiFirstMsg }).then(() => {
+    sendMessage({ text: aiFirstMsg }).then(() => {
       generateConversationTitle()
-
-      setAiSharedData((d) => {
-        d.aiFirstMsg = ''
-      })
+      setAiFirstMsg('')
     })
   }
 
   useEffect(() => {
-    if (aiSharedData.aiFirstMsg) {
+    if (aiFirstMsg) {
       firstMsg()
     } else {
       setMsg()

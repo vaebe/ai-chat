@@ -1,15 +1,16 @@
 'use client'
 
-import { useState, useContext } from 'react'
+import { useState } from 'react'
 import { LayoutHeader } from './components/layout/header'
 import { useRouter } from 'next/navigation'
-import { AiSharedDataContext } from './components/AiSharedDataContext'
+import { useAiStore } from './store/aiStore'
 import { Sender } from '@/app/ai/components/sender'
 import { generateUUID } from '@/lib/utils'
 import { createAiConversation } from '@/app/actions'
 
 export default function AIChatPage() {
-  const { setAiSharedData } = useContext(AiSharedDataContext)
+  const setAiFirstMsg = useAiStore((state) => state.setAiFirstMsg)
+  const updateConversationList = useAiStore((state) => state.updateConversationList)
 
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -27,21 +28,19 @@ export default function AIChatPage() {
 
     createAiConversation({ name: 'New Chat', uid: conversationId })
 
-    setAiSharedData((d) => {
-      d.aiFirstMsg = input
-      d.conversationList = [
-        {
-          desc: '',
-          id: conversationId,
-          name: 'New Chat',
-          userId: '',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          deletedAt: null
-        },
-        ...d.conversationList
-      ]
-    })
+    setAiFirstMsg(input)
+    updateConversationList((list) => [
+      {
+        desc: '',
+        id: conversationId,
+        name: 'New Chat',
+        userId: '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null
+      },
+      ...list
+    ])
 
     router.replace(`/ai/${conversationId}`)
   }
