@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { LayoutHeader } from './components/layout/header'
 import { useRouter } from 'next/navigation'
 import { useAiStore } from './store/aiStore'
@@ -9,15 +8,20 @@ import { type PromptInputMessage } from '@/components/ai-elements/prompt-input'
 import { generateUUID } from '@/lib/utils'
 import { createAiConversation } from '@/app/actions'
 
-const models = [{ id: 'deepseek-chat', name: 'deepseek-chat' }]
-
 export default function AIChatPage() {
   const setAiFirstMsg = useAiStore((state) => state.setAiFirstMsg)
   const updateConversationList = useAiStore((state) => state.updateConversationList)
 
-  const [text, setText] = useState('')
-  const [model, setModel] = useState<string>(models[0].id)
-  const [useWebSearch, setUseWebSearch] = useState<boolean>(false)
+  // 从状态管理获取输入框状态
+  const inputText = useAiStore((state) => state.aiSharedData.inputText)
+  const selectedModel = useAiStore((state) => state.aiSharedData.selectedModel)
+  const useWebSearch = useAiStore((state) => state.aiSharedData.useWebSearch)
+  const models = useAiStore((state) => state.aiSharedData.models)
+
+  // 状态管理方法
+  const setInputText = useAiStore((state) => state.setInputText)
+  const setSelectedModel = useAiStore((state) => state.setSelectedModel)
+  const setUseWebSearch = useAiStore((state) => state.setUseWebSearch)
 
   const router = useRouter()
 
@@ -48,6 +52,9 @@ export default function AIChatPage() {
     ])
 
     router.replace(`/ai/${conversationId}`)
+
+    // 清空输入框
+    setInputText('')
   }
 
   return (
@@ -60,15 +67,14 @@ export default function AIChatPage() {
         <div className="flex justify-center p-2 md:w-8/12 mx-auto">
           <AiPromptInput
             onSubmit={handleSubmit}
-            text={text}
-            setText={setText}
-            model={model}
-            setModel={setModel}
+            text={inputText}
+            setText={setInputText}
+            model={selectedModel}
+            setModel={setSelectedModel}
             useWebSearch={useWebSearch}
             setUseWebSearch={setUseWebSearch}
             models={models}
             className="w-full"
-            placeholder="询问任何问题？"
           />
         </div>
       </div>

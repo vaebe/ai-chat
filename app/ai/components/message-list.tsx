@@ -110,6 +110,10 @@ function WebSearchInfo({ message }: ToolsInfoProps) {
   const outputs: WebSearchResult[] = []
 
   parts.map((part) => {
+    if (!part?.output || !Array.isArray(part?.output)) {
+      return
+    }
+
     outputs.push(...(part?.output as WebSearchResult[]))
   })
 

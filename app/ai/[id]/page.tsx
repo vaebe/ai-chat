@@ -2,7 +2,7 @@
 
 import { AiPromptInput } from '@/app/ai/components/ai-prompt-input'
 import { type PromptInputMessage } from '@/components/ai-elements/prompt-input'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { useParams } from 'next/navigation'
 import { useAiStore } from '@/app/ai/store/aiStore'
@@ -14,15 +14,20 @@ import { LayoutHeader } from '@/app/ai/components/layout/header'
 import { MessageList } from '../components/message-list'
 import dayjs from 'dayjs'
 
-const models = [{ id: 'deepseek-chat', name: 'deepseek-chat' }]
-
 export default function Page() {
   const params = useParams<{ id: string }>()
   const conversationId = params.id
 
-  const [text, setText] = useState<string>('')
-  const [model, setModel] = useState<string>(models[0].id)
-  const [useWebSearch, setUseWebSearch] = useState<boolean>(false)
+  // 从状态管理获取输入框状态
+  const inputText = useAiStore((state) => state.aiSharedData.inputText)
+  const selectedModel = useAiStore((state) => state.aiSharedData.selectedModel)
+  const useWebSearch = useAiStore((state) => state.aiSharedData.useWebSearch)
+  const models = useAiStore((state) => state.aiSharedData.models)
+
+  // 状态管理方法
+  const setInputText = useAiStore((state) => state.setInputText)
+  const setSelectedModel = useAiStore((state) => state.setSelectedModel)
+  const setUseWebSearch = useAiStore((state) => state.setUseWebSearch)
 
   const aiFirstMsg = useAiStore((state) => state.aiSharedData.aiFirstMsg)
   const setAiFirstMsg = useAiStore((state) => state.setAiFirstMsg)
@@ -130,14 +135,14 @@ export default function Page() {
       },
       {
         body: {
-          model: model,
+          model: selectedModel,
           userTools: {
             enableWebSearch: useWebSearch
           }
         }
       }
     )
-    setText('')
+    setInputText('')
   }
 
   return (
@@ -148,18 +153,17 @@ export default function Page() {
 
       <AiPromptInput
         onSubmit={handleSubmit}
-        text={text}
-        setText={setText}
-        model={model}
-        setModel={setModel}
+        text={inputText}
+        setText={setInputText}
+        model={selectedModel}
+        setModel={setSelectedModel}
         useWebSearch={useWebSearch}
         setUseWebSearch={setUseWebSearch}
         models={models}
-        disabled={!text && !status}
+        disabled={!inputText && !status}
         status={status}
         onStop={stop}
         className="my-4 w-10/12 mx-auto"
-        placeholder="询问任何问题？"
       />
     </div>
   )
