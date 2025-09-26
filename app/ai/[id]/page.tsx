@@ -14,6 +14,7 @@ import { generateAiConversationTitle } from '@/app/actions'
 import { LayoutHeader } from '@/app/ai/components/layout/header'
 import { MessageList } from '../components/message-list'
 import dayjs from 'dayjs'
+import { useUIStore } from '@/app/ai/store/uiStore'
 
 export default function Page() {
   const params = useParams<{ id: string }>()
@@ -33,7 +34,7 @@ export default function Page() {
   const aiFirstMsg = useAiStore((state) => state.aiFirstMsg)
   const setAiFirstMsg = useAiStore((state) => state.setAiFirstMsg)
   const updateConversationList = useAiStore((state) => state.updateConversationList)
-  const messagesLoading = useAiStore((state) => state.messagesLoading)
+  const messagesLoading = useUIStore((state) => state.messagesLoading)
   const fetchMessages = useAiStore((state) => state.fetchMessages)
 
   const { status, stop, setMessages, sendMessage, messages } = useChat({
@@ -50,6 +51,7 @@ export default function Page() {
             id,
             timestamp: day.unix(),
             date: day.format('YYYY-MM-DD HH:mm:ss'),
+            model: selectedModel,
             userTools: {
               enableWebSearch: useWebSearch
             }
@@ -143,20 +145,10 @@ export default function Page() {
       return
     }
 
-    sendMessage(
-      {
-        text: message.text || 'Sent with attachments',
-        files: message.files
-      },
-      {
-        body: {
-          model: selectedModel,
-          userTools: {
-            enableWebSearch: useWebSearch
-          }
-        }
-      }
-    )
+    sendMessage({
+      text: message.text || 'Sent with attachments',
+      files: message.files
+    })
     setInputText('')
   }
 

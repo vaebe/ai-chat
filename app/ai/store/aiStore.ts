@@ -19,23 +19,10 @@ interface AiStore {
   setAiFirstMsg: (aiFirstMsg: string) => void
   fetchConversationList: () => Promise<void>
 
-  // 输入相关
-  inputText: string
-  selectedModel: string
-  useWebSearch: boolean
-  models: Array<{ id: string; name: string }>
-  setInputText: (inputText: string) => void
-  setSelectedModel: (selectedModel: string) => void
-  setUseWebSearch: (useWebSearch: boolean) => void
-
-  // UI 相关
-  layoutSidebar: boolean
-  messagesLoading: boolean
-  setLayoutSidebar: (layoutSidebar: boolean) => void
-  setMessagesLoading: (messagesLoading: boolean) => void
-
-  // 消息相关
+  // 消息相关（保留便捷方法）
   fetchMessages: (conversationId: string) => Promise<ApiRes<AiMessage[]>>
+
+  // 重置所有共享数据
   resetAiSharedData: () => void
 }
 
@@ -68,43 +55,6 @@ export const useAiStore = create<AiStore>(() => ({
   },
   fetchConversationList: async () => {
     await useConversationStore.getState().fetchConversationList()
-  },
-
-  // 输入相关 - 代理到 inputStore
-  get inputText() {
-    return useInputStore.getState().inputText
-  },
-  get selectedModel() {
-    return useInputStore.getState().selectedModel
-  },
-  get useWebSearch() {
-    return useInputStore.getState().useWebSearch
-  },
-  get models() {
-    return useInputStore.getState().models
-  },
-  setInputText: (inputText) => {
-    useInputStore.getState().setInputText(inputText)
-  },
-  setSelectedModel: (selectedModel) => {
-    useInputStore.getState().setSelectedModel(selectedModel)
-  },
-  setUseWebSearch: (useWebSearch) => {
-    useInputStore.getState().setUseWebSearch(useWebSearch)
-  },
-
-  // UI 相关 - 代理到 uiStore
-  get layoutSidebar() {
-    return useUIStore.getState().layoutSidebar
-  },
-  get messagesLoading() {
-    return useUIStore.getState().messagesLoading
-  },
-  setLayoutSidebar: (layoutSidebar) => {
-    useUIStore.getState().setLayoutSidebar(layoutSidebar)
-  },
-  setMessagesLoading: (messagesLoading) => {
-    useUIStore.getState().setMessagesLoading(messagesLoading)
   },
 
   // 消息相关

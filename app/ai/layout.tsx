@@ -2,10 +2,10 @@
 
 import { cn } from '@/lib/utils'
 import { LayoutSidebar } from './components/layout/sidebar'
-import { useAiStore } from './store/aiStore'
+import { useUIStore } from './store/uiStore'
 
 export default function AiLayout({ children }: { children: React.ReactNode }) {
-  const layoutSidebar = useAiStore((state) => state.layoutSidebar)
+  const layoutSidebar = useUIStore((state) => state.layoutSidebar)
 
   return (
     <div className={cn('flex h-screen')}>

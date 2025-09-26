@@ -1,13 +1,13 @@
 import { SidebarToggleIcon } from '@/app/ai/components/icon/sidebar-toggle'
 import { NewChatIcon } from '@/app/ai/components/icon/new-chat'
-import { useAiStore } from '@/app/ai/store/aiStore'
+import { useUIStore } from '@/app/ai/store/uiStore'
 import { UserButton } from '@clerk/nextjs'
 import { ThemeSwitch } from '@/components/theme-switch'
 
 function LayoutHeader() {
   const title = `AI Chat`
 
-  const layoutSidebar = useAiStore((state) => state.layoutSidebar)
+  const layoutSidebar = useUIStore((state) => state.layoutSidebar)
 
   return (
     <div className="w-full flex items-center justify-between py-2 pl-2 pr-8">
