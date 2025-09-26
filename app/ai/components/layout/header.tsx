@@ -1,19 +1,18 @@
 import { SidebarToggleIcon } from '@/app/ai/components/icon/sidebar-toggle'
 import { NewChatIcon } from '@/app/ai/components/icon/new-chat'
-import { AiSharedDataContext } from '@/app/ai/components/AiSharedDataContext'
-import { useContext } from 'react'
+import { useUIStore } from '@/app/ai/store/ui-store'
 import { UserButton } from '@clerk/nextjs'
 import { ThemeSwitch } from '@/components/theme-switch'
 
 function LayoutHeader() {
   const title = `AI Chat`
 
-  const { aiSharedData } = useContext(AiSharedDataContext)
+  const layoutSidebar = useUIStore((state) => state.layoutSidebar)
 
   return (
     <div className="w-full flex items-center justify-between py-2 pl-2 pr-8">
       <div className="flex items-center">
-        {!aiSharedData.layoutSidebar && (
+        {!layoutSidebar && (
           <div>
             <SidebarToggleIcon state={true}></SidebarToggleIcon>
             <NewChatIcon className="ml-4"></NewChatIcon>

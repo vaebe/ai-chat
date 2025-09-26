@@ -1,16 +1,13 @@
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Icon } from '@iconify/react'
-import { AiSharedDataContext } from '@/app/ai/components/AiSharedDataContext'
-import { useContext } from 'react'
+import { useUIStore } from '@/app/ai/store/ui-store'
 
 function SidebarToggleIcon({ state }: { state: boolean }) {
-  const { setAiSharedData } = useContext(AiSharedDataContext)
+  const setLayoutSidebar = useUIStore((state) => state.setLayoutSidebar)
 
   function handleClick() {
-    setAiSharedData((d) => {
-      d.layoutSidebar = state
-    })
+    setLayoutSidebar(state)
   }
 
   return (
