@@ -114,6 +114,7 @@ export const AiPromptInput = React.memo<AiPromptInputProps>(
               </PromptInputActionMenuContent>
             </PromptInputActionMenu>
             <PromptInputButton
+              className="cursor-pointer"
               onClick={handleWebSearchToggle}
               variant={useWebSearch ? 'default' : 'ghost'}
             >

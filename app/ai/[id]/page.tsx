@@ -6,6 +6,7 @@ import { useCallback, useEffect } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { useParams } from 'next/navigation'
 import { useAiStore } from '@/app/ai/store/aiStore'
+import { useInputStore } from '@/app/ai/store/inputStore'
 import { toast } from 'sonner'
 import { AiMessage } from '@prisma/client'
 import { DefaultChatTransport, UIMessage } from 'ai'
@@ -18,16 +19,16 @@ export default function Page() {
   const params = useParams<{ id: string }>()
   const conversationId = params.id
 
-  // 从状态管理获取输入框状态
-  const inputText = useAiStore((state) => state.inputText)
-  const selectedModel = useAiStore((state) => state.selectedModel)
-  const useWebSearch = useAiStore((state) => state.useWebSearch)
-  const models = useAiStore((state) => state.models)
+  // 从输入 store 获取输入框状态（直接订阅，确保变更触发重渲染）
+  const inputText = useInputStore((state) => state.inputText)
+  const selectedModel = useInputStore((state) => state.selectedModel)
+  const useWebSearch = useInputStore((state) => state.useWebSearch)
+  const models = useInputStore((state) => state.models)
 
-  // 状态管理方法
-  const setInputText = useAiStore((state) => state.setInputText)
-  const setSelectedModel = useAiStore((state) => state.setSelectedModel)
-  const setUseWebSearch = useAiStore((state) => state.setUseWebSearch)
+  // 输入相关方法
+  const setInputText = useInputStore((state) => state.setInputText)
+  const setSelectedModel = useInputStore((state) => state.setSelectedModel)
+  const setUseWebSearch = useInputStore((state) => state.setUseWebSearch)
 
   const aiFirstMsg = useAiStore((state) => state.aiFirstMsg)
   const setAiFirstMsg = useAiStore((state) => state.setAiFirstMsg)

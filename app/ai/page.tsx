@@ -3,6 +3,7 @@
 import { LayoutHeader } from './components/layout/header'
 import { useRouter } from 'next/navigation'
 import { useAiStore } from './store/aiStore'
+import { useInputStore } from './store/inputStore'
 import { AiPromptInput } from './components/ai-prompt-input'
 import { type PromptInputMessage } from '@/components/ai-elements/prompt-input'
 import { generateUUID } from '@/lib/utils'
@@ -12,16 +13,16 @@ export default function AIChatPage() {
   const setAiFirstMsg = useAiStore((state) => state.setAiFirstMsg)
   const updateConversationList = useAiStore((state) => state.updateConversationList)
 
-  // 从状态管理获取输入框状态
-  const inputText = useAiStore((state) => state.inputText)
-  const selectedModel = useAiStore((state) => state.selectedModel)
-  const useWebSearch = useAiStore((state) => state.useWebSearch)
-  const models = useAiStore((state) => state.models)
+  // 从输入 store 获取输入框状态（直接订阅，确保变更触发重渲染）
+  const inputText = useInputStore((state) => state.inputText)
+  const selectedModel = useInputStore((state) => state.selectedModel)
+  const useWebSearch = useInputStore((state) => state.useWebSearch)
+  const models = useInputStore((state) => state.models)
 
-  // 状态管理方法
-  const setInputText = useAiStore((state) => state.setInputText)
-  const setSelectedModel = useAiStore((state) => state.setSelectedModel)
-  const setUseWebSearch = useAiStore((state) => state.setUseWebSearch)
+  // 输入相关方法
+  const setInputText = useInputStore((state) => state.setInputText)
+  const setSelectedModel = useInputStore((state) => state.setSelectedModel)
+  const setUseWebSearch = useInputStore((state) => state.setUseWebSearch)
 
   const router = useRouter()
 
