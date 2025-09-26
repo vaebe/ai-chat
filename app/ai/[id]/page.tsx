@@ -1,51 +1,41 @@
 'use client'
 
-import {
-  PromptInput,
-  PromptInputActionAddAttachments,
-  PromptInputActionMenu,
-  PromptInputActionMenuContent,
-  PromptInputActionMenuTrigger,
-  PromptInputAttachment,
-  PromptInputAttachments,
-  PromptInputBody,
-  PromptInputButton,
-  type PromptInputMessage,
-  PromptInputModelSelect,
-  PromptInputModelSelectContent,
-  PromptInputModelSelectItem,
-  PromptInputModelSelectTrigger,
-  PromptInputModelSelectValue,
-  PromptInputSubmit,
-  PromptInputTextarea,
-  PromptInputToolbar,
-  PromptInputTools
-} from '@/components/ai-elements/prompt-input'
-import { GlobeIcon } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { AiPromptInput } from '@/app/ai/components/prompt-input'
+import { type PromptInputMessage } from '@/components/ai-elements/prompt-input'
+import { useCallback, useEffect } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { useParams } from 'next/navigation'
-import { AiSharedDataContext } from '@/app/ai/components/AiSharedDataContext'
-import { useContext } from 'react'
+import { useAiStore } from '@/app/ai/store/ai-store'
+import { useInputStore } from '@/app/ai/store/input-store'
 import { toast } from 'sonner'
 import { AiMessage } from '@prisma/client'
 import { DefaultChatTransport, UIMessage } from 'ai'
-import { generateAiConversationTitle, getAiMessages } from '@/app/actions'
+import { generateAiConversationTitle } from '@/app/actions'
 import { LayoutHeader } from '@/app/ai/components/layout/header'
 import { MessageList } from '../components/message-list'
 import dayjs from 'dayjs'
-
-const models = [{ id: 'deepseek-chat', name: 'deepseek-chat' }]
+import { useUIStore } from '@/app/ai/store/ui-store'
 
 export default function Page() {
   const params = useParams<{ id: string }>()
   const conversationId = params.id
 
-  const [text, setText] = useState<string>('')
-  const [model, setModel] = useState<string>(models[0].id)
-  const [useWebSearch, setUseWebSearch] = useState<boolean>(false)
+  // 从输入 store 获取输入框状态（直接订阅，确保变更触发重渲染）
+  const inputText = useInputStore((state) => state.inputText)
+  const selectedModel = useInputStore((state) => state.selectedModel)
+  const useWebSearch = useInputStore((state) => state.useWebSearch)
+  const models = useInputStore((state) => state.models)
 
-  const { aiSharedData, setAiSharedData } = useContext(AiSharedDataContext)
+  // 输入相关方法
+  const setInputText = useInputStore((state) => state.setInputText)
+  const setSelectedModel = useInputStore((state) => state.setSelectedModel)
+  const setUseWebSearch = useInputStore((state) => state.setUseWebSearch)
+
+  const aiFirstMsg = useAiStore((state) => state.aiFirstMsg)
+  const setAiFirstMsg = useAiStore((state) => state.setAiFirstMsg)
+  const updateConversationList = useAiStore((state) => state.updateConversationList)
+  const messagesLoading = useUIStore((state) => state.messagesLoading)
+  const fetchMessages = useAiStore((state) => state.fetchMessages)
 
   const { status, stop, setMessages, sendMessage, messages } = useChat({
     id: conversationId,
@@ -61,80 +51,91 @@ export default function Page() {
             id,
             timestamp: day.unix(),
             date: day.format('YYYY-MM-DD HH:mm:ss'),
-            userTools: {}
+            model: selectedModel,
+            userTools: {
+              enableWebSearch: useWebSearch
+            }
           }
         }
       }
     })
   })
 
-  async function setMsg() {
-    getAiMessages(conversationId)
-      .then((res) => {
-        if (res.code !== 0) {
-          toast('获取对象详情失败!')
-          return
-        }
+  const setMsg = useCallback(async () => {
+    try {
+      const res = await fetchMessages(conversationId)
 
-        const data = res?.data ?? []
-
-        const list = data.map((item: AiMessage) => ({
-          parts: JSON.parse(item.parts),
-          metadata: JSON.parse(item.metadata ?? '{}'),
-          role: item.role,
-          id: item.id
-        })) as UIMessage[]
-
-        console.log('历史消息', list)
-
-        setMessages(list)
-      })
-      .catch(() => {
+      if (res.code !== 0) {
         toast('获取对象详情失败!')
-      })
-  }
+        return
+      }
+
+      const data = res?.data ?? []
+
+      const list = data.map((item: AiMessage) => ({
+        parts: JSON.parse(item.parts),
+        metadata: JSON.parse(item.metadata ?? '{}'),
+        role: item.role,
+        id: item.id
+      })) as UIMessage[]
+
+      console.log('历史消息', list)
+
+      setMessages(list)
+    } catch {
+      toast('获取对象详情失败!')
+    }
+  }, [conversationId, fetchMessages, setMessages])
 
   // 生成对话标题
-  async function generateConversationTitle() {
+  const generateConversationTitle = useCallback(() => {
     generateAiConversationTitle(conversationId)
       .then((res) => {
         if (res.code === 0) {
           const conversationName = res.data?.name ?? ''
 
-          setAiSharedData((d) => {
-            d.conversationList = d.conversationList.map((item) => {
-              if (item.id === conversationId && conversationName) {
-                item.name = conversationName
-              }
-              return item
-            })
-          })
+          updateConversationList((list) =>
+            list.map((item) =>
+              item.id === conversationId && conversationName
+                ? { ...item, name: conversationName }
+                : item
+            )
+          )
         }
       })
       .catch((err) => {
         console.error('生成对话标题失败!', err)
       })
-  }
+  }, [conversationId, updateConversationList])
 
-  function firstMsg() {
-    sendMessage({ text: aiSharedData.aiFirstMsg }).then(() => {
+  const firstMsg = useCallback(() => {
+    sendMessage({ text: aiFirstMsg }).then(() => {
       generateConversationTitle()
-
-      setAiSharedData((d) => {
-        d.aiFirstMsg = ''
-      })
+      setAiFirstMsg('')
     })
-  }
+  }, [aiFirstMsg, sendMessage, setAiFirstMsg, generateConversationTitle])
 
   useEffect(() => {
-    if (aiSharedData.aiFirstMsg) {
-      firstMsg()
-    } else {
-      setMsg()
+    let isMounted = true
+
+    const initializeMessages = async () => {
+      if (aiFirstMsg) {
+        if (isMounted) {
+          firstMsg()
+        }
+      } else {
+        if (isMounted) {
+          await setMsg()
+        }
+      }
     }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    initializeMessages()
+
+    return () => {
+      isMounted = false
+    }
+  }, [aiFirstMsg, conversationId, firstMsg, setMsg])
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text)
@@ -144,75 +145,33 @@ export default function Page() {
       return
     }
 
-    sendMessage(
-      {
-        text: message.text || 'Sent with attachments',
-        files: message.files
-      },
-      {
-        body: {
-          model: model,
-          webSearch: useWebSearch
-        }
-      }
-    )
-    setText('')
+    sendMessage({
+      text: message.text || 'Sent with attachments',
+      files: message.files
+    })
+    setInputText('')
   }
 
   return (
     <div className="flex flex-col h-screen">
       <LayoutHeader></LayoutHeader>
 
-      <MessageList messages={messages} status={status}></MessageList>
+      <MessageList messages={messages} status={status} loading={messagesLoading}></MessageList>
 
-      <PromptInput onSubmit={handleSubmit} className="my-4 w-10/12 mx-auto" globalDrop multiple>
-        <PromptInputBody>
-          <PromptInputAttachments>
-            {(attachment) => <PromptInputAttachment data={attachment} />}
-          </PromptInputAttachments>
-          <PromptInputTextarea
-            onChange={(e) => setText(e.target.value)}
-            value={text}
-            placeholder="询问任何问题？"
-          />
-        </PromptInputBody>
-        <PromptInputToolbar>
-          <PromptInputTools>
-            <PromptInputActionMenu>
-              <PromptInputActionMenuTrigger />
-              <PromptInputActionMenuContent>
-                <PromptInputActionAddAttachments />
-              </PromptInputActionMenuContent>
-            </PromptInputActionMenu>
-            <PromptInputButton
-              onClick={() => setUseWebSearch(!useWebSearch)}
-              variant={useWebSearch ? 'default' : 'ghost'}
-            >
-              <GlobeIcon size={16} />
-              <span>搜索</span>
-            </PromptInputButton>
-            <PromptInputModelSelect
-              onValueChange={(value) => {
-                setModel(value)
-              }}
-              value={model}
-            >
-              <PromptInputModelSelectTrigger>
-                <PromptInputModelSelectValue />
-              </PromptInputModelSelectTrigger>
-              <PromptInputModelSelectContent>
-                {models.map((model) => (
-                  <PromptInputModelSelectItem key={model.id} value={model.id}>
-                    {model.name}
-                  </PromptInputModelSelectItem>
-                ))}
-              </PromptInputModelSelectContent>
-            </PromptInputModelSelect>
-          </PromptInputTools>
-
-          <PromptInputSubmit disabled={!text && !status} status={status} onClick={stop} />
-        </PromptInputToolbar>
-      </PromptInput>
+      <AiPromptInput
+        onSubmit={handleSubmit}
+        text={inputText}
+        setText={setInputText}
+        model={selectedModel}
+        setModel={setSelectedModel}
+        useWebSearch={useWebSearch}
+        setUseWebSearch={setUseWebSearch}
+        models={models}
+        disabled={!inputText && !status}
+        status={status}
+        onStop={stop}
+        className="my-4 w-10/12 mx-auto"
+      />
     </div>
   )
 }
