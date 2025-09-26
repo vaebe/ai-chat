@@ -80,7 +80,8 @@ interface IMessageProps {
 }
 
 const IMessage = React.memo<IMessageProps>(({ message, isDone, isLastMessage }) => {
-  const part = message.parts[message.parts.length - 1]
+  const textParts = message.parts.filter((item) => item.type === 'text')
+  let part = textParts[textParts.length - 1]
 
   const isSkippable = !part || ['dynamic-tool', 'tool-web_search'].includes(part.type)
 
