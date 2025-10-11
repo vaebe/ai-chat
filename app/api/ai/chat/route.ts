@@ -7,10 +7,7 @@ import {
   stepCountIs
 } from 'ai'
 import { auth } from '@clerk/nextjs/server'
-import { Ratelimit } from '@upstash/ratelimit'
-import { kv } from '@vercel/kv'
 import { NextRequest } from 'next/server'
-import { getClientIp } from '@/lib/utils'
 import { createAiMessage, getAiMessages } from '@/lib/ai-message'
 import { ToolManager } from './tools/tool-manager'
 import { huggingface } from './providers/huggingface'
@@ -18,13 +15,6 @@ import { createSystemPrompt } from './utils'
 
 // 允许最多 n 秒的流式响应
 export const maxDuration = 300
-
-// const ratelimit = new Ratelimit({
-//   redis: kv,
-//   limiter: Ratelimit.fixedWindow(5, '30s'),
-//   analytics: true,
-//   prefix: 'ai_chat'
-// })
 
 interface ReqProps {
   message: UIMessage
@@ -38,12 +28,6 @@ interface ReqProps {
 }
 
 export async function POST(req: NextRequest) {
-  // const { success } = await ratelimit.limit(getClientIp(req))
-
-  // if (!success) {
-  //   return new Response('Ratelimited!', { status: 429 })
-  // }
-
   const { userId } = await auth()
   if (!userId) {
     return new Response('无权限!', { status: 401 })
