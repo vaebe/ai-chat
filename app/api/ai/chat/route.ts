@@ -13,18 +13,18 @@ import { NextRequest } from 'next/server'
 import { getClientIp } from '@/lib/utils'
 import { createAiMessage, getAiMessages } from '@/lib/ai-message'
 import { ToolManager } from './tools/tool-manager'
-import { deepSeekProvider } from './providers/deepseek'
+import { huggingface } from './providers/huggingface'
 import { createSystemPrompt } from './utils'
 
 // 允许最多 n 秒的流式响应
 export const maxDuration = 300
 
-const ratelimit = new Ratelimit({
-  redis: kv,
-  limiter: Ratelimit.fixedWindow(5, '30s'),
-  analytics: true,
-  prefix: 'ai_chat'
-})
+// const ratelimit = new Ratelimit({
+//   redis: kv,
+//   limiter: Ratelimit.fixedWindow(5, '30s'),
+//   analytics: true,
+//   prefix: 'ai_chat'
+// })
 
 interface ReqProps {
   message: UIMessage
@@ -38,11 +38,11 @@ interface ReqProps {
 }
 
 export async function POST(req: NextRequest) {
-  const { success } = await ratelimit.limit(getClientIp(req))
+  // const { success } = await ratelimit.limit(getClientIp(req))
 
-  if (!success) {
-    return new Response('Ratelimited!', { status: 429 })
-  }
+  // if (!success) {
+  //   return new Response('Ratelimited!', { status: 429 })
+  // }
 
   const { userId } = await auth()
   if (!userId) {
@@ -77,8 +77,8 @@ export async function POST(req: NextRequest) {
 
   console.log('Available tools:', enabledToolNames)
 
-  // const aiModelName = 'deepseek/deepseek-v3.1'
-  const aiModelName = 'deepseek-chat'
+  const aiModelName = 'deepseek-ai/DeepSeek-V3.1:fireworks-ai'
+  // const aiModelName = 'deepseek-chat'
 
   const systemPrompt = createSystemPrompt({
     toolsDescription,
@@ -89,7 +89,8 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = streamText({
-      model: deepSeekProvider(aiModelName),
+      model: huggingface(aiModelName),
+      // model: aiModelName,
       system: systemPrompt,
       messages: convertToModelMessages([...oldMessages, message]),
       experimental_transform: smoothStream({ chunking: /[\u4E00-\u9FFF]|\S+\s+/ }),

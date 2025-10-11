@@ -69,7 +69,7 @@ export default function Home() {
         />
       </div>
 
-      <p className="text-center text-lg">一个使用 next 开发 AI 对话页面完善中...</p>
+      <p className="text-center text-lg">一个使用 Next 开发的 AI Agent 完善中...</p>
     </div>
   )
 }
