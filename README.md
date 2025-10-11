@@ -54,7 +54,6 @@
 - **数据库**: PostgreSQL with Prisma ORM
 - **缓存**: Vercel KV (Upstash Redis)
 - **部署**: Vercel
-- **图片存储**: ImageKit
 - **APIs**: DeepSeek API, Exa Web Search API, GitHub MCP
 
 ## 前置要求
@@ -64,7 +63,7 @@
 - Node.js (版本 18 或更高)
 - pnpm 包管理器
 - PostgreSQL 数据库
-- 所需服务的账户 (Clerk, Vercel, ImageKit, GitHub, Exa API)
+- 所需服务的账户 (Clerk, Vercel, GitHub, Exa API)
 
 ## 设置说明
 
@@ -86,7 +85,6 @@
    - 数据库连接 (DATABASE_URL)
    - Clerk 认证密钥
    - Vercel KV 凭据
-   - ImageKit 凭据
    - 用于 MCP 集成的 GitHub 令牌
    - 用于网络搜索的 Exa API 密钥
 
@@ -166,4 +164,3 @@ ai-chat/
 | CLERK_SECRET_KEY | Clerk backend key |
 | GITHUB_TOKEN | GitHub token for MCP integration |
 | KV_* | Vercel KV (Upstash Redis) credentials |
-| NEXT_PUBLIC_IMAGEKIT_* | ImageKit credentials |
