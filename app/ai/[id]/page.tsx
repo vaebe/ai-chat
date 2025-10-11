@@ -37,28 +37,31 @@ export default function Page() {
   const messagesLoading = useUIStore((state) => state.messagesLoading)
   const fetchMessages = useAiStore((state) => state.fetchMessages)
 
-  const { status, stop, setMessages, sendMessage, messages } = useChat({
-    id: conversationId,
-    transport: new DefaultChatTransport({
-      api: '/api/ai/chat',
-      // 仅发送最后一条消息
-      prepareSendMessagesRequest({ messages, id }) {
-        const day = dayjs()
+  const useChatTransport = new DefaultChatTransport({
+    api: '/api/ai/chat',
+    // 仅发送最后一条消息
+    prepareSendMessagesRequest({ messages, id }) {
+      const day = dayjs()
 
-        return {
-          body: {
-            message: messages[messages.length - 1],
-            id,
-            timestamp: day.unix(),
-            date: day.format('YYYY-MM-DD HH:mm:ss'),
-            model: selectedModel,
-            userTools: {
-              enableWebSearch: useWebSearch
-            }
+      return {
+        body: {
+          message: messages[messages.length - 1],
+          id,
+          timestamp: day.unix(),
+          date: day.format('YYYY-MM-DD HH:mm:ss'),
+          model: selectedModel,
+          userTools: {
+            enableWebSearch: useWebSearch
           }
         }
       }
-    })
+    }
+  })
+
+  const { status, stop, setMessages, sendMessage, messages } = useChat({
+    id: conversationId,
+    experimental_throttle: 50,
+    transport: useChatTransport
   })
 
   const setMsg = useCallback(async () => {
@@ -66,7 +69,7 @@ export default function Page() {
       const res = await fetchMessages(conversationId)
 
       if (res.code !== 0) {
-        toast('获取对象详情失败!')
+        toast('获取对话详情失败!')
         return
       }
 
@@ -83,7 +86,7 @@ export default function Page() {
 
       setMessages(list)
     } catch {
-      toast('获取对象详情失败!')
+      toast('获取对话详情失败!')
     }
   }, [conversationId, fetchMessages, setMessages])
 
