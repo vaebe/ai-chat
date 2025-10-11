@@ -10,7 +10,6 @@ import { auth } from '@clerk/nextjs/server'
 import { NextRequest } from 'next/server'
 import { createAiMessage, getAiMessages } from '@/lib/ai-message'
 import { ToolManager } from './tools/tool-manager'
-import { huggingface } from './providers/huggingface'
 import { createSystemPrompt } from './utils'
 
 // 允许最多 n 秒的流式响应
@@ -59,10 +58,7 @@ export async function POST(req: NextRequest) {
   const toolsDescription = toolManager.getToolsDescription()
   const enabledToolNames = toolManager.getEnabledToolNames()
 
-  console.log('Available tools:', enabledToolNames)
-
-  const aiModelName = 'deepseek-ai/DeepSeek-V3.1:fireworks-ai'
-  // const aiModelName = 'deepseek-chat'
+  const aiModelName = 'deepseek/deepseek-v3.1'
 
   const systemPrompt = createSystemPrompt({
     toolsDescription,
@@ -73,8 +69,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = streamText({
-      model: huggingface(aiModelName),
-      // model: aiModelName,
+      model: aiModelName,
       system: systemPrompt,
       messages: convertToModelMessages([...oldMessages, message]),
       experimental_transform: smoothStream({ chunking: /[\u4E00-\u9FFF]|\S+\s+/ }),
