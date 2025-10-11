@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^1.0.19",
+    "@ai-sdk/huggingface": "^0.0.4",
     "@ai-sdk/openai": "^2.0.32",
     "@ai-sdk/react": "^2.0.51",
     "@clerk/nextjs": "^6.31.6",
@@ -29,8 +30,6 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "@upstash/ratelimit": "^2.0.6",
-    "@vercel/kv": "^3.0.0",
     "ai": "^5.0.51",
     "cheerio": "^1.1.2",
     "class-variance-authority": "^0.7.1",
