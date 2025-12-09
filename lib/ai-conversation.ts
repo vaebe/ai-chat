@@ -1,7 +1,7 @@
 import { ApiRes, PaginationResData } from '@/lib/utils'
 import { auth } from '@clerk/nextjs/server'
-import { prisma } from '@/prisma'
-import { AiConversation, AiMessage } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
+import { AiConversation, AiMessage } from '@/generated/prisma/client'
 import { ModelMessage, UIMessage, generateText } from 'ai'
 import { z } from 'zod'
 

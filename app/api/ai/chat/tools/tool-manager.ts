@@ -1,9 +1,8 @@
-import { experimental_createMCPClient as createMCPClient } from 'ai'
+import { experimental_createMCPClient as createMCPClient } from '@ai-sdk/mcp'
 import { tool, Tool } from 'ai'
 import { z } from 'zod'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
-import Exa from 'exa-js'
-import { WebSearchResult } from '@/types'
+import { webSearch } from '@exalabs/ai-sdk'
 
 const ignoreGithubTools = [
   'copilot',
@@ -25,8 +24,6 @@ const ignoreGithubTools = [
 
 type MCPClient = Awaited<ReturnType<typeof createMCPClient>>
 
-const exa = new Exa(process.env.EXA_API_KEY)
-
 export interface ToolsConfig {
   enableWebSearch?: boolean
 }
@@ -39,6 +36,8 @@ export class ToolManager {
     try {
       // AI 自主决定的工具 - GitHub MCP
       await this.initializeGithubMCP()
+
+      console.log(userControlledTools.enableWebSearch)
 
       // 用户控制的工具
       if (userControlledTools.enableWebSearch) {
@@ -82,34 +81,22 @@ export class ToolManager {
 
       console.log('✅ GitHub MCP 服务器连接成功')
     } catch (error) {
-      console.warn('⚠️ GitHub MCP 连接失败，使用备用实现:', error)
+      console.warn('⚠️ GitHub MCP 连接失败:', error)
     }
   }
 
   private async initializeWebSearchTools() {
-    const webSearchTool = tool({
-      description: 'Search the web for up-to-date information',
-      inputSchema: z.object({
-        query: z.string().min(1).max(100).describe('The search query')
-      }),
-      execute: async ({ query }) => {
-        const { results } = await exa.searchAndContents(query, {
-          livecrawl: 'always',
-          numResults: 3
-        })
-
-        const list: WebSearchResult[] = results.map((result) => ({
-          title: result.title,
-          url: result.url,
-          content: result.text.slice(0, 1000), // take just the first 1000 characters
-          publishedDate: result.publishedDate
-        }))
-
-        return list
+    this.allTools['web_search'] = webSearch({
+      apiKey: process.env.EXA_API_KEY,
+      type: 'auto', // intelligent hybrid search
+      numResults: 6, // return up to 6 results
+      category: 'company', // focus on companies
+      contents: {
+        text: { maxCharacters: 1000 }, // get up to 1000 chars per result
+        livecrawl: 'preferred', // always get fresh content if possible
+        summary: true // return an AI-generated summary for each result
       }
     })
-
-    this.allTools['web_search'] = webSearchTool
     console.log('✅ 网络搜索工具已启用')
   }
 

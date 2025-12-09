@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { getAiConversationList } from '@/app/actions'
 import { ConversationState, ConversationActions } from '@/types/ai'
-import type { AiConversation } from '@prisma/client'
+import type { AiConversation } from '@/generated/prisma/client'
 
 const defaultState: ConversationState = {
   conversationList: [],

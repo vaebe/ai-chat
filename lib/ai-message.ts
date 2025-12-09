@@ -1,8 +1,8 @@
 import { UIMessage } from 'ai'
-import { prisma } from '@/prisma'
 import { ApiRes } from '@/lib/utils'
 import { auth } from '@clerk/nextjs/server'
-import { AiMessage } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
+import { AiMessage } from '@/generated/prisma/client'
 
 interface CreateAiMessageProps {
   message: UIMessage

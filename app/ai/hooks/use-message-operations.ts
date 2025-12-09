@@ -4,7 +4,7 @@ import { useUIStore } from '../store/ui-store'
 import { getAiMessages } from '@/app/actions'
 import { generateAiConversationTitle } from '@/app/actions'
 import { UseMessageOperationsReturn, ApiResponse } from '@/types/ai'
-import { AiMessage } from '@prisma/client'
+import { AiMessage } from '@/generated/prisma/client'
 import { UIMessage } from 'ai'
 
 export function useMessageOperations(): UseMessageOperationsReturn {

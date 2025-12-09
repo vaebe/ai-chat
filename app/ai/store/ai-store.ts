@@ -3,7 +3,7 @@ import { getAiMessages } from '@/app/actions'
 import { useConversationStore } from './conversation-store'
 import { useInputStore } from './input-store'
 import { useUIStore } from './ui-store'
-import { AiConversation, AiMessage } from '@prisma/client'
+import { AiConversation, AiMessage } from '@/generated/prisma/client'
 import { ApiRes } from '@/lib/utils'
 
 // 组合所有 stores 的接口

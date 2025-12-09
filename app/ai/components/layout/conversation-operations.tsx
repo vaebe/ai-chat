@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { AiConversation } from '@prisma/client'
+import { AiConversation } from '@/generated/prisma/client'
 import { useConversationOperations } from '../../hooks/use-conversation-operations'
 import {
   DropdownMenu,
@@ -135,7 +135,7 @@ export const ConversationOperations = React.memo<ConversationOperationsProps>(
       <>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Icon icon="dashicons:ellipsis" className="w-[20px] cursor-pointer" />
+            <Icon icon="dashicons:ellipsis" className="w-5 cursor-pointer" />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem className="cursor-pointer" onSelect={editDialog.show}>

@@ -1,4 +1,4 @@
-import { AiConversation, AiMessage } from '@prisma/client'
+import { AiConversation, AiMessage } from '@/generated/prisma/client'
 import { UIMessage } from 'ai'
 
 // 重新导出 Prisma 类型
@@ -70,13 +70,12 @@ export interface ApiResponse<T = any> {
   data?: T
 }
 
-export interface PaginationResponse<T>
-  extends ApiResponse<{
-    list: T[]
-    total: number
-    currentPage: number
-    totalPages: number
-  }> {}
+export interface PaginationResponse<T> extends ApiResponse<{
+  list: T[]
+  total: number
+  currentPage: number
+  totalPages: number
+}> {}
 
 // 组件 Props 类型
 export interface ConversationItemProps {

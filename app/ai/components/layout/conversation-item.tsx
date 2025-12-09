@@ -1,5 +1,5 @@
 import React from 'react'
-import { AiConversation } from '@prisma/client'
+import { AiConversation } from '@/generated/prisma/client'
 import { useConversationOperations } from '../../hooks/use-conversation-operations'
 import { ConversationOperations } from './conversation-operations'
 

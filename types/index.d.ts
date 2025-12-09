@@ -10,10 +10,3 @@ declare global {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyObject = Record<string, any>
-
-export interface WebSearchResult {
-  title: string | null
-  url: string
-  content: string
-  publishedDate: string | undefined
-}
