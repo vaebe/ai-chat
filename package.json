@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^1.0.31",
-    "@ai-sdk/huggingface": "^0.0.11",
     "@ai-sdk/mcp": "^0.0.11",
     "@ai-sdk/openai": "^2.0.80",
     "@ai-sdk/react": "^2.0.109",
@@ -39,7 +38,6 @@
     "clsx": "^2.1.1",
     "dayjs": "^1.11.19",
     "dotenv": "^17.2.3",
-    "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.556.0",
     "nanoid": "^5.1.6",
     "next": "^16.0.8",
@@ -65,7 +63,6 @@
     "@commitlint/config-conventional": "^20.2.0",
     "@eslint/eslintrc": "^3.3.3",
     "@tailwindcss/postcss": "^4.1.17",
-    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.19.2",
     "@types/pg": "^8.15.6",
     "@types/react": "^19.2.7",
