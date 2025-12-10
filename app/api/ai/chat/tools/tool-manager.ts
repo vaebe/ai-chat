@@ -1,6 +1,5 @@
 import { experimental_createMCPClient as createMCPClient } from '@ai-sdk/mcp'
-import { tool, Tool } from 'ai'
-import { z } from 'zod'
+import { Tool } from 'ai'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
 import { webSearch } from '@exalabs/ai-sdk'
 

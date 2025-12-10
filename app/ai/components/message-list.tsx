@@ -21,7 +21,7 @@ import {
   getStatusBadge
 } from '@/components/ai-elements/tool'
 import { Source, Sources, SourcesContent, SourcesTrigger } from '@/components/ai-elements/sources'
-import { WebSearchResult } from '@/types'
+import { ExaSearchResult } from '@exalabs/ai-sdk'
 import React from 'react'
 
 interface MessageListProps {
@@ -131,14 +131,14 @@ interface ToolsInfoProps {
 const WebSearchInfo = React.memo<ToolsInfoProps>(({ message }) => {
   const outputs = useMemo(() => {
     const parts = message.parts.filter((item) => item.type === 'tool-web_search') as Array<{
-      output: WebSearchResult[]
+      output: ExaSearchResult[]
     }>
 
-    const results: WebSearchResult[] = []
+    const results: ExaSearchResult[] = []
 
     parts.forEach((part) => {
       if (part?.output && Array.isArray(part.output)) {
-        results.push(...(part.output as WebSearchResult[]))
+        results.push(...(part.output as ExaSearchResult[]))
       }
     })
 
