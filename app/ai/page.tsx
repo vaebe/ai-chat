@@ -6,7 +6,7 @@ import { useAiStore } from './store/ai-store'
 import { useInputStore } from './store/input-store'
 import { AiPromptInput } from './components/prompt-input'
 import { type PromptInputMessage } from '@/components/ai-elements/prompt-input'
-import { generateUUID } from '@/lib/utils'
+import { nanoid } from 'nanoid'
 import { createAiConversation } from '@/app/actions'
 
 export default function AIChatPage() {
@@ -34,7 +34,7 @@ export default function AIChatPage() {
       return
     }
 
-    const conversationId = generateUUID(false)
+    const conversationId = nanoid()
 
     createAiConversation({ name: 'New Chat', uid: conversationId })
 
