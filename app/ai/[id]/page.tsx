@@ -15,6 +15,7 @@ import { LayoutHeader } from '@/app/ai/components/layout/header'
 import { MessageList } from '../components/message-list'
 import dayjs from 'dayjs'
 import { useUIStore } from '@/app/ai/store/ui-store'
+import { getAiGatewayModels } from '@/lib/utils'
 
 export default function Page() {
   const params = useParams<{ id: string }>()
@@ -30,6 +31,14 @@ export default function Page() {
   const setInputText = useInputStore((state) => state.setInputText)
   const setSelectedModel = useInputStore((state) => state.setSelectedModel)
   const setUseWebSearch = useInputStore((state) => state.setUseWebSearch)
+
+  const setModels = useInputStore((state) => state.setModels)
+
+  useEffect(() => {
+    getAiGatewayModels().then((models) => {
+      setModels(models)
+    })
+  }, [])
 
   const aiFirstMsg = useAiStore((state) => state.aiFirstMsg)
   const setAiFirstMsg = useAiStore((state) => state.setAiFirstMsg)

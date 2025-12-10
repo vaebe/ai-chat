@@ -1,5 +1,6 @@
 import { AiConversation, AiMessage } from '@/generated/prisma/client'
 import { UIMessage } from 'ai'
+import { type GatewayLanguageModelEntry } from '@ai-sdk/gateway'
 
 // 重新导出 Prisma 类型
 export type { AiConversation, AiMessage }
@@ -27,20 +28,15 @@ export interface InputState {
   inputText: string
   selectedModel: string
   useWebSearch: boolean
-  models: ModelOption[]
+  models: GatewayLanguageModelEntry[]
 }
 
 export interface InputActions {
   setInputText: (inputText: string) => void
   setSelectedModel: (selectedModel: string) => void
   setUseWebSearch: (useWebSearch: boolean) => void
-  setModels: (models: ModelOption[]) => void
+  setModels: (models: GatewayLanguageModelEntry[]) => void
   resetInputState: () => void
-}
-
-export interface ModelOption {
-  id: string
-  name: string
 }
 
 // UI 相关类型

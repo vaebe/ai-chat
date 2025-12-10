@@ -2,6 +2,7 @@ import { type ClassValue, clsx } from 'clsx'
 import { NextResponse } from 'next/server'
 import { twMerge } from 'tailwind-merge'
 import { NextRequest } from 'next/server'
+import { gateway, type GatewayLanguageModelEntry } from '@ai-sdk/gateway'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -50,4 +51,34 @@ export function getClientIp(req: NextRequest) {
     req.headers.get('x-real-ip') || // 备用
     'Unknown'
   )
+}
+
+// 获取 ai gateway 的模型列表
+export async function getAiGatewayModels(): Promise<GatewayLanguageModelEntry[]> {
+  const availableModels = await gateway.getAvailableModels()
+
+  return availableModels.models.filter((model) => {
+    // 不是语言模型直接返回
+    if (model.modelType !== 'language') {
+      return false
+    }
+
+    if (!['alibaba', 'anthropic', 'google', 'deepseek'].some((item) => model.id.startsWith(item))) {
+      return false
+    }
+
+    const inputPricing = Number(model?.pricing?.input) || 0
+    const outputPricing = Number(model?.pricing?.output) || 0
+    // 价格不存在直接返回
+    if (!inputPricing || !outputPricing) {
+      return false
+    }
+
+    console.log({
+      inputPricing: (inputPricing * 1000000).toFixed(2),
+      outputPricing: (outputPricing * 1000000).toFixed(2),
+      name: model.name
+    })
+    return inputPricing * 1000000 < 0.5 && outputPricing * 1000000 < 0.5
+  })
 }

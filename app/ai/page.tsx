@@ -8,6 +8,8 @@ import { AiPromptInput } from './components/prompt-input'
 import { type PromptInputMessage } from '@/components/ai-elements/prompt-input'
 import { nanoid } from 'nanoid'
 import { createAiConversation } from '@/app/actions'
+import { getAiGatewayModels } from '@/lib/utils'
+import { useEffect } from 'react'
 
 export default function AIChatPage() {
   const setAiFirstMsg = useAiStore((state) => state.setAiFirstMsg)
@@ -18,6 +20,13 @@ export default function AIChatPage() {
   const selectedModel = useInputStore((state) => state.selectedModel)
   const useWebSearch = useInputStore((state) => state.useWebSearch)
   const models = useInputStore((state) => state.models)
+  const setModels = useInputStore((state) => state.setModels)
+
+  useEffect(() => {
+    getAiGatewayModels().then((models) => {
+      setModels(models)
+    })
+  }, [])
 
   // 输入相关方法
   const setInputText = useInputStore((state) => state.setInputText)

@@ -1,11 +1,29 @@
 import { create } from 'zustand'
-import { InputState, InputActions, ModelOption } from '@/types/ai'
+import { InputState, InputActions } from '@/types/ai'
+import { type GatewayLanguageModelEntry } from '@ai-sdk/gateway'
+
+const DefaultModels: GatewayLanguageModelEntry = {
+  id: 'deepseek/deepseek-v3.2',
+  name: 'DeepSeek V3.2',
+  description: 'DeepSeek-V3.2: Official successor to V3.2-Exp.',
+  pricing: {
+    input: '0.00000027',
+    output: '0.0000004',
+    cachedInputTokens: '0.000000216'
+  },
+  specification: {
+    specificationVersion: 'v2',
+    provider: 'deepinfra',
+    modelId: 'deepseek/deepseek-v3.2'
+  },
+  modelType: 'language'
+}
 
 const defaultState: InputState = {
   inputText: '',
-  selectedModel: 'deepseek-chat',
+  selectedModel: 'deepseek/deepseek-v3.2',
   useWebSearch: false,
-  models: [{ id: 'deepseek-chat', name: 'deepseek-chat' }] as ModelOption[]
+  models: [DefaultModels]
 }
 
 export const useInputStore = create<InputState & InputActions>((set) => ({
@@ -17,7 +35,7 @@ export const useInputStore = create<InputState & InputActions>((set) => ({
 
   setUseWebSearch: (useWebSearch: boolean) => set({ useWebSearch }),
 
-  setModels: (models: Array<{ id: string; name: string }>) => set({ models }),
+  setModels: (models: GatewayLanguageModelEntry[]) => set({ models }),
 
   resetInputState: () => set(defaultState)
 }))
