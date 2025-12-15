@@ -1,11 +1,7 @@
 'use client'
 
 import { CopyIcon } from 'lucide-react'
-import {
-  Conversation,
-  ConversationContent,
-  ConversationScrollButton
-} from '@/components/ai-elements/conversation'
+import { Conversation, ConversationContent, ConversationScrollButton } from '@/components/ai-elements/conversation'
 import { Message, MessageContent } from '@/components/ai-elements/message'
 import { Response } from '@/components/ai-elements/response'
 import { Fragment, useMemo } from 'react'
@@ -13,13 +9,7 @@ import { ChatStatus, UIMessage } from 'ai'
 import { Loader } from '@/components/ai-elements/loader'
 import { Actions, Action } from '@/components/ai-elements/actions'
 import { Loading } from '@/components/ui/loading'
-import {
-  Tool,
-  ToolContent,
-  ToolHeader,
-  ToolInput,
-  getStatusBadge
-} from '@/components/ai-elements/tool'
+import { Tool, ToolContent, ToolHeader, ToolInput, getStatusBadge } from '@/components/ai-elements/tool'
 import { Source, Sources, SourcesContent, SourcesTrigger } from '@/components/ai-elements/sources'
 import { ExaSearchResult } from '@exalabs/ai-sdk'
 import React from 'react'
@@ -176,7 +166,7 @@ const ToolsInfo = React.memo<ToolsInfoProps>(({ message }) => {
 
   return (
     <Tool defaultOpen={false}>
-      <ToolHeader type={`tool-${lastTool.toolName}`} state={lastTool.state} />
+      <ToolHeader state={lastTool.state} type={`tool-${lastTool.toolName}`} />
       <ToolContent>
         <ul>
           {tools.map((item, index) => (
