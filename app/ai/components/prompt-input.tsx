@@ -11,15 +11,15 @@ import {
   PromptInputBody,
   PromptInputButton,
   type PromptInputMessage,
-  PromptInputModelSelect,
-  PromptInputModelSelectContent,
-  PromptInputModelSelectItem,
-  PromptInputModelSelectTrigger,
-  PromptInputModelSelectValue,
+  PromptInputSelect,
+  PromptInputSelectContent,
+  PromptInputSelectItem,
+  PromptInputSelectTrigger,
+  PromptInputSelectValue,
   PromptInputSubmit,
   PromptInputTextarea,
-  PromptInputToolbar,
-  PromptInputTools
+  PromptInputTools,
+  PromptInputFooter
 } from '@/components/ai-elements/prompt-input'
 import { GlobeIcon } from 'lucide-react'
 import type { ChatStatus } from 'ai'
@@ -91,21 +91,19 @@ export const AiPromptInput = React.memo<AiPromptInputProps>(
 
     const modelOptions = useMemo(() => {
       return models.map((model) => (
-        <PromptInputModelSelectItem key={model.id} value={model.id}>
+        <PromptInputSelectItem key={model.id} value={model.id}>
           {model.name}
-        </PromptInputModelSelectItem>
+        </PromptInputSelectItem>
       ))
     }, [models])
 
     return (
       <PromptInput onSubmit={handleSubmit} className={className} globalDrop multiple>
         <PromptInputBody>
-          <PromptInputAttachments>
-            {(attachment) => <PromptInputAttachment data={attachment} />}
-          </PromptInputAttachments>
+          <PromptInputAttachments>{(attachment) => <PromptInputAttachment data={attachment} />}</PromptInputAttachments>
           <PromptInputTextarea onChange={handleTextChange} value={text} placeholder={placeholder} />
         </PromptInputBody>
-        <PromptInputToolbar>
+        <PromptInputFooter>
           <PromptInputTools>
             <PromptInputActionMenu>
               <PromptInputActionMenuTrigger />
@@ -121,16 +119,16 @@ export const AiPromptInput = React.memo<AiPromptInputProps>(
               <GlobeIcon size={16} />
               <span>搜索</span>
             </PromptInputButton>
-            <PromptInputModelSelect onValueChange={handleModelChange} value={model}>
-              <PromptInputModelSelectTrigger>
-                <PromptInputModelSelectValue />
-              </PromptInputModelSelectTrigger>
-              <PromptInputModelSelectContent>{modelOptions}</PromptInputModelSelectContent>
-            </PromptInputModelSelect>
+            <PromptInputSelect onValueChange={handleModelChange} value={model}>
+              <PromptInputSelectTrigger>
+                <PromptInputSelectValue />
+              </PromptInputSelectTrigger>
+              <PromptInputSelectContent>{modelOptions}</PromptInputSelectContent>
+            </PromptInputSelect>
           </PromptInputTools>
 
           <PromptInputSubmit disabled={disabled || !text} status={status} onClick={onStop} />
-        </PromptInputToolbar>
+        </PromptInputFooter>
       </PromptInput>
     )
   }
