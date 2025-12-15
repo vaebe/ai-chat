@@ -74,11 +74,6 @@ export async function getAiGatewayModels(): Promise<GatewayLanguageModelEntry[]>
       return false
     }
 
-    console.log({
-      inputPricing: (inputPricing * 1000000).toFixed(2),
-      outputPricing: (outputPricing * 1000000).toFixed(2),
-      name: model.name
-    })
     return inputPricing * 1000000 < 0.5 && outputPricing * 1000000 < 0.5
   })
 }
