@@ -1,9 +1,19 @@
-import { convertToModelMessages, createIdGenerator, streamText, UIMessage, smoothStream, stepCountIs } from 'ai'
+import {
+  convertToModelMessages,
+  createIdGenerator,
+  streamText,
+  UIMessage,
+  smoothStream,
+  stepCountIs,
+  wrapLanguageModel,
+  extractReasoningMiddleware
+} from 'ai'
 import { auth } from '@clerk/nextjs/server'
 import { NextRequest } from 'next/server'
 import { createAiMessage, getAiMessages } from '@/lib/ai-message'
 import { createTools } from './tools/tool-manager'
 import { createSystemPrompt } from './utils'
+import { gateway } from '@ai-sdk/gateway'
 
 // 允许最多 n 秒的流式响应
 export const maxDuration = 300
@@ -69,8 +79,14 @@ export async function POST(req: NextRequest) {
   })
 
   try {
+    // 使用 extractReasoningMiddleware 提取 <think> 和 </think>
+    const model = wrapLanguageModel({
+      model: gateway(modelName),
+      middleware: extractReasoningMiddleware({ tagName: 'think' })
+    })
+
     const result = streamText({
-      model: modelName,
+      model,
       system: systemPrompt,
       messages: convertToModelMessages([...chatHistoryRes.data, message]),
       experimental_transform: smoothStream({ chunking: /[\u4E00-\u9FFF]|\S+\s+/ }),
