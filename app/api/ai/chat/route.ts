@@ -1,19 +1,33 @@
-import {
-  convertToModelMessages,
-  createIdGenerator,
-  streamText,
-  UIMessage,
-  smoothStream,
-  stepCountIs
-} from 'ai'
+import { convertToModelMessages, createIdGenerator, streamText, UIMessage, smoothStream, stepCountIs } from 'ai'
 import { auth } from '@clerk/nextjs/server'
 import { NextRequest } from 'next/server'
 import { createAiMessage, getAiMessages } from '@/lib/ai-message'
-import { ToolManager } from './tools/tool-manager'
+import { createTools } from './tools/tool-manager'
 import { createSystemPrompt } from './utils'
 
 // 允许最多 n 秒的流式响应
 export const maxDuration = 300
+
+// 获取历史消息
+async function getChatHistory(id: string) {
+  const { code, data, msg } = await getAiMessages(id)
+  if (code !== 0) {
+    return { code, data: [], msg }
+  }
+
+  const datas = Array.isArray(data) ? data : []
+
+  const list = datas.map((item) => {
+    return {
+      id: item.id,
+      role: item.role,
+      metadata: JSON.parse(item.metadata ?? '{}'),
+      parts: JSON.parse(item.parts)
+    } as UIMessage
+  })
+
+  return { code, data: list, msg }
+}
 
 interface ReqProps {
   message: UIMessage
@@ -33,42 +47,23 @@ export async function POST(req: NextRequest) {
     return new Response('无权限!', { status: 401 })
   }
 
-  const {
-    message,
-    id: chatId,
-    userTools,
-    timestamp,
-    date,
-    model: modelName
-  }: ReqProps = await req.json()
+  const { message, id: chatId, userTools, timestamp, date, model: modelName }: ReqProps = await req.json()
 
   // 保存用户发送的消息
   createAiMessage({ message, chatId })
 
-  const oldMessagesRes = await getAiMessages(chatId)
-  if (oldMessagesRes.code !== 0) {
-    return new Response(oldMessagesRes.msg, { status: 500 })
+  const chatHistoryRes = await getChatHistory(chatId)
+
+  if (chatHistoryRes.code !== 0) {
+    return new Response(chatHistoryRes.msg, { status: 500 })
   }
 
-  const oldMessages =
-    oldMessagesRes.data?.map((item) => {
-      return {
-        id: item.id,
-        role: item.role,
-        metadata: JSON.parse(item.metadata ?? '{}'),
-        parts: JSON.parse(item.parts)
-      } as UIMessage
-    }) ?? []
-
   // 根据用户控制的工具配置初始化工具管理器
-  const toolManager = await new ToolManager().initialize(userTools)
-  const allTools = toolManager.getAllTools()
-  const toolsDescription = toolManager.getToolsDescription()
-  const enabledToolNames = toolManager.getEnabledToolNames()
+  const toolManager = await createTools(userTools)
 
   const systemPrompt = createSystemPrompt({
-    toolsDescription,
-    enabledTools: enabledToolNames,
+    toolsDescription: toolManager.getDesc(),
+    enabledTools: toolManager.getNames(),
     timestamp,
     date
   })
@@ -77,9 +72,9 @@ export async function POST(req: NextRequest) {
     const result = streamText({
       model: modelName,
       system: systemPrompt,
-      messages: convertToModelMessages([...oldMessages, message]),
+      messages: convertToModelMessages([...chatHistoryRes.data, message]),
       experimental_transform: smoothStream({ chunking: /[\u4E00-\u9FFF]|\S+\s+/ }),
-      tools: allTools,
+      tools: toolManager.getAllTools(),
       toolChoice: 'auto',
       stopWhen: stepCountIs(10), // 最多 10 步
       // 每步完成后的回调
@@ -93,6 +88,7 @@ export async function POST(req: NextRequest) {
         })
       },
       prepareStep: async ({ messages }) => {
+        // 压缩消息-这里可以使用 ai 总结
         if (messages.length > 10) {
           return {
             messages: [
@@ -111,7 +107,7 @@ export async function POST(req: NextRequest) {
           steps: finishResult.steps?.length || 1
         })
 
-        await toolManager.closeAll()
+        await toolManager.close()
       }
     })
 
@@ -119,7 +115,7 @@ export async function POST(req: NextRequest) {
     result.consumeStream({
       onError: (error) => {
         console.error('Stream consumption error:', error)
-        toolManager.closeAll()
+        toolManager.close()
       }
     })
 
@@ -132,7 +128,7 @@ export async function POST(req: NextRequest) {
           return {
             createdAt: Date.now(),
             model: modelName,
-            availableTools: enabledToolNames
+            availableTools: toolManager.getNames()
           }
         }
 
@@ -151,7 +147,7 @@ export async function POST(req: NextRequest) {
     })
   } catch (error) {
     console.error('Chat processing error:', error)
-    await toolManager.closeAll()
+    await toolManager.close()
     return new Response('处理请求时发生错误', { status: 500 })
   }
 }
