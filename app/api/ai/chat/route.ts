@@ -20,6 +20,7 @@ interface ReqProps {
   id: string
   timestamp: number
   date: string
+  model: string
   // 仅包含用户控制的工具
   userTools?: {
     enableWebSearch?: boolean
@@ -32,7 +33,14 @@ export async function POST(req: NextRequest) {
     return new Response('无权限!', { status: 401 })
   }
 
-  const { message, id: chatId, userTools, timestamp, date }: ReqProps = await req.json()
+  const {
+    message,
+    id: chatId,
+    userTools,
+    timestamp,
+    date,
+    model: modelName
+  }: ReqProps = await req.json()
 
   // 保存用户发送的消息
   createAiMessage({ message, chatId })
@@ -58,8 +66,6 @@ export async function POST(req: NextRequest) {
   const toolsDescription = toolManager.getToolsDescription()
   const enabledToolNames = toolManager.getEnabledToolNames()
 
-  const aiModelName = 'deepseek/deepseek-v3.1'
-
   const systemPrompt = createSystemPrompt({
     toolsDescription,
     enabledTools: enabledToolNames,
@@ -69,7 +75,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = streamText({
-      model: aiModelName,
+      model: modelName,
       system: systemPrompt,
       messages: convertToModelMessages([...oldMessages, message]),
       experimental_transform: smoothStream({ chunking: /[\u4E00-\u9FFF]|\S+\s+/ }),
@@ -125,7 +131,7 @@ export async function POST(req: NextRequest) {
         if (part.type === 'start') {
           return {
             createdAt: Date.now(),
-            model: aiModelName,
+            model: modelName,
             availableTools: enabledToolNames
           }
         }
