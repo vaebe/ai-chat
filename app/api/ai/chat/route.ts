@@ -91,7 +91,10 @@ export async function POST(req: NextRequest) {
       model,
       system: systemPrompt,
       messages,
-      experimental_transform: smoothStream({ chunking: /[\u4E00-\u9FFF]|\S+\s+/ }),
+      experimental_transform: smoothStream({
+        delayInMs: 20,
+        chunking: 'line'
+      }),
       tools: toolManager.getAllTools(),
       toolChoice: 'auto',
       stopWhen: stepCountIs(10), // 最多 10 步
@@ -151,9 +154,7 @@ export async function POST(req: NextRequest) {
         }
 
         if (part.type === 'finish') {
-          return {
-            totalTokens: part.totalUsage.totalTokens
-          }
+          return { ...part, endAt: Date.now() }
         }
       },
       onFinish: ({ messages }) => {
