@@ -75,7 +75,10 @@ const IMessage = React.memo<IMessageProps>(({ message, isDone, isLastMessage }) 
 
   const isSkippable = !part || ['dynamic-tool', 'tool-web_search'].includes(part.type)
 
-  const showActions = message.role === 'assistant' && isLastMessage && isDone
+  let showCopyAction = message.role === 'assistant'
+  if (isLastMessage) {
+    showCopyAction = isDone
+  }
 
   const handleCopy = useMemo(() => {
     return () => {
@@ -98,13 +101,13 @@ const IMessage = React.memo<IMessageProps>(({ message, isDone, isLastMessage }) 
           </MessageContent>
         </Message>
 
-        {showActions && (
-          <Actions>
+        <Actions>
+          {showCopyAction && (
             <Action onClick={handleCopy} label="Copy">
               <CopyIcon className="size-4" />
             </Action>
-          </Actions>
-        )}
+          )}
+        </Actions>
       </Fragment>
     )
   }
