@@ -5,7 +5,7 @@ import { Conversation, ConversationContent, ConversationScrollButton } from '@/c
 import { Message, MessageContent } from '@/components/ai-elements/message'
 import { Response } from '@/components/ai-elements/response'
 import { Fragment, useMemo } from 'react'
-import { ChatStatus, UIMessage } from 'ai'
+import { ChatStatus, TextUIPart, UIMessage } from 'ai'
 import { Loader } from '@/components/ai-elements/loader'
 import { Actions, Action } from '@/components/ai-elements/actions'
 import { Loading } from '@/components/ui/loading'
@@ -13,6 +13,20 @@ import { Tool, ToolContent, ToolHeader, ToolInput, getStatusBadge } from '@/comp
 import { Source, Sources, SourcesContent, SourcesTrigger } from '@/components/ai-elements/sources'
 import { ExaSearchResult } from '@exalabs/ai-sdk'
 import React from 'react'
+import { toast } from 'sonner'
+
+function handleCopy(part: TextUIPart) {
+  if (part && part.type === 'text' && 'text' in part) {
+    navigator.clipboard
+      .writeText(part.text)
+      .then(() => {
+        toast.success('复制成功!')
+      })
+      .catch(() => {
+        toast.warning('复制失败!')
+      })
+  }
+}
 
 interface MessageListProps {
   messages: UIMessage[]
@@ -80,14 +94,6 @@ const IMessage = React.memo<IMessageProps>(({ message, isDone, isLastMessage }) 
     showCopyAction = isDone
   }
 
-  const handleCopy = useMemo(() => {
-    return () => {
-      if (part && part.type === 'text' && 'text' in part) {
-        navigator.clipboard.writeText(part.text)
-      }
-    }
-  }, [part])
-
   if (isSkippable) {
     return null
   }
@@ -103,7 +109,7 @@ const IMessage = React.memo<IMessageProps>(({ message, isDone, isLastMessage }) 
 
         <Actions>
           {showCopyAction && (
-            <Action onClick={handleCopy} label="Copy">
+            <Action onClick={() => handleCopy(part)} label="Copy">
               <CopyIcon className="size-4" />
             </Action>
           )}
