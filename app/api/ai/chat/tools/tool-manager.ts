@@ -1,4 +1,4 @@
-import { experimental_createMCPClient as createMCPClient } from '@ai-sdk/mcp'
+import { createMCPClient, MCPClient } from '@ai-sdk/mcp'
 import { Tool } from 'ai'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
 import { webSearch } from '@exalabs/ai-sdk'
@@ -21,8 +21,6 @@ const IGNORE_GITHUB = [
   'security'
 ]
 
-type MCPClient = Awaited<ReturnType<typeof createMCPClient>>
-
 interface ToolsState {
   tools: Record<string, Tool>
   clients: Array<{ client: MCPClient; name: string }>
@@ -34,13 +32,15 @@ interface ToolsState {
 
 // 初始化 GitHub MCP
 async function initGithub(state: ToolsState) {
+  let client: MCPClient | undefined
+
   try {
-    const client = await createMCPClient({
-      transport: new StreamableHTTPClientTransport(new URL('https://api.githubcopilot.com/mcp/'), {
-        requestInit: {
-          headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN ?? ''}` }
-        }
-      })
+    client = await createMCPClient({
+      transport: {
+        type: 'http',
+        url: 'https://api.githubcopilot.com/mcp/',
+        headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN ?? ''}` }
+      }
     })
 
     state.clients.push({ client, name: 'github' })
@@ -57,6 +57,7 @@ async function initGithub(state: ToolsState) {
 
     console.log('✅ GitHub MCP 已连接')
   } catch (error) {
+    await client?.close()
     console.warn('⚠️ GitHub MCP 连接失败:', error)
   }
 }

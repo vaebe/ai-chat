@@ -12,7 +12,7 @@ const DefaultModels: GatewayLanguageModelEntry = {
     cachedInputTokens: '0.000000216'
   },
   specification: {
-    specificationVersion: 'v2',
+    specificationVersion: 'v3',
     provider: 'deepinfra',
     modelId: 'deepseek/deepseek-v3.2'
   },

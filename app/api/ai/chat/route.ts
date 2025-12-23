@@ -85,10 +85,12 @@ export async function POST(req: NextRequest) {
       middleware: extractReasoningMiddleware({ tagName: 'think' })
     })
 
+    const messages = await convertToModelMessages([...chatHistoryRes.data, message])
+
     const result = streamText({
       model,
       system: systemPrompt,
-      messages: convertToModelMessages([...chatHistoryRes.data, message]),
+      messages,
       experimental_transform: smoothStream({ chunking: /[\u4E00-\u9FFF]|\S+\s+/ }),
       tools: toolManager.getAllTools(),
       toolChoice: 'auto',
