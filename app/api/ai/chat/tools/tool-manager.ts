@@ -1,6 +1,5 @@
 import { createMCPClient, MCPClient } from '@ai-sdk/mcp'
 import { Tool } from 'ai'
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
 import { webSearch } from '@exalabs/ai-sdk'
 
 const IGNORE_GITHUB = [

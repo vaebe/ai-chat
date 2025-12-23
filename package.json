@@ -20,7 +20,6 @@
     "@clerk/themes": "^2.4.46",
     "@exalabs/ai-sdk": "^1.0.5",
     "@iconify/react": "^6.0.2",
-    "@modelcontextprotocol/sdk": "^1.25.1",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "@radix-ui/react-avatar": "^1.1.11",
