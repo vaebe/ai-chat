@@ -144,7 +144,7 @@ npx @modelcontextprotocol/inspector node mcp/githubSearch.mjs
 
 ```text
 ai-chat/
-├── app/                 # Next.js app router
+├── app/                # Next.js app router
 │   ├── ai/             # AI chat interface
 │   ├── api/            # API routes
 │   ├── sign-in/        # Authentication pages
@@ -157,10 +157,9 @@ ai-chat/
 
 ## 关键环境变量
 
-| Variable | Description |
-|----------|-------------|
-| DATABASE_URL | 数据库连接地址 |
-| NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY | Clerk frontend key |
-| CLERK_SECRET_KEY | Clerk backend key |
-| GITHUB_TOKEN | GitHub token for MCP integration |
-| KV_* | Vercel KV (Upstash Redis) credentials |
+| Variable                          | Description                           |
+| --------------------------------- | ------------------------------------- |
+| DATABASE_URL                      | 数据库连接地址                        |
+| NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY | Clerk frontend key                    |
+| CLERK_SECRET_KEY                  | Clerk backend key                     |
+| GITHUB_TOKEN                      | GitHub token for MCP integration      |
