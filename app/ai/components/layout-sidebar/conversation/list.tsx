@@ -4,7 +4,7 @@ import { useConversationStore } from '../../../store/conversation-store'
 import { ConversationItem } from './item'
 import { useParams } from 'next/navigation'
 
-export const ConversationList = React.memo(() => {
+export const ConversationList = () => {
   const { id } = useParams()
   const conversationList = useConversationStore((state) => state.conversationList)
   const conversationListLoading = useConversationStore((state) => state.conversationListLoading)
@@ -35,6 +35,4 @@ export const ConversationList = React.memo(() => {
       )}
     </div>
   )
-})
-
-ConversationList.displayName = 'ConversationList'
+}
