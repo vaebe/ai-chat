@@ -1,3 +1,25 @@
+import { z } from 'zod'
+
+export const ChatRequestSchema = z.object({
+  message: z.object({
+    id: z.string().min(1),
+    role: z.enum(['user', 'assistant', 'system']),
+    parts: z.any().refine((val) => Array.isArray(val) && val.length > 0, {
+      message: 'parts must be a non-empty array'
+    }),
+    metadata: z.any().optional()
+  }),
+  id: z.string().min(1),
+  timestamp: z.number().int().positive(),
+  date: z.string().min(1, 'date cannot be empty'),
+  model: z.string().min(1),
+  userTools: z
+    .object({
+      enableWebSearch: z.boolean().optional()
+    })
+    .optional()
+})
+
 interface CreateSystemPromptProps {
   toolsDescription: string
   enabledTools: string[]

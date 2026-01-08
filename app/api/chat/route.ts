@@ -15,25 +15,7 @@ import { createTools } from './tools/tool-manager'
 import { createSystemPrompt } from './utils'
 import { gateway } from '@ai-sdk/gateway'
 import { z } from 'zod'
-
-// Zod 验证 schema
-const ChatRequestSchema = z.object({
-  message: z.object({
-    id: z.string().min(1),
-    role: z.enum(['user', 'assistant', 'system']),
-    parts: z.any().refine((val) => Array.isArray(val) && val.length > 0, {
-      message: 'parts must be a non-empty array'
-    }),
-    metadata: z.any().optional()
-  }),
-  id: z.string().min(1),
-  timestamp: z.number().int().positive(),
-  date: z.string().min(1, 'date cannot be empty'),
-  model: z.string().min(1),
-  userTools: z.object({
-    enableWebSearch: z.boolean().optional()
-  }).optional()
-})
+import { ChatRequestSchema } from './utils'
 
 // 允许最多 n 秒的流式响应
 export const maxDuration = 300
@@ -59,18 +41,6 @@ async function getChatHistory(id: string) {
   return { code, data: list, msg }
 }
 
-interface ReqProps {
-  message: UIMessage
-  id: string
-  timestamp: number
-  date: string
-  model: string
-  // 仅包含用户控制的工具
-  userTools?: {
-    enableWebSearch?: boolean
-  }
-}
-
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) {
@@ -89,23 +59,23 @@ export async function POST(req: NextRequest) {
     // 保存用户发送的消息
     createAiMessage({ message, chatId })
 
-  const chatHistoryRes = await getChatHistory(chatId)
+    const chatHistoryRes = await getChatHistory(chatId)
 
-  if (chatHistoryRes.code !== 0) {
-    return new Response(chatHistoryRes.msg, { status: 500 })
-  }
+    if (chatHistoryRes.code !== 0) {
+      return new Response(chatHistoryRes.msg, { status: 500 })
+    }
 
-  // 根据用户控制的工具配置初始化工具管理器
-  toolManager = await createTools(userTools)
+    // 根据用户控制的工具配置初始化工具管理器
+    toolManager = await createTools(userTools)
 
-  const systemPrompt = createSystemPrompt({
-    toolsDescription: toolManager.getDesc(),
-    enabledTools: toolManager.getNames(),
-    timestamp,
-    date
-  })
+    const systemPrompt = createSystemPrompt({
+      toolsDescription: toolManager.getDesc(),
+      enabledTools: toolManager.getNames(),
+      timestamp,
+      date
+    })
 
-  // 使用 extractReasoningMiddleware 提取 <think> 和 </think>
+    // 使用 extractReasoningMiddleware 提取 <think> 和 </think>
     const model = wrapLanguageModel({
       model: gateway(modelName),
       middleware: extractReasoningMiddleware({ tagName: 'think' })
