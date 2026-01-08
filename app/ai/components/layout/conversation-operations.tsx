@@ -13,9 +13,11 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
 
 interface ConversationOperationsProps {
   conversation: AiConversation
+  className?: string
 }
 
 interface UseShowHideRes {
@@ -52,11 +54,12 @@ function RemoveConversationDialog({ conversation, dialog }: { conversation: AiCo
 
   return (
     <Dialog onOpenChange={dialog.toggle} open={dialog.visible}>
-      <DialogContent className="sm:max-w-106">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>删除聊天</DialogTitle>
           <DialogDescription>这会删除 &quot;{conversation.name}&quot;。</DialogDescription>
         </DialogHeader>
+
         <DialogFooter>
           <Button type="button" variant="secondary" className="cursor-pointer" onClick={dialog.hide}>
             取消
@@ -81,11 +84,13 @@ function EditConversationDialog({ conversation, dialog }: { conversation: AiConv
 
   return (
     <Dialog onOpenChange={dialog.toggle} open={dialog.visible}>
-      <DialogContent className="sm:max-w-106">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>编辑对话名称</DialogTitle>
         </DialogHeader>
+
         <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+
         <DialogFooter>
           <Button className="cursor-pointer" type="button" variant="secondary" onClick={dialog.hide}>
             取消
@@ -99,7 +104,7 @@ function EditConversationDialog({ conversation, dialog }: { conversation: AiConv
   )
 }
 
-export const ConversationOperations = React.memo<ConversationOperationsProps>(({ conversation }) => {
+export const ConversationOperations = React.memo<ConversationOperationsProps>(({ className, conversation }) => {
   const deleteDialog = useShowHide()
   const editDialog = useShowHide()
 
@@ -107,7 +112,9 @@ export const ConversationOperations = React.memo<ConversationOperationsProps>(({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Icon icon="dashicons:ellipsis" className="w-5 cursor-pointer" />
+          <div className={cn('w-5 h-5 rounded hover:bg-white hover:text-blue-500 cursor-pointer', className)}>
+            <Icon icon="dashicons:ellipsis" className="w-5 mt-0.5" />
+          </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem className="cursor-pointer" onSelect={editDialog.show}>

@@ -13,19 +13,13 @@ export const ConversationItem = React.memo<ConversationItemProps>(({ item, isAct
 
   return (
     <div
-      className={`flex items-center justify-between p-2 text-sm cursor-pointer rounded-lg dark:text-white hover:bg-black/10 dark:hover:bg-white/10 ${
-        isActive ? 'bg-black/10 dark:bg-white/10' : ''
-      }`}
-      style={{ boxSizing: 'border-box' }}
+      className={`group flex items-center justify-between box-border p-2 text-sm cursor-pointer rounded-md dark:text-white hover:bg-black/10 dark:hover:bg-white/10 
+        ${isActive ? 'bg-black/10 dark:bg-white/10' : ''}`}
     >
-      <p
-        className="overflow-hidden whitespace-nowrap"
-        style={{ width: `calc(100% - 30px)` }}
-        onClick={() => switchConversation(item.id)}
-      >
+      <p className="truncate flex-1" onClick={() => switchConversation(item.id)}>
         {item.name}
       </p>
-      <ConversationOperations conversation={item} />
+      <ConversationOperations conversation={item} className="hidden group-hover:block" />
     </div>
   )
 })
