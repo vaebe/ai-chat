@@ -47,7 +47,7 @@ export const MessageList = React.memo<MessageListProps>(({ messages, status, loa
 
   return (
     <Conversation>
-      <ConversationContent className="max-w-10/12 mx-auto">
+      <ConversationContent className="max-w-8/12 mx-auto">
         {loading ? (
           <Loading text="加载消息中..." size="lg" className="p-8" />
         ) : (

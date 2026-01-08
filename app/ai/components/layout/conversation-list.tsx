@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Loading } from '@/components/ui/loading'
 import { useConversationStore } from '../../store/conversation-store'
 import { ConversationItem } from './conversation-item'
@@ -28,17 +27,13 @@ export const ConversationList = React.memo(() => {
   }, [fetchConversationList])
 
   return (
-    <ScrollArea className="h-[92vh]">
-      <div className="w-64 p-2 space-y-1">
-        {conversationListLoading ? (
-          <Loading text="加载列表中..." className="p-4" />
-        ) : (
-          conversationList.map((item) => (
-            <ConversationItem key={item.id} item={item} isActive={id === item.id} />
-          ))
-        )}
-      </div>
-    </ScrollArea>
+    <div className="w-60 flex flex-col gap-2">
+      {conversationListLoading ? (
+        <Loading text="加载列表中..." className="p-4" />
+      ) : (
+        conversationList.map((item) => <ConversationItem key={item.id} item={item} isActive={id === item.id} />)
+      )}
+    </div>
   )
 })
 

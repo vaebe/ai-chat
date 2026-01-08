@@ -41,12 +41,12 @@ export interface InputActions {
 
 // UI 相关类型
 export interface UIState {
-  layoutSidebar: boolean
+  showSidebar: boolean
   messagesLoading: boolean
 }
 
 export interface UIActions {
-  setLayoutSidebar: (layoutSidebar: boolean) => void
+  setShowSidebar: (showSidebar: boolean) => void
   setMessagesLoading: (messagesLoading: boolean) => void
   resetUIState: () => void
 }
