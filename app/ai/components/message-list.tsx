@@ -143,7 +143,7 @@ const WebSearchInfo = ({ message }: ToolsInfoProps) => {
       <SourcesTrigger count={results.length} />
       <SourcesContent>
         {results.map((item, index) => (
-          <Source href={item.url} title={item.title ?? ''} key={index} />
+          <Source href={item.url} title={item.title ?? ''} key={item.url + index} />
         ))}
       </SourcesContent>
     </Sources>
