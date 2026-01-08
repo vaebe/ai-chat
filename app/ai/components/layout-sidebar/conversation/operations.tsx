@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { AiConversation } from '@/generated/prisma/client'
-import { useConversationOperations } from '../../hooks/use-conversation-operations'
+import { useOperations } from './use-operations'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Icon } from '@iconify/react'
 import {
@@ -14,10 +14,12 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface ConversationOperationsProps {
   conversation: AiConversation
   className?: string
+  onMenuOpenChange?: (open: boolean) => void
 }
 
 interface UseShowHideRes {
@@ -45,7 +47,7 @@ function useShowHide(defaultVisible = false): UseShowHideRes {
 }
 
 function RemoveConversationDialog({ conversation, dialog }: { conversation: AiConversation; dialog: UseShowHideRes }) {
-  const { removeConversation } = useConversationOperations()
+  const { removeConversation } = useOperations()
 
   const handleRemove = async () => {
     await removeConversation(conversation)
@@ -74,11 +76,23 @@ function RemoveConversationDialog({ conversation, dialog }: { conversation: AiCo
 }
 
 function EditConversationDialog({ conversation, dialog }: { conversation: AiConversation; dialog: UseShowHideRes }) {
-  const { updateConversation } = useConversationOperations()
+  const { updateConversation } = useOperations()
   const [name, setName] = useState(conversation.name)
 
-  const handleSave = async () => {
-    await updateConversation(conversation, name)
+  function handleSave() {
+    const trimmedName = name.trim()
+    if (!trimmedName) {
+      toast.warning('对话标题不能为空！')
+      return
+    }
+
+    // 相同直接关闭
+    if (trimmedName === conversation.name) {
+      dialog.hide()
+      return
+    }
+
+    updateConversation(conversation, trimmedName)
     dialog.hide()
   }
 
@@ -104,38 +118,46 @@ function EditConversationDialog({ conversation, dialog }: { conversation: AiConv
   )
 }
 
-export const ConversationOperations = React.memo<ConversationOperationsProps>(({ className, conversation }) => {
-  const deleteDialog = useShowHide()
-  const editDialog = useShowHide()
+export const ConversationOperations = React.memo<ConversationOperationsProps>(
+  ({ className, conversation, onMenuOpenChange }) => {
+    const deleteDialog = useShowHide()
 
-  return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <div className={cn('w-5 h-5 rounded hover:bg-white hover:text-blue-500 cursor-pointer', className)}>
-            <Icon icon="dashicons:ellipsis" className="w-5 mt-0.5" />
-          </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem className="cursor-pointer" onSelect={editDialog.show}>
-            <div className="flex items-center">
-              <Icon icon="lucide:edit" className="w-5 h-5 mx-2" />
-              <span>重命名</span>
-            </div>
-          </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer" onSelect={deleteDialog.show}>
-            <div className="flex items-center">
-              <Icon icon="fluent:delete-12-regular" className="w-5 h-5 mx-2" />
-              <span>删除</span>
-            </div>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+    const editDialog = useShowHide()
 
-      <RemoveConversationDialog conversation={conversation} dialog={deleteDialog} />
-      <EditConversationDialog conversation={conversation} dialog={editDialog} />
-    </>
-  )
-})
+    return (
+      <>
+        <DropdownMenu onOpenChange={onMenuOpenChange}>
+          <DropdownMenuTrigger asChild>
+            <div className={cn('w-5 h-5 rounded hover:bg-white hover:text-blue-500 cursor-pointer', className)}>
+              <Icon icon="dashicons:ellipsis" className="w-5 mt-0.5" />
+            </div>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent>
+            <DropdownMenuItem className="cursor-pointer" onSelect={editDialog.show}>
+              <div className="flex items-center">
+                <Icon icon="lucide:edit" className="w-5 h-5 mx-2" />
+
+                <span>重命名</span>
+              </div>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem className="cursor-pointer" onSelect={deleteDialog.show}>
+              <div className="flex items-center">
+                <Icon icon="fluent:delete-12-regular" className="w-5 h-5 mx-2" />
+
+                <span>删除</span>
+              </div>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <RemoveConversationDialog conversation={conversation} dialog={deleteDialog} />
+
+        <EditConversationDialog conversation={conversation} dialog={editDialog} />
+      </>
+    )
+  }
+)
 
 ConversationOperations.displayName = 'ConversationOperations'

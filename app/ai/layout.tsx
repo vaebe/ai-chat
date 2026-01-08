@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { LayoutSidebar } from './components/layout/sidebar'
+import { LayoutSidebar } from './components/layout-sidebar'
 
 export default function AiLayout({ children }: { children: React.ReactNode }) {
   return (

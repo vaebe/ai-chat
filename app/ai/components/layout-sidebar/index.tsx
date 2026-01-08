@@ -1,6 +1,6 @@
 import { SidebarToggleIcon } from '@/app/ai/components/icon/sidebar-toggle'
 import { NewChat } from '@/app/ai/components/icon/new-chat'
-import { ConversationList } from './conversation-list'
+import { ConversationList } from './conversation/list'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
 import { useUIStore } from '@/app/ai/store/ui-store'
@@ -17,7 +17,13 @@ function LayoutSidebar() {
     <div className={cn('border-r bg-white dark:bg-black p-2 flex flex-col gap-2', showSidebar ? 'w-64' : 'w-14')}>
       <div className="flex items-center justify-between">
         <div className="flex items-center pl-1">
-          <Image src={theme === 'dark' ? '/logo/light.svg' : '/logo/dark.svg'} alt="logo" width={34} height={34} />
+          <Image
+            src={theme === 'dark' ? '/logo/light.svg' : '/logo/dark.svg'}
+            alt="logo"
+            width={34}
+            height={34}
+            priority
+          />
           {showSidebar && <div className="text-2xl font-bold ml-2">Chat</div>}
         </div>
 
