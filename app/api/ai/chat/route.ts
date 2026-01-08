@@ -91,10 +91,7 @@ export async function POST(req: NextRequest) {
       model,
       system: systemPrompt,
       messages,
-      experimental_transform: smoothStream({
-        delayInMs: 20,
-        chunking: 'line'
-      }),
+      experimental_transform: smoothStream(),
       tools: toolManager.getAllTools(),
       toolChoice: 'auto',
       stopWhen: stepCountIs(10), // 最多 10 步

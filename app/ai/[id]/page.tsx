@@ -69,7 +69,7 @@ export default function Page() {
 
   const { status, stop, setMessages, sendMessage, messages } = useChat({
     id: conversationId,
-    experimental_throttle: 50,
+    // experimental_throttle: 50,
     transport: useChatTransport
   })
 
@@ -108,9 +108,7 @@ export default function Page() {
 
           updateConversationList((list) =>
             list.map((item) =>
-              item.id === conversationId && conversationName
-                ? { ...item, name: conversationName }
-                : item
+              item.id === conversationId && conversationName ? { ...item, name: conversationName } : item
             )
           )
         }
