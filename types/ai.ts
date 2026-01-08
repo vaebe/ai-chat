@@ -60,7 +60,7 @@ export interface MessageOperations {
 }
 
 // API 响应类型
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   code: number
   msg: string
   data?: T
