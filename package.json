@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:inspect": "next dev --turbopack --inspect",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint .",

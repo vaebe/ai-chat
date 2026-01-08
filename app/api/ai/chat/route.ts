@@ -14,6 +14,26 @@ import { createAiMessage, getAiMessages } from '@/lib/ai-message'
 import { createTools } from './tools/tool-manager'
 import { createSystemPrompt } from './utils'
 import { gateway } from '@ai-sdk/gateway'
+import { z } from 'zod'
+
+// Zod 验证 schema
+const ChatRequestSchema = z.object({
+  message: z.object({
+    id: z.string().min(1),
+    role: z.enum(['user', 'assistant', 'system']),
+    parts: z.any().refine((val) => Array.isArray(val) && val.length > 0, {
+      message: 'parts must be a non-empty array'
+    }),
+    metadata: z.any().optional()
+  }),
+  id: z.string().min(1),
+  timestamp: z.number().int().positive(),
+  date: z.string().min(1, 'date cannot be empty'),
+  model: z.string().min(1),
+  userTools: z.object({
+    enableWebSearch: z.boolean().optional()
+  }).optional()
+})
 
 // 允许最多 n 秒的流式响应
 export const maxDuration = 300
@@ -57,10 +77,17 @@ export async function POST(req: NextRequest) {
     return new Response('无权限!', { status: 401 })
   }
 
-  const { message, id: chatId, userTools, timestamp, date, model: modelName }: ReqProps = await req.json()
+  let toolManager: Awaited<ReturnType<typeof createTools>> | null = null
 
-  // 保存用户发送的消息
-  createAiMessage({ message, chatId })
+  try {
+    // 解析并验证请求体
+    const body = await req.json()
+    const validatedData = ChatRequestSchema.parse(body)
+
+    const { message, id: chatId, userTools, timestamp, date, model: modelName } = validatedData
+
+    // 保存用户发送的消息
+    createAiMessage({ message, chatId })
 
   const chatHistoryRes = await getChatHistory(chatId)
 
@@ -69,7 +96,7 @@ export async function POST(req: NextRequest) {
   }
 
   // 根据用户控制的工具配置初始化工具管理器
-  const toolManager = await createTools(userTools)
+  toolManager = await createTools(userTools)
 
   const systemPrompt = createSystemPrompt({
     toolsDescription: toolManager.getDesc(),
@@ -78,8 +105,7 @@ export async function POST(req: NextRequest) {
     date
   })
 
-  try {
-    // 使用 extractReasoningMiddleware 提取 <think> 和 </think>
+  // 使用 extractReasoningMiddleware 提取 <think> 和 </think>
     const model = wrapLanguageModel({
       model: gateway(modelName),
       middleware: extractReasoningMiddleware({ tagName: 'think' })
@@ -125,7 +151,9 @@ export async function POST(req: NextRequest) {
           steps: finishResult.steps?.length || 1
         })
 
-        await toolManager.close()
+        if (toolManager) {
+          await toolManager.close()
+        }
       }
     })
 
@@ -133,7 +161,9 @@ export async function POST(req: NextRequest) {
     result.consumeStream({
       onError: (error) => {
         console.error('Stream consumption error:', error)
-        toolManager.close()
+        if (toolManager) {
+          toolManager.close()
+        }
       }
     })
 
@@ -146,7 +176,7 @@ export async function POST(req: NextRequest) {
           return {
             createdAt: Date.now(),
             model: modelName,
-            availableTools: toolManager.getNames()
+            availableTools: toolManager?.getNames() || []
           }
         }
 
@@ -162,8 +192,15 @@ export async function POST(req: NextRequest) {
       }
     })
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      console.error('请求参数验证失败:', error.issues)
+      return new Response(`请求参数错误: ${JSON.stringify(error.issues)}`, { status: 400 })
+    }
+
     console.error('Chat processing error:', error)
-    await toolManager.close()
+    if (toolManager) {
+      await toolManager.close()
+    }
     return new Response('处理请求时发生错误', { status: 500 })
   }
 }
