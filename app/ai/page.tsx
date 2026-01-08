@@ -1,6 +1,5 @@
 'use client'
 
-import { LayoutHeader } from './components/layout/header'
 import { useRouter } from 'next/navigation'
 import { useAiStore } from './store/ai-store'
 import { useInputStore } from './store/input-store'
@@ -69,10 +68,8 @@ export default function AIChatPage() {
 
   return (
     <div className="flex flex-col h-screen w-full bg-white/10">
-      <LayoutHeader></LayoutHeader>
-
       <div className="w-full h-full flex flex-col items-center justify-center">
-        <div className="text-4xl font-bold mb-10 text-center">有什么可以帮忙的？</div>
+        <div className="text-3xl font-bold mb-10 text-center">有什么可以帮忙的？</div>
 
         <div className="flex justify-center p-2 md:w-8/12 mx-auto">
           <AiPromptInput

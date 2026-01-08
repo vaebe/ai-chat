@@ -4,10 +4,14 @@ import { cn } from '@/lib/utils'
 import { Icon } from '@iconify/react'
 import { useRouter, usePathname } from 'next/navigation'
 import * as React from 'react'
+import { useUIStore } from '@/app/ai/store/ui-store'
 
-function NewChatIcon({ className }: React.ComponentProps<'div'>) {
+function NewChat({ className }: React.ComponentProps<'div'>) {
+  const showSidebar = useUIStore((state) => state.showSidebar)
+
   const router = useRouter()
   const pathname = usePathname()
+
   function newChat() {
     if (pathname === '/ai') {
       return
@@ -22,20 +26,21 @@ function NewChatIcon({ className }: React.ComponentProps<'div'>) {
         <TooltipTrigger asChild>
           <Button
             variant="outline"
-            size="icon"
+            size={showSidebar ? 'default' : 'icon'}
             onClick={newChat}
             className={cn('cursor-pointer', className)}
           >
             <Icon icon="hugeicons:pencil-edit-02" className="h-6 w-6"></Icon>
+            {showSidebar && <span>开启新对话</span>}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>新聊天</p>
+          <p>开启新对话</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   )
 }
 
-export { NewChatIcon }
-export default NewChatIcon
+export { NewChat }
+export default NewChat

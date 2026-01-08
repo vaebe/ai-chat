@@ -3,11 +3,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Icon } from '@iconify/react'
 import { useUIStore } from '@/app/ai/store/ui-store'
 
-function SidebarToggleIcon({ state }: { state: boolean }) {
-  const setLayoutSidebar = useUIStore((state) => state.setLayoutSidebar)
+function SidebarToggleIcon() {
+  const showSidebar = useUIStore((state) => state.showSidebar)
+  const setShowSidebar = useUIStore((state) => state.setShowSidebar)
 
   function handleClick() {
-    setLayoutSidebar(state)
+    setShowSidebar(!showSidebar)
   }
 
   return (
@@ -19,7 +20,7 @@ function SidebarToggleIcon({ state }: { state: boolean }) {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{state ? '打开侧边栏' : '关闭侧边栏'}</p>
+          <p>{showSidebar ? '关闭侧边栏' : '打开侧边栏'}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

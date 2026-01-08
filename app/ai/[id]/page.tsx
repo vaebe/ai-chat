@@ -11,7 +11,6 @@ import { toast } from 'sonner'
 import { AiMessage } from '@/generated/prisma/client'
 import { DefaultChatTransport, UIMessage } from 'ai'
 import { generateAiConversationTitle } from '@/app/actions'
-import { LayoutHeader } from '@/app/ai/components/layout/header'
 import { MessageList } from '../components/message-list'
 import dayjs from 'dayjs'
 import { useUIStore } from '@/app/ai/store/ui-store'
@@ -164,8 +163,6 @@ export default function Page() {
 
   return (
     <div className="flex flex-col h-screen">
-      <LayoutHeader></LayoutHeader>
-
       <MessageList messages={messages} status={status} loading={messagesLoading}></MessageList>
 
       <AiPromptInput
@@ -180,7 +177,7 @@ export default function Page() {
         disabled={!inputText && !status}
         status={status}
         onStop={stop}
-        className="my-4 w-10/12 mx-auto"
+        className="my-4 w-8/12 mx-auto"
       />
     </div>
   )
