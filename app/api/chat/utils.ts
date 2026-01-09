@@ -1,3 +1,5 @@
+import { getAiMessages } from '@/lib/ai-message'
+import { UIMessage } from 'ai'
 import { z } from 'zod'
 
 export const ChatRequestSchema = z.object({
@@ -54,4 +56,24 @@ ${toolsDescription}
 请在理解用户需求的基础上，结合可用工具，提供准确、有帮助的回答。
 `
   return info.replaceAll(/\s+/g, '')
+}
+
+// 获取对话历史数据
+export async function loadChatHistory(id: string) {
+  const { code, data, msg } = await getAiMessages(id)
+
+  if (code !== 0) {
+    return { code, data: [], msg }
+  }
+
+  const datas = Array.isArray(data) ? data : []
+
+  const list = datas.map((item) => ({
+    id: item.id,
+    role: item.role,
+    metadata: JSON.parse(item.metadata ?? '{}'),
+    parts: JSON.parse(item.parts)
+  })) as UIMessage[]
+
+  return { code, data: list, msg }
 }
