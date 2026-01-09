@@ -13,8 +13,9 @@ import { ZodError } from 'zod'
 import { ChatRequestSchema } from './utils'
 import { createAiMessage } from '@/lib/ai-message'
 import { createTools } from './tools/tool-manager'
-import { createSystemPrompt, loadChatHistory } from './utils'
+import { loadChatHistory } from './utils'
 import { gateway } from '@ai-sdk/gateway'
+import { createSystemPrompt } from './prompts'
 
 export const maxDuration = 300
 
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
     const validatedData = ChatRequestSchema.parse(body)
     const { message, id: chatId, userTools, timestamp, date, model: modelName } = validatedData
 
-    createAiMessage({ message, chatId })
+    await createAiMessage({ message, chatId })
 
     const chatHistoryRes = await loadChatHistory(chatId)
     if (chatHistoryRes.code !== 0) {
@@ -80,11 +81,8 @@ export async function POST(req: NextRequest) {
         return {}
       },
       onFinish: async (finishResult) => {
-        console.log('Stream finished:', {
-          finishReason: finishResult.finishReason,
-          totalUsage: finishResult.usage,
-          steps: finishResult.steps?.length || 1
-        })
+        const { finishReason, usage, steps } = finishResult
+        console.log('Stream finished:', { finishReason, usage, steps: steps?.length || 1 })
       }
     })
 
