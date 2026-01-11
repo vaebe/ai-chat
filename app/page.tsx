@@ -49,12 +49,28 @@ function HomeHeader() {
 }
 
 export default function Home() {
+  const { theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   return (
     <div className="min-h-screen dark:bg-black dark:text-white">
       <HomeHeader></HomeHeader>
 
       <div className="w-11/12 md:w-9/12 mx-auto my-10">
-        <Image src="/img/chat-dark.png" alt="聊天示例" className="w-full" width={1200} height={664} priority />
+        {mounted && (
+          <Image
+            src={theme === 'dark' ? '/img/chat-dark.png' : '/img/chat-light.png'}
+            alt="聊天示例"
+            className="w-full"
+            width={1200}
+            height={664}
+            priority
+          />
+        )}
       </div>
 
       <p className="text-center text-lg">一个使用 Next 开发的 AI Agent 完善中...</p>
