@@ -8,9 +8,6 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 
-// ============================================================================
-// Header Component - 浮动玻璃效果导航栏
-// ============================================================================
 function HomeHeader() {
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -87,9 +84,6 @@ function HomeHeader() {
   )
 }
 
-// ============================================================================
-// Hero Section - Aurora 渐变背景动画
-// ============================================================================
 function HeroSection() {
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-24 pb-16">
@@ -157,9 +151,6 @@ function HeroSection() {
   )
 }
 
-// ============================================================================
-// Features Section - Simplify Bento Grid
-// ============================================================================
 const features = [
   {
     icon: MessageSquare,
@@ -220,9 +211,6 @@ function FeaturesSection() {
   )
 }
 
-// ============================================================================
-// CTA Section - 行动号召
-// ============================================================================
 function CTASection() {
   return (
     <section className="py-24 relative overflow-hidden">
@@ -249,9 +237,6 @@ function CTASection() {
   )
 }
 
-// ============================================================================
-// Footer Section - 页脚
-// ============================================================================
 function Footer() {
   return (
     <footer className="py-12 bg-orange-50 dark:bg-slate-950 border-t border-orange-100 dark:border-slate-800">
@@ -280,9 +265,6 @@ function Footer() {
   )
 }
 
-// ============================================================================
-// Main Page Component
-// ============================================================================
 export default function Home() {
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 selection:bg-orange-200 selection:text-orange-900">
