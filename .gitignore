@@ -42,3 +42,6 @@ next-env.d.ts
 
 # 生成的文件
 generated
+
+.agent
+.shared
