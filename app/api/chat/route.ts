@@ -32,12 +32,17 @@ export async function POST(req: NextRequest) {
     const validatedData = ChatRequestSchema.parse(body)
     const { message, id: chatId, userTools, timestamp, date, model: modelName } = validatedData
 
-    await createAiMessage({ message, chatId })
-
     const chatHistoryRes = await loadChatHistory(chatId)
     if (chatHistoryRes.code !== 0) {
       return new Response(chatHistoryRes.msg, { status: 500 })
     }
+
+    await createAiMessage({ message, chatId })
+
+    const model = wrapLanguageModel({
+      model: gateway(modelName),
+      middleware: extractReasoningMiddleware({ tagName: 'think' })
+    })
 
     toolManager = await createTools(userTools)
 
@@ -46,11 +51,6 @@ export async function POST(req: NextRequest) {
       enabledTools: toolManager.getNames(),
       timestamp,
       date
-    })
-
-    const model = wrapLanguageModel({
-      model: gateway(modelName),
-      middleware: extractReasoningMiddleware({ tagName: 'think' })
     })
 
     const messages = await convertToModelMessages([...chatHistoryRes.data, message])
@@ -108,22 +108,31 @@ export async function POST(req: NextRequest) {
           return { ...part, endAt: Date.now() }
         }
       },
-      onFinish: (result) => {
+      onFinish: async (result) => {
         if (result?.responseMessage) {
-          createAiMessage({ message: result.responseMessage, chatId })
+          await createAiMessage({ message: result.responseMessage, chatId })
         }
+        if (toolManager) {
+          await toolManager.close()
+        }
+      },
+      onError: (error) => {
+        console.error('Stream error:', error)
+        if (toolManager) {
+          toolManager.close()
+        }
+        return 'Stream error occurred'
       }
     })
   } catch (error) {
+    if (toolManager) {
+      await toolManager.close()
+    }
     if (error instanceof ZodError) {
       console.error('请求参数验证失败:', error.issues)
       return new Response(`请求参数错误: ${JSON.stringify(error.issues)}`, { status: 400 })
     }
     console.error('Chat processing error:', error)
     return new Response('处理请求时发生错误', { status: 500 })
-  } finally {
-    if (toolManager) {
-      await toolManager.close()
-    }
   }
 }
