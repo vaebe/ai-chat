@@ -8,7 +8,7 @@ interface ConversationItemProps {
   isActive: boolean
 }
 
-export const ConversationItem = React.memo<ConversationItemProps>(({ item, isActive }) => {
+export const ConversationItem = ({ item, isActive }: ConversationItemProps) => {
   const { switchConversation } = useOperations()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [shouldShowOperations, setShouldShowOperations] = useState(false)
@@ -43,6 +43,4 @@ export const ConversationItem = React.memo<ConversationItemProps>(({ item, isAct
       />
     </div>
   )
-})
-
-ConversationItem.displayName = 'ConversationItem'
+}

@@ -4,7 +4,7 @@ import { CopyIcon } from 'lucide-react'
 import { Conversation, ConversationContent, ConversationScrollButton } from '@/components/ai-elements/conversation'
 import { Message, MessageContent } from '@/components/ai-elements/message'
 import { Response } from '@/components/ai-elements/response'
-import { Fragment, useMemo } from 'react'
+import { Fragment } from 'react'
 import { ChatStatus, TextUIPart, UIMessage } from 'ai'
 import { Loader } from '@/components/ai-elements/loader'
 import { Actions, Action } from '@/components/ai-elements/actions'
@@ -34,16 +34,14 @@ interface MessageListProps {
   loading?: boolean
 }
 
-export const MessageList = React.memo<MessageListProps>(({ messages, status, loading = false }) => {
+export const MessageList = ({ messages, status, loading = false }: MessageListProps) => {
   const isDone = !['submitted', 'streaming'].includes(status)
 
-  const processedMessages = useMemo(() => {
-    return messages.map((message, messageIndex) => ({
-      message,
-      messageIndex,
-      isLastMessage: messageIndex === messages.length - 1
-    }))
-  }, [messages])
+  const processedMessages = messages.map((message, messageIndex) => ({
+    message,
+    messageIndex,
+    isLastMessage: messageIndex === messages.length - 1
+  }))
 
   return (
     <Conversation>
@@ -71,9 +69,7 @@ export const MessageList = React.memo<MessageListProps>(({ messages, status, loa
       <ConversationScrollButton />
     </Conversation>
   )
-})
-
-MessageList.displayName = 'MessageList'
+}
 
 interface IMessageProps {
   message: UIMessage
@@ -83,7 +79,7 @@ interface IMessageProps {
   isLastMessage: boolean
 }
 
-const IMessage = React.memo<IMessageProps>(({ message, isDone, isLastMessage }) => {
+const IMessage = ({ message, isDone, isLastMessage }: IMessageProps) => {
   const textParts = message.parts.filter((item) => item.type === 'text')
   const part = textParts[textParts.length - 1]
 
@@ -119,53 +115,43 @@ const IMessage = React.memo<IMessageProps>(({ message, isDone, isLastMessage }) 
   }
 
   return <Response>{part.type}</Response>
-})
-
-IMessage.displayName = 'IMessage'
+}
 
 interface ToolsInfoProps {
   message: UIMessage
 }
 
-const WebSearchInfo = React.memo<ToolsInfoProps>(({ message }) => {
-  const outputs = useMemo(() => {
-    const parts = message.parts.filter((item) => item.type === 'tool-web_search') as Array<{
-      output: ExaSearchResult[]
-    }>
+const WebSearchInfo = ({ message }: ToolsInfoProps) => {
+  const parts = message.parts.filter((item) => item.type === 'tool-web_search') as Array<{
+    output: ExaSearchResult[]
+  }>
 
-    const results: ExaSearchResult[] = []
+  const results: ExaSearchResult[] = []
 
-    parts.forEach((part) => {
-      if (part?.output && Array.isArray(part.output)) {
-        results.push(...(part.output as ExaSearchResult[]))
-      }
-    })
+  parts.forEach((part) => {
+    if (part?.output && Array.isArray(part.output)) {
+      results.push(...(part.output as ExaSearchResult[]))
+    }
+  })
 
-    return results
-  }, [message.parts])
-
-  if (outputs.length === 0) {
+  if (results.length === 0) {
     return null
   }
 
   return (
     <Sources>
-      <SourcesTrigger count={outputs.length} />
+      <SourcesTrigger count={results.length} />
       <SourcesContent>
-        {outputs.map((item, index) => (
-          <Source href={item.url} title={item.title ?? ''} key={index} />
+        {results.map((item, index) => (
+          <Source href={item.url} title={item.title ?? ''} key={item.url + index} />
         ))}
       </SourcesContent>
     </Sources>
   )
-})
+}
 
-WebSearchInfo.displayName = 'WebSearchInfo'
-
-const ToolsInfo = React.memo<ToolsInfoProps>(({ message }) => {
-  const tools = useMemo(() => {
-    return message.parts.filter((item) => item.type === 'dynamic-tool')
-  }, [message.parts])
+const ToolsInfo = ({ message }: ToolsInfoProps) => {
+  const tools = message.parts.filter((item) => item.type === 'dynamic-tool')
 
   const lastTool = tools[tools.length - 1]
 
@@ -191,6 +177,4 @@ const ToolsInfo = React.memo<ToolsInfoProps>(({ message }) => {
       </ToolContent>
     </Tool>
   )
-})
-
-ToolsInfo.displayName = 'ToolsInfo'
+}

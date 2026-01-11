@@ -118,46 +118,42 @@ function EditConversationDialog({ conversation, dialog }: { conversation: AiConv
   )
 }
 
-export const ConversationOperations = React.memo<ConversationOperationsProps>(
-  ({ className, conversation, onMenuOpenChange }) => {
-    const deleteDialog = useShowHide()
+export const ConversationOperations = ({ className, conversation, onMenuOpenChange }: ConversationOperationsProps) => {
+  const deleteDialog = useShowHide()
 
-    const editDialog = useShowHide()
+  const editDialog = useShowHide()
 
-    return (
-      <>
-        <DropdownMenu onOpenChange={onMenuOpenChange}>
-          <DropdownMenuTrigger asChild>
-            <div className={cn('w-5 h-5 rounded hover:bg-white hover:text-blue-500 cursor-pointer', className)}>
-              <Icon icon="dashicons:ellipsis" className="w-5 mt-0.5" />
+  return (
+    <>
+      <DropdownMenu onOpenChange={onMenuOpenChange}>
+        <DropdownMenuTrigger asChild>
+          <div className={cn('w-5 h-5 rounded hover:bg-white hover:text-blue-500 cursor-pointer', className)}>
+            <Icon icon="dashicons:ellipsis" className="w-5 mt-0.5" />
+          </div>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent>
+          <DropdownMenuItem className="cursor-pointer" onSelect={editDialog.show}>
+            <div className="flex items-center">
+              <Icon icon="lucide:edit" className="w-5 h-5 mx-2" />
+
+              <span>重命名</span>
             </div>
-          </DropdownMenuTrigger>
+          </DropdownMenuItem>
 
-          <DropdownMenuContent>
-            <DropdownMenuItem className="cursor-pointer" onSelect={editDialog.show}>
-              <div className="flex items-center">
-                <Icon icon="lucide:edit" className="w-5 h-5 mx-2" />
+          <DropdownMenuItem className="cursor-pointer" onSelect={deleteDialog.show}>
+            <div className="flex items-center">
+              <Icon icon="fluent:delete-12-regular" className="w-5 h-5 mx-2" />
 
-                <span>重命名</span>
-              </div>
-            </DropdownMenuItem>
+              <span>删除</span>
+            </div>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-            <DropdownMenuItem className="cursor-pointer" onSelect={deleteDialog.show}>
-              <div className="flex items-center">
-                <Icon icon="fluent:delete-12-regular" className="w-5 h-5 mx-2" />
+      <RemoveConversationDialog conversation={conversation} dialog={deleteDialog} />
 
-                <span>删除</span>
-              </div>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <RemoveConversationDialog conversation={conversation} dialog={deleteDialog} />
-
-        <EditConversationDialog conversation={conversation} dialog={editDialog} />
-      </>
-    )
-  }
-)
-
-ConversationOperations.displayName = 'ConversationOperations'
+      <EditConversationDialog conversation={conversation} dialog={editDialog} />
+    </>
+  )
+}

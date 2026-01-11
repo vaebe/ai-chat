@@ -46,7 +46,7 @@ export default function Page() {
   const fetchMessages = useAiStore((state) => state.fetchMessages)
 
   const useChatTransport = new DefaultChatTransport({
-    api: '/api/ai/chat',
+    api: '/api/chat',
     // 仅发送最后一条消息
     prepareSendMessagesRequest({ messages, id }) {
       const day = dayjs()
