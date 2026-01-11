@@ -51,7 +51,7 @@ function HomeHeader() {
             height={32}
             className="w-8 h-8"
           />
-          <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-rose-500 bg-clip-text text-transparent">
+          <span className="text-xl font-bold bg-linear-to-r from-orange-500 to-rose-500 bg-clip-text text-transparent">
             AI Chat
           </span>
         </div>
@@ -72,7 +72,7 @@ function HomeHeader() {
           <Link href="/sign-up">
             <Button
               size="sm"
-              className="cursor-pointer rounded-full px-6 bg-gradient-to-r from-orange-500 to-rose-500 hover:scale-105 transition-transform duration-200 text-white shadow-lg shadow-orange-500/20 border-0"
+              className="cursor-pointer rounded-full px-6 bg-linear-to-r from-orange-500 to-rose-500 hover:scale-105 transition-transform duration-200 text-white shadow-lg shadow-orange-500/20 border-0"
             >
               开始使用
               <ArrowRight className="w-4 h-4 ml-1" />
@@ -90,13 +90,13 @@ function HeroSection() {
       {/* Aurora 动画背景 - 暖色调 */}
       <div className="absolute inset-0 -z-10">
         {/* 浅色模式渐变 */}
-        <div className="dark:hidden absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-rose-50" />
+        <div className="dark:hidden absolute inset-0 bg-linear-to-br from-orange-50 via-white to-rose-50" />
         <div className="dark:hidden absolute top-0 left-1/4 w-96 h-96 bg-orange-300/30 rounded-full blur-3xl animate-pulse" />
         <div className="dark:hidden absolute bottom-1/4 right-1/4 w-80 h-80 bg-rose-300/30 rounded-full blur-3xl animate-pulse delay-1000" />
         <div className="dark:hidden absolute top-1/3 right-1/3 w-64 h-64 bg-amber-200/40 rounded-full blur-3xl animate-pulse delay-500" />
 
         {/* 深色模式渐变 */}
-        <div className="hidden dark:block absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
+        <div className="hidden dark:block absolute inset-0 bg-linear-to-br from-slate-950 via-slate-900 to-slate-950" />
         <div className="hidden dark:block absolute top-0 left-1/4 w-96 h-96 bg-orange-600/10 rounded-full blur-3xl animate-pulse" />
         <div className="hidden dark:block absolute bottom-1/4 right-1/4 w-80 h-80 bg-rose-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
         <div className="hidden dark:block absolute top-1/3 right-1/3 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl animate-pulse delay-500" />
@@ -114,7 +114,7 @@ function HeroSection() {
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
             <span className="text-slate-900 dark:text-white">功能完整的</span>
             <br />
-            <span className="bg-gradient-to-r from-orange-500 via-rose-500 to-amber-500 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
+            <span className="bg-linear-to-r from-orange-500 via-rose-500 to-amber-500 bg-clip-text text-transparent bg-size-[200%_auto] animate-gradient">
               现代化 AI 助手
             </span>
           </h1>
@@ -131,7 +131,7 @@ function HeroSection() {
             <Link href="/ai">
               <Button
                 size="lg"
-                className="cursor-pointer w-full sm:w-auto bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white shadow-xl shadow-orange-500/25 px-8 py-6 text-lg border-0 rounded-full hover:scale-105 transition-transform duration-200"
+                className="cursor-pointer w-full sm:w-auto bg-linear-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white shadow-xl shadow-orange-500/25 px-8 py-6 text-lg border-0 rounded-full hover:scale-105 transition-transform duration-200"
               >
                 <MessageSquare className="w-5 h-5 mr-2" />
                 开始聊天
@@ -193,7 +193,7 @@ function FeaturesSection() {
             >
               {/* Icon */}
               <div
-                className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 shadow-md text-white`}
+                className={`w-12 h-12 rounded-2xl bg-linear-to-br ${feature.gradient} flex items-center justify-center mb-6 shadow-md text-white`}
               >
                 <feature.icon className="w-6 h-6" />
               </div>
@@ -215,7 +215,7 @@ function CTASection() {
   return (
     <section className="py-24 relative overflow-hidden">
       {/* 背景渐变 - 暖色 */}
-      <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-rose-400 to-amber-400" />
+      <div className="absolute inset-0 bg-linear-to-r from-orange-400 via-rose-400 to-amber-400" />
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl relative z-10">
