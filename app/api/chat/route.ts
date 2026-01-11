@@ -5,7 +5,8 @@ import {
   smoothStream,
   stepCountIs,
   wrapLanguageModel,
-  extractReasoningMiddleware
+  extractReasoningMiddleware,
+  consumeStream
 } from 'ai'
 import { auth } from '@clerk/nextjs/server'
 import { NextRequest } from 'next/server'
@@ -86,13 +87,9 @@ export async function POST(req: NextRequest) {
       }
     })
 
-    // 配置流消费
-    result.consumeStream({
-      onError: (error) => console.error('Stream consumption error:', error)
-    })
-
     // 返回响应
     return result.toUIMessageStreamResponse({
+      consumeSseStream: consumeStream,
       sendReasoning: true,
       sendSources: true,
       generateMessageId: createIdGenerator({ prefix: 'msg', size: 16 }),
