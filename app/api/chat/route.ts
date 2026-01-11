@@ -109,22 +109,16 @@ export async function POST(req: NextRequest) {
         if (result?.responseMessage) {
           await createAiMessage({ message: result.responseMessage, chatId })
         }
-        if (toolManager) {
-          await toolManager.close()
-        }
+        await toolManager?.close()
       },
       onError: (error) => {
         console.error('Stream error:', error)
-        if (toolManager) {
-          toolManager.close()
-        }
+        toolManager?.close()
         return 'Stream error occurred'
       }
     })
   } catch (error) {
-    if (toolManager) {
-      await toolManager.close()
-    }
+    await toolManager?.close()
     if (error instanceof ZodError) {
       console.error('请求参数验证失败:', error.issues)
       return new Response(`请求参数错误: ${JSON.stringify(error.issues)}`, { status: 400 })
