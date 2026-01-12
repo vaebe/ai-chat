@@ -1,5 +1,5 @@
 import { getAiMessages } from '@/lib/ai-message'
-import { UIMessage } from 'ai'
+import { createTextStreamResponse, generateId, UIMessage } from 'ai'
 import { z } from 'zod'
 
 export const ChatRequestSchema = z.object({
@@ -47,4 +47,68 @@ export async function loadChatHistory(id: string) {
   })) as UIMessage[]
 
   return { code, data: list, msg }
+}
+
+// 返回自定义 AI 消息
+export function createCustomAIMessagesResponse(errorMessage: string) {
+  const textStream = new ReadableStream<string>({
+    start(controller) {
+      const messageId = generateId()
+      const textId = 'txt-0'
+
+      // start
+      controller.enqueue(
+        `data: ${JSON.stringify({
+          type: 'start',
+          messageId
+        })}\n\n`
+      )
+
+      controller.enqueue(`data: ${JSON.stringify({ type: 'start-step' })}\n\n`)
+
+      // text start
+      controller.enqueue(
+        `data: ${JSON.stringify({
+          type: 'text-start',
+          id: textId
+        })}\n\n`
+      )
+
+      // text delta（真正显示的内容）
+      controller.enqueue(
+        `data: ${JSON.stringify({
+          type: 'text-delta',
+          id: textId,
+          delta: errorMessage
+        })}\n\n`
+      )
+
+      // text end
+      controller.enqueue(
+        `data: ${JSON.stringify({
+          type: 'text-end',
+          id: textId
+        })}\n\n`
+      )
+
+      controller.enqueue(`data: ${JSON.stringify({ type: 'finish-step' })}\n\n`)
+
+      controller.enqueue(
+        `data: ${JSON.stringify({
+          type: 'finish',
+          finishReason: 'stop'
+        })}\n\n`
+      )
+
+      controller.enqueue(`data: [DONE]\n\n`)
+      controller.close()
+    }
+  })
+
+  return createTextStreamResponse({
+    textStream,
+    headers: {
+      'Content-Type': 'text/event-stream'
+    }
+  })
 }
