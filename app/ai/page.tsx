@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useAiStore } from './store/ai-store'
+import { useConversationStore } from './store/conversation-store'
 import { useInputStore } from './store/input-store'
 import { AiPromptInput } from './components/prompt-input'
 import { type PromptInputMessage } from '@/components/ai-elements/prompt-input'
@@ -11,8 +11,8 @@ import { getAiGatewayModels } from '@/lib/utils'
 import { useEffect } from 'react'
 
 export default function AIChatPage() {
-  const setAiFirstMsg = useAiStore((state) => state.setAiFirstMsg)
-  const updateConversationList = useAiStore((state) => state.updateConversationList)
+  const setAiFirstMsg = useConversationStore((state) => state.setAiFirstMsg)
+  const updateConversationList = useConversationStore((state) => state.updateConversationList)
 
   const setModels = useInputStore((state) => state.setModels)
   const setInputText = useInputStore((state) => state.setInputText)
@@ -21,7 +21,7 @@ export default function AIChatPage() {
     getAiGatewayModels().then((models) => {
       setModels(models)
     })
-  }, [setModels])
+  }, [])
 
   const router = useRouter()
 

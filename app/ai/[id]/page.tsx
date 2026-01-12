@@ -2,103 +2,66 @@
 
 import { useParams } from 'next/navigation'
 import { useInputStore } from '@/app/ai/store/input-store'
-import { useAiStore } from '@/app/ai/store/ai-store'
+import { useConversationStore } from '@/app/ai/store/conversation-store'
 import { useUIStore } from '@/app/ai/store/ui-store'
-import { useEffect } from 'react'
+import { useMessageOperations } from '@/app/ai/hooks/use-message-operations'
+import { useEffect, useRef } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { getAiGatewayModels } from '@/lib/utils'
 import { ChatProvider, useChatContext } from '@/app/ai/context/chat-context'
 import { MessageList } from '../components/message-list'
 import { ChatPromptInput } from '../components/chat-prompt-input'
 import { toast } from 'sonner'
-import { AiMessage } from '@/generated/prisma/client'
-import { UIMessage } from 'ai'
-import { generateAiConversationTitle } from '@/app/actions'
 
 function ChatContent({ conversationId }: { conversationId: string }) {
   const { chat } = useChatContext()
   const { messages, status, setMessages, sendMessage } = useChat({ chat })
 
-  const aiFirstMsg = useAiStore((state) => state.aiFirstMsg)
-  const setAiFirstMsg = useAiStore((state) => state.setAiFirstMsg)
-  const updateConversationList = useAiStore((state) => state.updateConversationList)
-  const fetchMessages = useAiStore((state) => state.fetchMessages)
+  const aiFirstMsg = useConversationStore((state) => state.aiFirstMsg)
+  const setAiFirstMsg = useConversationStore((state) => state.setAiFirstMsg)
   const messagesLoading = useUIStore((state) => state.messagesLoading)
+  const { fetchMessages, processMessages, generateConversationTitle } = useMessageOperations()
 
-  // 生成对话标题
-  const generateConversationTitle = () => {
-    generateAiConversationTitle(conversationId)
-      .then((res) => {
-        if (res.code === 0) {
-          const conversationName = res.data?.name ?? ''
-          updateConversationList((list) =>
-            list.map((item) =>
-              item.id === conversationId && conversationName ? { ...item, name: conversationName } : item
-            )
-          )
-        }
-      })
-      .catch((err) => {
-        console.error('生成对话标题失败!', err)
-      })
-  }
-
-  // 设置历史消息
-  const setMsg = async () => {
-    try {
-      const res = await fetchMessages(conversationId)
-
-      if (res.code !== 0) {
-        toast('获取对话详情失败!')
-        return
-      }
-
-      const data = res?.data ?? []
-
-      const list = data.map((item: AiMessage) => ({
-        parts: JSON.parse(item.parts),
-        metadata: JSON.parse(item.metadata ?? '{}'),
-        role: item.role,
-        id: item.id
-      })) as UIMessage[]
-
-      console.log('历史消息', list)
-
-      setMessages(list)
-    } catch {
-      toast('获取对话详情失败!')
-    }
-  }
+  // 使用 useRef 追踪是否已经初始化过，防止重复加载
+  const initializedRef = useRef(false)
 
   // 发送首条消息
   const firstMsg = () => {
     sendMessage({ text: aiFirstMsg }).then(() => {
-      generateConversationTitle()
+      generateConversationTitle(conversationId)
       setAiFirstMsg('')
     })
   }
 
   // 初始化消息
   useEffect(() => {
-    let isMounted = true
-
     const initializeMessages = async () => {
-      if (aiFirstMsg) {
-        if (isMounted) {
-          firstMsg()
-        }
-      } else {
-        if (isMounted) {
-          await setMsg()
-        }
+      // 如果已经初始化过，不再执行
+      if (initializedRef.current) {
+        return
       }
+
+      if (aiFirstMsg) {
+        firstMsg()
+      } else {
+        const res = await fetchMessages(conversationId)
+
+        if (res.code !== 0) {
+          toast('获取对话详情失败!')
+          return
+        }
+
+        const data = res?.data ?? []
+        const list = processMessages(data)
+        console.log('历史消息', list)
+        setMessages(list)
+      }
+
+      // 标记为已初始化
+      initializedRef.current = true
     }
 
     initializeMessages()
-
-    return () => {
-      isMounted = false
-    }
   }, [conversationId])
 
   return (
