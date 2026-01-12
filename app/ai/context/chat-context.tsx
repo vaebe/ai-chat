@@ -9,11 +9,12 @@ import dayjs from 'dayjs'
 interface ChatContextValue {
   chat: Chat<UIMessage>
   clearChat: () => void
+  onFinish?: () => void
 }
 
 const ChatContext = createContext<ChatContextValue | undefined>(undefined)
 
-function createChat(conversationId: string) {
+function createChat(conversationId: string, onFinish?: () => void) {
   return new Chat<UIMessage>({
     id: conversationId,
     transport: new DefaultChatTransport({
@@ -33,23 +34,25 @@ function createChat(conversationId: string) {
           }
         }
       }
-    })
+    }),
+    onFinish
   })
 }
 
 interface ChatProviderProps {
   children: ReactNode
   conversationId: string
+  onFinish?: () => void
 }
 
-export function ChatProvider({ children, conversationId }: ChatProviderProps) {
-  const [chat, setChat] = useState(() => createChat(conversationId))
+export function ChatProvider({ children, conversationId, onFinish }: ChatProviderProps) {
+  const [chat, setChat] = useState(() => createChat(conversationId, onFinish))
 
   const clearChat = () => {
-    setChat(createChat(conversationId))
+    setChat(createChat(conversationId, onFinish))
   }
 
-  return <ChatContext.Provider value={{ chat, clearChat }}>{children}</ChatContext.Provider>
+  return <ChatContext.Provider value={{ chat, clearChat, onFinish }}>{children}</ChatContext.Provider>
 }
 
 export function useChatContext() {

@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       return new Response(chatHistoryRes.msg, { status: 500 })
     }
 
-    await createAiMessage({ message, chatId })
+    createAiMessage({ message, chatId })
 
     const model = wrapLanguageModel({
       model: gateway(modelName),

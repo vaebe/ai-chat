@@ -14,24 +14,16 @@ import { ChatPromptInput } from '../components/chat-prompt-input'
 import { toast } from 'sonner'
 
 function ChatContent({ conversationId }: { conversationId: string }) {
+  const aiFirstMsg = useConversationStore((state) => state.aiFirstMsg)
+  const { fetchMessages, processMessages } = useMessageOperations()
+
   const { chat } = useChatContext()
   const { messages, status, setMessages, sendMessage } = useChat({ chat })
 
-  const aiFirstMsg = useConversationStore((state) => state.aiFirstMsg)
-  const setAiFirstMsg = useConversationStore((state) => state.setAiFirstMsg)
   const messagesLoading = useUIStore((state) => state.messagesLoading)
-  const { fetchMessages, processMessages, generateConversationTitle } = useMessageOperations()
 
   // 使用 useRef 追踪是否已经初始化过，防止重复加载
   const initializedRef = useRef(false)
-
-  // 发送首条消息
-  const firstMsg = () => {
-    sendMessage({ text: aiFirstMsg }).then(() => {
-      generateConversationTitle(conversationId)
-      setAiFirstMsg('')
-    })
-  }
 
   // 初始化消息
   useEffect(() => {
@@ -42,7 +34,7 @@ function ChatContent({ conversationId }: { conversationId: string }) {
       }
 
       if (aiFirstMsg) {
-        firstMsg()
+        sendMessage({ text: aiFirstMsg })
       } else {
         const res = await fetchMessages(conversationId)
 
@@ -73,8 +65,20 @@ function ChatContent({ conversationId }: { conversationId: string }) {
 }
 
 export default function Page() {
-  const params = useParams<{ id: string }>()
-  const conversationId = params.id
+  const conversationId = useParams<{ id: string }>().id
+
+  const setAiFirstMsg = useConversationStore((state) => state.setAiFirstMsg)
+  const { generateConversationTitle } = useMessageOperations()
+
+  const handleFinish = () => {
+    // 直接从 store 获取最新的 aiFirstMsg 值
+    const currentAiFirstMsg = useConversationStore.getState().aiFirstMsg
+    // 第一次对话完成后生成对话标题
+    if (currentAiFirstMsg) {
+      generateConversationTitle(conversationId)
+      setAiFirstMsg('')
+    }
+  }
 
   const setModels = useInputStore((state) => state.setModels)
 
@@ -82,10 +86,10 @@ export default function Page() {
     getAiGatewayModels().then((models) => {
       setModels(models)
     })
-  }, [setModels])
+  }, [])
 
   return (
-    <ChatProvider key={conversationId} conversationId={conversationId}>
+    <ChatProvider key={conversationId} conversationId={conversationId} onFinish={handleFinish}>
       <ChatContent conversationId={conversationId} />
     </ChatProvider>
   )
