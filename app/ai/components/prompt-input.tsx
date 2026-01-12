@@ -11,19 +11,29 @@ import {
   PromptInputBody,
   PromptInputButton,
   type PromptInputMessage,
-  PromptInputSelect,
-  PromptInputSelectContent,
-  PromptInputSelectItem,
-  PromptInputSelectTrigger,
-  PromptInputSelectValue,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputTools,
   PromptInputFooter
 } from '@/components/ai-elements/prompt-input'
-import { GlobeIcon } from 'lucide-react'
+import {
+  ModelSelector,
+  ModelSelectorContent,
+  ModelSelectorEmpty,
+  ModelSelectorGroup,
+  ModelSelectorInput,
+  ModelSelectorItem,
+  ModelSelectorList,
+  ModelSelectorLogo,
+  ModelSelectorLogoGroup,
+  ModelSelectorName,
+  ModelSelectorTrigger
+} from '@/components/ai-elements/model-selector'
+import { Button } from '@/components/ui/button'
+import { CheckIcon, GlobeIcon } from 'lucide-react'
 import type { ChatStatus } from 'ai'
-import React from 'react'
+import type { GatewayLanguageModelEntry } from '@ai-sdk/gateway'
+import React, { useState } from 'react'
 
 interface AiPromptInputProps {
   onSubmit: (message: PromptInputMessage) => void
@@ -33,7 +43,7 @@ interface AiPromptInputProps {
   setModel: (model: string) => void
   useWebSearch: boolean
   setUseWebSearch: (useWebSearch: boolean) => void
-  models: Array<{ id: string; name: string }>
+  models: GatewayLanguageModelEntry[]
   disabled?: boolean
   status?: ChatStatus
   onStop?: () => void
@@ -56,6 +66,8 @@ export const AiPromptInput = ({
   className,
   placeholder = '询问任何问题？'
 }: AiPromptInputProps) => {
+  const [open, setOpen] = useState(false)
+
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text)
     const hasAttachments = Boolean(message.files?.length)
@@ -71,19 +83,42 @@ export const AiPromptInput = ({
     setText(e.target.value)
   }
 
-  const handleModelChange = (value: string) => {
-    setModel(value)
+  const handleModelChange = (modelId: string) => {
+    setModel(modelId)
+    setOpen(false)
   }
 
   const handleWebSearchToggle = () => {
     setUseWebSearch(!useWebSearch)
   }
 
-  const modelOptions = models.map((model) => (
-    <PromptInputSelectItem key={model.id} value={model.id}>
-      {model.name}
-    </PromptInputSelectItem>
-  ))
+  const selectedModelData = models.find((m) => m.id === model)
+  const selectedModelName = selectedModelData?.name || '选择模型'
+  const selectedModelProvider = selectedModelData?.specification?.provider || ''
+
+  // 按品牌分组模型
+  const groupedModels = models.reduce(
+    (acc, modelItem) => {
+      const brand = modelItem.specification?.provider || 'other'
+      if (!acc[brand]) {
+        acc[brand] = []
+      }
+      acc[brand].push(modelItem)
+      return acc
+    },
+    {} as Record<string, GatewayLanguageModelEntry[]>
+  )
+
+  // 品牌显示名称映射
+  const brandNames: Record<string, string> = {
+    alibaba: 'Alibaba',
+    anthropic: 'Anthropic',
+    deepseek: 'DeepSeek',
+    google: 'Google',
+    openai: 'OpenAI',
+    mistral: 'Mistral',
+    llama: 'Meta'
+  }
 
   return (
     <PromptInput onSubmit={handleSubmit} className={className} globalDrop multiple>
@@ -99,6 +134,7 @@ export const AiPromptInput = ({
               <PromptInputActionAddAttachments />
             </PromptInputActionMenuContent>
           </PromptInputActionMenu>
+
           <PromptInputButton
             className="cursor-pointer"
             onClick={handleWebSearchToggle}
@@ -107,12 +143,47 @@ export const AiPromptInput = ({
             <GlobeIcon size={16} />
             <span>搜索</span>
           </PromptInputButton>
-          <PromptInputSelect onValueChange={handleModelChange} value={model}>
-            <PromptInputSelectTrigger>
-              <PromptInputSelectValue />
-            </PromptInputSelectTrigger>
-            <PromptInputSelectContent>{modelOptions}</PromptInputSelectContent>
-          </PromptInputSelect>
+
+          <ModelSelector open={open} onOpenChange={setOpen}>
+            <ModelSelectorTrigger asChild>
+              <Button variant="outline" className="cursor-pointer justify-start h-9 min-w-40 gap-2" size="sm">
+                {selectedModelProvider && <ModelSelectorLogo provider={selectedModelProvider} />}
+                <ModelSelectorName className="truncate">{selectedModelName}</ModelSelectorName>
+              </Button>
+            </ModelSelectorTrigger>
+            <ModelSelectorContent>
+              <ModelSelectorInput placeholder="搜索模型..." />
+              <ModelSelectorList>
+                <ModelSelectorEmpty>没有找到模型</ModelSelectorEmpty>
+                {Object.entries(groupedModels).map(([brand, brandModels]) => (
+                  <ModelSelectorGroup key={brand} heading={brandNames[brand] || brand}>
+                    {brandModels.map((modelItem) => (
+                      <ModelSelectorItem
+                        key={modelItem.id}
+                        value={modelItem.id}
+                        onSelect={() => handleModelChange(modelItem.id)}
+                      >
+                        {modelItem.specification?.provider && (
+                          <ModelSelectorLogo provider={modelItem.specification.provider} />
+                        )}
+                        <ModelSelectorName>{modelItem.name}</ModelSelectorName>
+                        {(modelItem.specification as any)?.apiProvider && (
+                          <ModelSelectorLogoGroup>
+                            <ModelSelectorLogo provider={(modelItem.specification as any).apiProvider} />
+                          </ModelSelectorLogoGroup>
+                        )}
+                        {model === modelItem.id ? (
+                          <CheckIcon className="ml-auto size-4" />
+                        ) : (
+                          <div className="ml-auto size-4" />
+                        )}
+                      </ModelSelectorItem>
+                    ))}
+                  </ModelSelectorGroup>
+                ))}
+              </ModelSelectorList>
+            </ModelSelectorContent>
+          </ModelSelector>
         </PromptInputTools>
 
         <PromptInputSubmit disabled={disabled || !text} status={status} onClick={onStop} />
