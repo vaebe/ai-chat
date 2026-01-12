@@ -14,23 +14,14 @@ export default function AIChatPage() {
   const setAiFirstMsg = useAiStore((state) => state.setAiFirstMsg)
   const updateConversationList = useAiStore((state) => state.updateConversationList)
 
-  // 从输入 store 获取输入框状态（直接订阅，确保变更触发重渲染）
-  const inputText = useInputStore((state) => state.inputText)
-  const selectedModel = useInputStore((state) => state.selectedModel)
-  const useWebSearch = useInputStore((state) => state.useWebSearch)
-  const models = useInputStore((state) => state.models)
   const setModels = useInputStore((state) => state.setModels)
+  const setInputText = useInputStore((state) => state.setInputText)
 
   useEffect(() => {
     getAiGatewayModels().then((models) => {
       setModels(models)
     })
-  }, [])
-
-  // 输入相关方法
-  const setInputText = useInputStore((state) => state.setInputText)
-  const setSelectedModel = useInputStore((state) => state.setSelectedModel)
-  const setUseWebSearch = useInputStore((state) => state.setUseWebSearch)
+  }, [setModels])
 
   const router = useRouter()
 
@@ -72,17 +63,7 @@ export default function AIChatPage() {
         <div className="text-3xl font-bold mb-10 text-center">有什么可以帮忙的？</div>
 
         <div className="flex justify-center p-2 md:w-8/12 mx-auto">
-          <AiPromptInput
-            onSubmit={handleSubmit}
-            text={inputText}
-            setText={setInputText}
-            model={selectedModel}
-            setModel={setSelectedModel}
-            useWebSearch={useWebSearch}
-            setUseWebSearch={setUseWebSearch}
-            models={models}
-            className="w-full"
-          />
+          <AiPromptInput onSubmit={handleSubmit} className="w-full" />
         </div>
       </div>
     </div>

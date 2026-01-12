@@ -1,5 +1,8 @@
 'use client'
 
+import { useChatContext } from '@/app/ai/context/chat-context'
+import { useChat } from '@ai-sdk/react'
+import { useInputStore } from '@/app/ai/store/input-store'
 import {
   PromptInput,
   PromptInputActionAddAttachments,
@@ -32,17 +35,18 @@ import {
 import { Button } from '@/components/ui/button'
 import { CheckIcon, GlobeIcon } from 'lucide-react'
 import type { GatewayLanguageModelEntry } from '@ai-sdk/gateway'
-import React, { useState } from 'react'
-import { useInputStore } from '@/app/ai/store/input-store'
+import { useState } from 'react'
 
-interface AiPromptInputProps {
-  onSubmit: (message: PromptInputMessage) => void
+interface ChatPromptInputProps {
   className?: string
   placeholder?: string
 }
 
-export const AiPromptInput = ({ onSubmit, className, placeholder = '询问任何问题？' }: AiPromptInputProps) => {
-  // 从 store 获取状态
+export function ChatPromptInput({ className, placeholder = '询问任何问题？' }: ChatPromptInputProps) {
+  const { chat } = useChatContext()
+  const { status, stop, sendMessage } = useChat({ chat })
+
+  // 从 store 获取输入状态
   const inputText = useInputStore((state) => state.inputText)
   const selectedModel = useInputStore((state) => state.selectedModel)
   const useWebSearch = useInputStore((state) => state.useWebSearch)
@@ -61,7 +65,11 @@ export const AiPromptInput = ({ onSubmit, className, placeholder = '询问任何
       return
     }
 
-    onSubmit(message)
+    sendMessage({
+      text: message.text || 'Sent with attachments',
+      files: message.files
+    })
+    setInputText('')
   }
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -160,7 +168,7 @@ export const AiPromptInput = ({ onSubmit, className, placeholder = '询问任何
           </ModelSelector>
         </PromptInputTools>
 
-        <PromptInputSubmit disabled={!inputText} />
+        <PromptInputSubmit disabled={!inputText} status={status} onClick={stop} />
       </PromptInputFooter>
     </PromptInput>
   )

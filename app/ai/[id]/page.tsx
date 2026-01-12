@@ -1,78 +1,50 @@
 'use client'
 
-import { AiPromptInput } from '@/app/ai/components/prompt-input'
-import { type PromptInputMessage } from '@/components/ai-elements/prompt-input'
-import { useCallback, useEffect } from 'react'
-import { useChat } from '@ai-sdk/react'
 import { useParams } from 'next/navigation'
-import { useAiStore } from '@/app/ai/store/ai-store'
 import { useInputStore } from '@/app/ai/store/input-store'
+import { useAiStore } from '@/app/ai/store/ai-store'
+import { useUIStore } from '@/app/ai/store/ui-store'
+import { useEffect } from 'react'
+import { useChat } from '@ai-sdk/react'
+import { getAiGatewayModels } from '@/lib/utils'
+import { ChatProvider, useChatContext } from '@/app/ai/context/chat-context'
+import { MessageList } from '../components/message-list'
+import { ChatPromptInput } from '../components/chat-prompt-input'
 import { toast } from 'sonner'
 import { AiMessage } from '@/generated/prisma/client'
-import { DefaultChatTransport, UIMessage } from 'ai'
+import { UIMessage } from 'ai'
 import { generateAiConversationTitle } from '@/app/actions'
-import { MessageList } from '../components/message-list'
-import dayjs from 'dayjs'
-import { useUIStore } from '@/app/ai/store/ui-store'
-import { getAiGatewayModels } from '@/lib/utils'
 
-export default function Page() {
-  const params = useParams<{ id: string }>()
-  const conversationId = params.id
-
-  // 从输入 store 获取输入框状态（直接订阅，确保变更触发重渲染）
-  const inputText = useInputStore((state) => state.inputText)
-  const selectedModel = useInputStore((state) => state.selectedModel)
-  const useWebSearch = useInputStore((state) => state.useWebSearch)
-  const models = useInputStore((state) => state.models)
-
-  // 输入相关方法
-  const setInputText = useInputStore((state) => state.setInputText)
-  const setSelectedModel = useInputStore((state) => state.setSelectedModel)
-  const setUseWebSearch = useInputStore((state) => state.setUseWebSearch)
-
-  const setModels = useInputStore((state) => state.setModels)
-
-  useEffect(() => {
-    getAiGatewayModels().then((models) => {
-      setModels(models)
-    })
-  }, [])
+function ChatContent({ conversationId }: { conversationId: string }) {
+  const { chat } = useChatContext()
+  const { messages, status, setMessages, sendMessage } = useChat({ chat })
 
   const aiFirstMsg = useAiStore((state) => state.aiFirstMsg)
   const setAiFirstMsg = useAiStore((state) => state.setAiFirstMsg)
   const updateConversationList = useAiStore((state) => state.updateConversationList)
-  const messagesLoading = useUIStore((state) => state.messagesLoading)
   const fetchMessages = useAiStore((state) => state.fetchMessages)
+  const messagesLoading = useUIStore((state) => state.messagesLoading)
 
-  const useChatTransport = new DefaultChatTransport({
-    api: '/api/chat',
-    // 仅发送最后一条消息
-    prepareSendMessagesRequest({ messages, id }) {
-      const day = dayjs()
-
-      return {
-        body: {
-          message: messages[messages.length - 1],
-          id,
-          timestamp: day.unix(),
-          date: day.format('YYYY-MM-DD HH:mm:ss'),
-          model: selectedModel,
-          userTools: {
-            enableWebSearch: useWebSearch
-          }
+  // 生成对话标题
+  const generateConversationTitle = () => {
+    generateAiConversationTitle(conversationId)
+      .then((res) => {
+        if (res.code === 0) {
+          const conversationName = res.data?.name ?? ''
+          updateConversationList((list) =>
+            list.map((item) =>
+              item.id === conversationId && conversationName ? { ...item, name: conversationName } : item
+            )
+          )
         }
-      }
-    }
-  })
+      })
+      .catch((err) => {
+        console.error('生成对话标题失败!', err)
+      })
+  }
 
-  const { status, stop, setMessages, sendMessage, messages } = useChat({
-    id: conversationId,
-    // experimental_throttle: 50,
-    transport: useChatTransport
-  })
-
-  const setMsg = useCallback(async () => {
+  // 设置历史消息
+  const setMsg = async () => {
     try {
       const res = await fetchMessages(conversationId)
 
@@ -96,34 +68,17 @@ export default function Page() {
     } catch {
       toast('获取对话详情失败!')
     }
-  }, [conversationId, fetchMessages, setMessages])
+  }
 
-  // 生成对话标题
-  const generateConversationTitle = useCallback(() => {
-    generateAiConversationTitle(conversationId)
-      .then((res) => {
-        if (res.code === 0) {
-          const conversationName = res.data?.name ?? ''
-
-          updateConversationList((list) =>
-            list.map((item) =>
-              item.id === conversationId && conversationName ? { ...item, name: conversationName } : item
-            )
-          )
-        }
-      })
-      .catch((err) => {
-        console.error('生成对话标题失败!', err)
-      })
-  }, [conversationId, updateConversationList])
-
-  const firstMsg = useCallback(() => {
+  // 发送首条消息
+  const firstMsg = () => {
     sendMessage({ text: aiFirstMsg }).then(() => {
       generateConversationTitle()
       setAiFirstMsg('')
     })
-  }, [aiFirstMsg, sendMessage, setAiFirstMsg, generateConversationTitle])
+  }
 
+  // 初始化消息
   useEffect(() => {
     let isMounted = true
 
@@ -144,41 +99,31 @@ export default function Page() {
     return () => {
       isMounted = false
     }
-  }, [aiFirstMsg, conversationId, firstMsg, setMsg])
-
-  const handleSubmit = (message: PromptInputMessage) => {
-    const hasText = Boolean(message.text)
-    const hasAttachments = Boolean(message.files?.length)
-
-    if (!(hasText || hasAttachments)) {
-      return
-    }
-
-    sendMessage({
-      text: message.text || 'Sent with attachments',
-      files: message.files
-    })
-    setInputText('')
-  }
+  }, [conversationId])
 
   return (
     <div className="flex flex-col h-screen">
-      <MessageList messages={messages} status={status} loading={messagesLoading}></MessageList>
-
-      <AiPromptInput
-        onSubmit={handleSubmit}
-        text={inputText}
-        setText={setInputText}
-        model={selectedModel}
-        setModel={setSelectedModel}
-        useWebSearch={useWebSearch}
-        setUseWebSearch={setUseWebSearch}
-        models={models}
-        disabled={!inputText && !status}
-        status={status}
-        onStop={stop}
-        className="my-4 w-8/12 mx-auto"
-      />
+      <MessageList messages={messages} status={status} loading={messagesLoading} />
+      <ChatPromptInput className="my-4 w-8/12 mx-auto" />
     </div>
+  )
+}
+
+export default function Page() {
+  const params = useParams<{ id: string }>()
+  const conversationId = params.id
+
+  const setModels = useInputStore((state) => state.setModels)
+
+  useEffect(() => {
+    getAiGatewayModels().then((models) => {
+      setModels(models)
+    })
+  }, [setModels])
+
+  return (
+    <ChatProvider key={conversationId} conversationId={conversationId}>
+      <ChatContent conversationId={conversationId} />
+    </ChatProvider>
   )
 }
