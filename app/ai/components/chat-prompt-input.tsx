@@ -168,7 +168,12 @@ export function ChatPromptInput({ className, placeholder = '询问任何问题�
           </ModelSelector>
         </PromptInputTools>
 
-        <PromptInputSubmit disabled={!inputText} status={status} onClick={stop} />
+        <PromptInputSubmit
+          disabled={!inputText && status !== 'streaming'}
+          className="cursor-pointer"
+          status={status}
+          onClick={stop}
+        />
       </PromptInputFooter>
     </PromptInput>
   )
