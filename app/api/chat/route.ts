@@ -14,7 +14,7 @@ import { ZodError } from 'zod'
 import { ChatRequestSchema } from './utils'
 import { createAiMessage } from '@/lib/ai-message'
 import { createTools } from './tools/tool-manager'
-import { loadChatHistory, createCustomAIMessagesResponse } from './utils'
+import { loadChatHistory, createErrorStreamResponse } from './utils'
 import { gateway } from '@ai-sdk/gateway'
 import { createSystemPrompt } from './prompts'
 
@@ -23,7 +23,7 @@ export const maxDuration = 300
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) {
-    return createCustomAIMessagesResponse('无权限!')
+    return createErrorStreamResponse('401 无权限!')
   }
 
   let toolManager: Awaited<ReturnType<typeof createTools>> | null = null
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
     const chatHistoryRes = await loadChatHistory(chatId)
     if (chatHistoryRes.code !== 0) {
-      return createCustomAIMessagesResponse(chatHistoryRes.msg || '加载聊天历史失败')
+      return createErrorStreamResponse(chatHistoryRes.msg || '加载聊天历史失败')
     }
 
     createAiMessage({ message, chatId })
@@ -121,10 +121,9 @@ export async function POST(req: NextRequest) {
     toolManager?.close()
     if (error instanceof ZodError) {
       console.error('请求参数验证失败:', error.issues)
-      return createCustomAIMessagesResponse(`请求参数错误: ${JSON.stringify(error.issues)}`)
+      return createErrorStreamResponse('请求 AI 对话参数错误!')
     }
     console.error('Chat processing error:', error)
-    const errorMessage = error instanceof Error ? error.message : '处理请求时发生错误'
-    return createCustomAIMessagesResponse(errorMessage)
+    return createErrorStreamResponse('处理 AI 对话请求时发生错误!')
   }
 }
