@@ -79,7 +79,7 @@ export const github_get_file_contents = tool({
   }),
   execute: async ({ owner, repo, path, ref }) => {
     const params = ref ? `?ref=${encodeURIComponent(ref)}` : ''
-    return githubRequest(`/repos/${owner}/${repo}/contents/${path}${params}`)
+    return githubRequest(`/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}${params}`)
   }
 })
 
@@ -299,7 +299,7 @@ export const github_search_issues = tool({
     let searchQuery = query
 
     // Automatically scope to issues
-    if (!searchQuery.includes('is:')) {
+    if (!/(^|\s)is:/.test(searchQuery)) {
       searchQuery += ' is:issue'
     }
 
@@ -403,7 +403,7 @@ export const github_search_pull_requests = tool({
     let searchQuery = query
 
     // Automatically scope to pull requests
-    if (!searchQuery.includes('is:')) {
+    if (!/(^|\s)is:/.test(searchQuery)) {
       searchQuery += ' is:pr'
     }
 
