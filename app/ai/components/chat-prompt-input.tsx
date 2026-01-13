@@ -169,10 +169,15 @@ export function ChatPromptInput({ className, placeholder = '询问任何问题�
         </PromptInputTools>
 
         <PromptInputSubmit
-          disabled={!inputText && status !== 'streaming'}
+          disabled={!inputText.trim() && status !== 'streaming'}
           className="cursor-pointer"
           status={status}
-          onClick={stop}
+          onClick={(e) => {
+            if (status === 'streaming') {
+              e.preventDefault()
+              stop()
+            }
+          }}
         />
       </PromptInputFooter>
     </PromptInput>
