@@ -23,7 +23,7 @@ const DefaultModels: GatewayLanguageModelEntry = {
 const defaultState: InputState = {
   inputText: '',
   selectedModel: 'deepseek/deepseek-v3.2',
-  useWebSearch: false,
+  webSearchEnabled: false,
   models: [DefaultModels]
 }
 
@@ -36,7 +36,7 @@ export const useInputStore = create<InputState & InputActions>()(
 
       setSelectedModel: (selectedModel: string) => set({ selectedModel }),
 
-      setUseWebSearch: (useWebSearch: boolean) => set({ useWebSearch }),
+      setWebSearchEnabled: (webSearchEnabled: boolean) => set({ webSearchEnabled }),
 
       setModels: (models: GatewayLanguageModelEntry[]) => set({ models }),
 

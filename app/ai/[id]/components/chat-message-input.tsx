@@ -33,9 +33,9 @@ export function ChatMessageInput({ className, placeholder = '询问任何问题�
   const { status, stop, sendMessage } = useChat({ chat })
 
   const inputText = useInputStore((state) => state.inputText)
-  const useWebSearch = useInputStore((state) => state.useWebSearch)
+  const webSearchEnabled = useInputStore((state) => state.webSearchEnabled)
   const setInputText = useInputStore((state) => state.setInputText)
-  const setUseWebSearch = useInputStore((state) => state.setUseWebSearch)
+  const setWebSearchEnabled = useInputStore((state) => state.setWebSearchEnabled)
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text)
@@ -57,7 +57,7 @@ export function ChatMessageInput({ className, placeholder = '询问任何问题�
   }
 
   const handleWebSearchToggle = () => {
-    setUseWebSearch(!useWebSearch)
+    setWebSearchEnabled(!webSearchEnabled)
   }
 
   return (
@@ -78,7 +78,7 @@ export function ChatMessageInput({ className, placeholder = '询问任何问题�
           <PromptInputButton
             className="cursor-pointer"
             onClick={handleWebSearchToggle}
-            variant={useWebSearch ? 'default' : 'ghost'}
+            variant={webSearchEnabled ? 'default' : 'ghost'}
           >
             <GlobeIcon size={16} />
             <span>搜索</span>

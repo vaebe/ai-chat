@@ -29,7 +29,7 @@ function createChat(conversationId: string, onFinish?: () => void) {
             date: day.format('YYYY-MM-DD HH:mm:ss'),
             model: useInputStore.getState().selectedModel,
             userTools: {
-              enableWebSearch: useInputStore.getState().useWebSearch
+              enableWebSearch: useInputStore.getState().webSearchEnabled
             }
           }
         }

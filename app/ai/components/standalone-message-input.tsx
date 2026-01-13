@@ -33,9 +33,9 @@ export const StandaloneMessageInput = ({
   placeholder = '询问任何问题？'
 }: StandaloneMessageInputProps) => {
   const inputText = useInputStore((state) => state.inputText)
-  const useWebSearch = useInputStore((state) => state.useWebSearch)
+  const webSearchEnabled = useInputStore((state) => state.webSearchEnabled)
   const setInputText = useInputStore((state) => state.setInputText)
-  const setUseWebSearch = useInputStore((state) => state.setUseWebSearch)
+  const setWebSearchEnabled = useInputStore((state) => state.setWebSearchEnabled)
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text)
@@ -53,7 +53,7 @@ export const StandaloneMessageInput = ({
   }
 
   const handleWebSearchToggle = () => {
-    setUseWebSearch(!useWebSearch)
+    setWebSearchEnabled(!webSearchEnabled)
   }
 
   return (
@@ -74,7 +74,7 @@ export const StandaloneMessageInput = ({
           <PromptInputButton
             className="cursor-pointer"
             onClick={handleWebSearchToggle}
-            variant={useWebSearch ? 'default' : 'ghost'}
+            variant={webSearchEnabled ? 'default' : 'ghost'}
           >
             <GlobeIcon size={16} />
             <span>搜索</span>
