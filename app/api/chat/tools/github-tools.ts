@@ -274,21 +274,6 @@ export const github_list_issues = tool({
   }
 })
 
-export const github_list_issue_types = tool({
-  description: 'List supported issue types for repository owner (organization)',
-  inputSchema: z.object({
-    owner: z.string().describe('The organization owner of the repository')
-  }),
-  execute: async ({ owner }) => {
-    // This requires GraphQL API as REST API doesn't have this endpoint
-    // For now, we'll return a placeholder response
-    return {
-      message: `Issue types are organization-specific for ${owner} and require GraphQL API access`,
-      available_types: ['issue', 'bug', 'enhancement', 'documentation', 'duplicate']
-    }
-  }
-})
-
 export const github_search_issues = tool({
   description: 'Search for issues in GitHub repositories using issues search syntax already scoped to is:issue',
   inputSchema: z.object({
@@ -507,7 +492,6 @@ export const githubTools = {
   github_search_users,
   github_issue_read,
   github_list_issues,
-  github_list_issue_types,
   github_search_issues,
   github_list_branches,
   github_pull_request_read,
