@@ -32,7 +32,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { CheckIcon, GlobeIcon } from 'lucide-react'
 import type { GatewayLanguageModelEntry } from '@ai-sdk/gateway'
-import React, { useState } from 'react'
+import { useState, type ChangeEvent } from 'react'
 import { useInputStore } from '@/app/ai/store/input-store'
 
 interface AiPromptInputProps {
@@ -64,7 +64,7 @@ export const AiPromptInput = ({ onSubmit, className, placeholder = '询问任何
     onSubmit(message)
   }
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleTextChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setInputText(e.target.value)
   }
 

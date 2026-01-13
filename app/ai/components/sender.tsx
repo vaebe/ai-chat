@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowUpIcon, StopCircle } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type ChangeEvent } from 'react'
 import { cn } from '@/lib/utils'
 
 interface SenderProps {
@@ -30,7 +30,7 @@ function Sender({ onSubmit, input, setInput, isLoading, stop, className }: Sende
     }
   }, [])
 
-  const handleInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleInput = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setInput(event.target.value)
     adjustHeight()
   }
@@ -54,10 +54,7 @@ function Sender({ onSubmit, input, setInput, isLoading, stop, className }: Sende
         placeholder="Send a message..."
         value={input}
         onChange={handleInput}
-        className={cn(
-          'max-h-[calc(45dvh)] overflow-hidden resize-none rounded-xl text-base bg-muted pb-10',
-          className
-        )}
+        className={cn('max-h-[calc(45dvh)] overflow-hidden resize-none rounded-xl text-base bg-muted pb-10', className)}
         autoFocus
         onKeyDown={(event) => {
           if (event.key === 'Enter' && !event.shiftKey) {
@@ -84,13 +81,7 @@ function Sender({ onSubmit, input, setInput, isLoading, stop, className }: Sende
         </Button>
 
         {isLoading && (
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            className="cursor-pointer"
-            onClick={stop}
-          >
+          <Button type="button" size="sm" variant="outline" className="cursor-pointer" onClick={stop}>
             <StopCircle size={18} />
           </Button>
         )}

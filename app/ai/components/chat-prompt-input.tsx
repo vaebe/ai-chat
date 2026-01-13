@@ -35,7 +35,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { CheckIcon, GlobeIcon } from 'lucide-react'
 import type { GatewayLanguageModelEntry } from '@ai-sdk/gateway'
-import { useState } from 'react'
+import { useState, type ChangeEvent } from 'react'
 
 interface ChatPromptInputProps {
   className?: string
@@ -72,7 +72,7 @@ export function ChatPromptInput({ className, placeholder = '询问任何问题�
     setInputText('')
   }
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleTextChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setInputText(e.target.value)
   }
 
