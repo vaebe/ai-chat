@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, ReactNode, useState, useEffect } from 'react'
+import { createContext, useContext, ReactNode, useState } from 'react'
 import { Chat } from '@ai-sdk/react'
 import { DefaultChatTransport, UIMessage } from 'ai'
 import { useInputStore } from '@/app/ai/store/input-store'
@@ -51,10 +51,6 @@ export function ChatProvider({ children, conversationId, onFinish }: ChatProvide
   const clearChat = () => {
     setChat(createChat(conversationId, onFinish))
   }
-
-  useEffect(() => {
-    setChat(createChat(conversationId, onFinish))
-  }, [conversationId, onFinish])
 
   return <ChatContext.Provider value={{ chat, clearChat, onFinish }}>{children}</ChatContext.Provider>
 }
