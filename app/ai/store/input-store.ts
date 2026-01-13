@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import { InputState, InputActions } from '@/types/ai'
 import { type GatewayLanguageModelEntry } from '@ai-sdk/gateway'
 
@@ -22,20 +23,28 @@ const DefaultModels: GatewayLanguageModelEntry = {
 const defaultState: InputState = {
   inputText: '',
   selectedModel: 'deepseek/deepseek-v3.2',
-  useWebSearch: false,
+  webSearchEnabled: false,
   models: [DefaultModels]
 }
 
-export const useInputStore = create<InputState & InputActions>((set) => ({
-  ...defaultState,
+export const useInputStore = create<InputState & InputActions>()(
+  persist(
+    (set) => ({
+      ...defaultState,
 
-  setInputText: (inputText: string) => set({ inputText }),
+      setInputText: (inputText: string) => set({ inputText }),
 
-  setSelectedModel: (selectedModel: string) => set({ selectedModel }),
+      setSelectedModel: (selectedModel: string) => set({ selectedModel }),
 
-  setUseWebSearch: (useWebSearch: boolean) => set({ useWebSearch }),
+      setWebSearchEnabled: (webSearchEnabled: boolean) => set({ webSearchEnabled }),
 
-  setModels: (models: GatewayLanguageModelEntry[]) => set({ models }),
+      setModels: (models: GatewayLanguageModelEntry[]) => set({ models }),
 
-  resetInputState: () => set(defaultState)
-}))
+      resetInputState: () => set(defaultState)
+    }),
+    {
+      name: 'ai-input-store',
+      partialize: (state) => ({ selectedModel: state.selectedModel })
+    }
+  )
+)

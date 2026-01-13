@@ -1,5 +1,5 @@
 import { getAiMessages } from '@/lib/ai-message'
-import { UIMessage } from 'ai'
+import { createTextStreamResponse, generateId, UIMessage } from 'ai'
 import { z } from 'zod'
 
 export const ChatRequestSchema = z.object({
@@ -47,4 +47,38 @@ export async function loadChatHistory(id: string) {
   })) as UIMessage[]
 
   return { code, data: list, msg }
+}
+
+// 返回自定义 错误消息 sse 流
+export function createErrorStreamResponse(msg: string) {
+  const textStream = new ReadableStream<string>({
+    start(controller) {
+      const messageId = generateId()
+      const textId = 'txt-0'
+
+      const events = [
+        { type: 'start', messageId },
+        { type: 'start-step' },
+        { type: 'text-start', id: textId },
+        { type: 'text-delta', id: textId, delta: msg },
+        { type: 'text-end', id: textId },
+        { type: 'finish-step' },
+        { type: 'finish', finishReason: 'stop' }
+      ]
+
+      events.forEach((event) => {
+        controller.enqueue(`data: ${JSON.stringify(event)}\n\n`)
+      })
+
+      controller.enqueue(`data: [DONE]\n\n`)
+      controller.close()
+    }
+  })
+
+  return createTextStreamResponse({
+    textStream,
+    headers: {
+      'Content-Type': 'text/event-stream'
+    }
+  })
 }

@@ -27,14 +27,14 @@ export interface ConversationActions {
 export interface InputState {
   inputText: string
   selectedModel: string
-  useWebSearch: boolean
+  webSearchEnabled: boolean
   models: GatewayLanguageModelEntry[]
 }
 
 export interface InputActions {
   setInputText: (inputText: string) => void
   setSelectedModel: (selectedModel: string) => void
-  setUseWebSearch: (useWebSearch: boolean) => void
+  setWebSearchEnabled: (webSearchEnabled: boolean) => void
   setModels: (models: GatewayLanguageModelEntry[]) => void
   resetInputState: () => void
 }

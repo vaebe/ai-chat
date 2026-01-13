@@ -11,51 +11,32 @@ import {
   PromptInputBody,
   PromptInputButton,
   type PromptInputMessage,
-  PromptInputSelect,
-  PromptInputSelectContent,
-  PromptInputSelectItem,
-  PromptInputSelectTrigger,
-  PromptInputSelectValue,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputTools,
   PromptInputFooter
 } from '@/components/ai-elements/prompt-input'
+import { ModelSelectorDropdown } from './model-selector-dropdown'
 import { GlobeIcon } from 'lucide-react'
-import type { ChatStatus } from 'ai'
-import React from 'react'
+import { type ChangeEvent } from 'react'
+import { useInputStore } from '@/app/ai/store/input-store'
 
-interface AiPromptInputProps {
+interface StandaloneMessageInputProps {
   onSubmit: (message: PromptInputMessage) => void
-  text: string
-  setText: (text: string) => void
-  model: string
-  setModel: (model: string) => void
-  useWebSearch: boolean
-  setUseWebSearch: (useWebSearch: boolean) => void
-  models: Array<{ id: string; name: string }>
-  disabled?: boolean
-  status?: ChatStatus
-  onStop?: () => void
   className?: string
   placeholder?: string
 }
 
-export const AiPromptInput = ({
+export const StandaloneMessageInput = ({
   onSubmit,
-  text,
-  setText,
-  model,
-  setModel,
-  useWebSearch,
-  setUseWebSearch,
-  models,
-  disabled = false,
-  status,
-  onStop,
   className,
   placeholder = '询问任何问题？'
-}: AiPromptInputProps) => {
+}: StandaloneMessageInputProps) => {
+  const inputText = useInputStore((state) => state.inputText)
+  const webSearchEnabled = useInputStore((state) => state.webSearchEnabled)
+  const setInputText = useInputStore((state) => state.setInputText)
+  const setWebSearchEnabled = useInputStore((state) => state.setWebSearchEnabled)
+
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text)
     const hasAttachments = Boolean(message.files?.length)
@@ -67,29 +48,19 @@ export const AiPromptInput = ({
     onSubmit(message)
   }
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setText(e.target.value)
-  }
-
-  const handleModelChange = (value: string) => {
-    setModel(value)
+  const handleTextChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setInputText(e.target.value)
   }
 
   const handleWebSearchToggle = () => {
-    setUseWebSearch(!useWebSearch)
+    setWebSearchEnabled(!webSearchEnabled)
   }
-
-  const modelOptions = models.map((model) => (
-    <PromptInputSelectItem key={model.id} value={model.id}>
-      {model.name}
-    </PromptInputSelectItem>
-  ))
 
   return (
     <PromptInput onSubmit={handleSubmit} className={className} globalDrop multiple>
       <PromptInputBody>
         <PromptInputAttachments>{(attachment) => <PromptInputAttachment data={attachment} />}</PromptInputAttachments>
-        <PromptInputTextarea onChange={handleTextChange} value={text} placeholder={placeholder} />
+        <PromptInputTextarea onChange={handleTextChange} value={inputText} placeholder={placeholder} />
       </PromptInputBody>
       <PromptInputFooter>
         <PromptInputTools>
@@ -99,23 +70,20 @@ export const AiPromptInput = ({
               <PromptInputActionAddAttachments />
             </PromptInputActionMenuContent>
           </PromptInputActionMenu>
+
           <PromptInputButton
             className="cursor-pointer"
             onClick={handleWebSearchToggle}
-            variant={useWebSearch ? 'default' : 'ghost'}
+            variant={webSearchEnabled ? 'default' : 'ghost'}
           >
             <GlobeIcon size={16} />
             <span>搜索</span>
           </PromptInputButton>
-          <PromptInputSelect onValueChange={handleModelChange} value={model}>
-            <PromptInputSelectTrigger>
-              <PromptInputSelectValue />
-            </PromptInputSelectTrigger>
-            <PromptInputSelectContent>{modelOptions}</PromptInputSelectContent>
-          </PromptInputSelect>
+
+          <ModelSelectorDropdown />
         </PromptInputTools>
 
-        <PromptInputSubmit disabled={disabled || !text} status={status} onClick={onStop} />
+        <PromptInputSubmit disabled={!inputText.trim()} />
       </PromptInputFooter>
     </PromptInput>
   )

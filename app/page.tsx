@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { MessageSquare, Zap, Search, Github, Moon, Shield, ArrowRight, Sparkles, ExternalLink } from 'lucide-react'
+import { MessageSquare, Zap, Search, ArrowRight, Sparkles } from 'lucide-react'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
@@ -249,6 +249,7 @@ function Footer() {
           </div>
 
           {/* Links */}
+
           <div className="flex items-center gap-6">
             <Link
               href="https://github.com/vaebe/ai-chat"
@@ -256,7 +257,7 @@ function Footer() {
               rel="noopener noreferrer"
               className="text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer"
             >
-              <Github className="w-5 h-5" />
+              <img height="28" width="28" src="https://cdn.simpleicons.org/github" />
             </Link>
           </div>
         </div>

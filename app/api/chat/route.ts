@@ -14,7 +14,7 @@ import { ZodError } from 'zod'
 import { ChatRequestSchema } from './utils'
 import { createAiMessage } from '@/lib/ai-message'
 import { createTools } from './tools/tool-manager'
-import { loadChatHistory } from './utils'
+import { loadChatHistory, createErrorStreamResponse } from './utils'
 import { gateway } from '@ai-sdk/gateway'
 import { createSystemPrompt } from './prompts'
 
@@ -23,7 +23,7 @@ export const maxDuration = 300
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) {
-    return new Response('无权限!', { status: 401 })
+    return createErrorStreamResponse('401 无权限!')
   }
 
   let toolManager: Awaited<ReturnType<typeof createTools>> | null = null
@@ -35,10 +35,10 @@ export async function POST(req: NextRequest) {
 
     const chatHistoryRes = await loadChatHistory(chatId)
     if (chatHistoryRes.code !== 0) {
-      return new Response(chatHistoryRes.msg, { status: 500 })
+      return createErrorStreamResponse(chatHistoryRes.msg || '加载聊天历史失败')
     }
 
-    await createAiMessage({ message, chatId })
+    createAiMessage({ message, chatId })
 
     const model = wrapLanguageModel({
       model: gateway(modelName),
@@ -105,11 +105,11 @@ export async function POST(req: NextRequest) {
           return { ...part, endAt: Date.now() }
         }
       },
-      onFinish: async (result) => {
+      onFinish: (result) => {
         if (result?.responseMessage) {
-          await createAiMessage({ message: result.responseMessage, chatId })
+          createAiMessage({ message: result.responseMessage, chatId })
         }
-        await toolManager?.close()
+        toolManager?.close()
       },
       onError: (error) => {
         console.error('Stream error:', error)
@@ -118,12 +118,12 @@ export async function POST(req: NextRequest) {
       }
     })
   } catch (error) {
-    await toolManager?.close()
+    toolManager?.close()
     if (error instanceof ZodError) {
       console.error('请求参数验证失败:', error.issues)
-      return new Response(`请求参数错误: ${JSON.stringify(error.issues)}`, { status: 400 })
+      return createErrorStreamResponse('请求 AI 对话参数错误!')
     }
     console.error('Chat processing error:', error)
-    return new Response('处理请求时发生错误', { status: 500 })
+    return createErrorStreamResponse('处理 AI 对话请求时发生错误!')
   }
 }

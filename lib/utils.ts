@@ -53,27 +53,55 @@ export function getClientIp(req: NextRequest) {
   )
 }
 
+// 品牌图标映射表，用于处理特殊情况
+const PROVIDER_ICON_MAP: Record<string, string> = {
+  alibaba: 'alibaba',
+  anthropic: 'anthropic',
+  deepseek: 'deepseek',
+  google: 'google',
+  meta: 'llama', // Meta 的模型使用 llama 图标
+  mistral: 'mistral',
+  openai: 'openai'
+}
+
+// 根据模型 ID 获取正确的图标 provider
+function getModelIconProvider(modelId: string): string {
+  // 从 modelId 中提取品牌部分（斜杠前的部分）
+  // 例如: "alibaba/qwen-3-14b" -> "alibaba"
+  const brand = modelId.split('/')[0]?.toLowerCase() || ''
+
+  // 使用映射表获取对应的图标 provider，如果没有映射则直接使用品牌名
+  return PROVIDER_ICON_MAP[brand] || brand
+}
+
 // 获取 ai gateway 的模型列表
 export async function getAiGatewayModels(): Promise<GatewayLanguageModelEntry[]> {
   const availableModels = await gateway.getAvailableModels()
 
-  return availableModels.models.filter((model) => {
-    // 不是语言模型直接返回
-    if (model.modelType !== 'language') {
-      return false
-    }
+  return availableModels.models
+    .filter((model) => {
+      // 不是语言模型直接返回
+      if (model.modelType !== 'language') {
+        return false
+      }
 
-    if (!['alibaba', 'anthropic', 'google', 'deepseek'].some((item) => model.id.startsWith(item))) {
-      return false
-    }
+      const inputPricing = Number(model?.pricing?.input) || 0
+      const outputPricing = Number(model?.pricing?.output) || 0
+      // 价格不存在直接返回
+      if (!inputPricing || !outputPricing) {
+        return false
+      }
 
-    const inputPricing = Number(model?.pricing?.input) || 0
-    const outputPricing = Number(model?.pricing?.output) || 0
-    // 价格不存在直接返回
-    if (!inputPricing || !outputPricing) {
-      return false
-    }
-
-    return inputPricing * 1000000 < 0.5 && outputPricing * 1000000 < 0.5
-  })
+      return inputPricing * 1000000 < 0.5 && outputPricing * 1000000 < 0.5
+    })
+    .map((model) => ({
+      ...model,
+      specification: {
+        ...model.specification,
+        // 保留原始 provider（API 提供商）
+        apiProvider: model.specification?.provider || '',
+        // provider 字段改为品牌图标
+        provider: getModelIconProvider(model.specification?.modelId || model.id)
+      }
+    }))
 }

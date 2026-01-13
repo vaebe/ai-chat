@@ -1,63 +1,26 @@
-import { createMCPClient, MCPClient } from '@ai-sdk/mcp'
 import { Tool } from 'ai'
 import { webSearch } from '@exalabs/ai-sdk'
-
-const IGNORE_GITHUB = [
-  'copilot',
-  'team',
-  'create',
-  'add',
-  'delete',
-  'update',
-  'notification',
-  'workflow',
-  'fork',
-  'job',
-  'push',
-  'pull',
-  'dependabot',
-  'unstar',
-  'security'
-]
+import { githubTools } from './github-tools'
 
 interface ToolsState {
   tools: Record<string, Tool>
-  clients: Array<{ client: MCPClient; name: string }>
   categories: {
     ai: string[] // AI 自主决定使用的工具
     user: string[] // 用户启用的工具
   }
 }
 
-// 初始化 GitHub MCP
-async function initGithub(state: ToolsState) {
-  let client: MCPClient | undefined
-
+// 初始化 GitHub 工具
+function initGithub(state: ToolsState) {
   try {
-    client = await createMCPClient({
-      transport: {
-        type: 'http',
-        url: 'https://api.githubcopilot.com/mcp/',
-        headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN ?? ''}` }
-      }
+    Object.entries(githubTools).forEach(([name, tool]) => {
+      state.tools[name] = tool
+      state.categories.ai.push(name) // 记录为 AI 工具
     })
 
-    state.clients.push({ client, name: 'github' })
-
-    const tools = await client.tools()
-
-    Object.entries(tools).forEach(([name, tool]) => {
-      if (!IGNORE_GITHUB.some((item) => name.toLowerCase().includes(item))) {
-        const toolName = `github_${name}`
-        state.tools[toolName] = tool
-        state.categories.ai.push(toolName) // 记录为 AI 工具
-      }
-    })
-
-    console.log('✅ GitHub MCP 已连接')
+    console.log('✅ GitHub 工具已加载')
   } catch (error) {
-    await client?.close()
-    console.warn('⚠️ GitHub MCP 连接失败:', error)
+    console.warn('⚠️ GitHub 工具加载失败:', error)
   }
 }
 
@@ -87,7 +50,6 @@ export interface ToolsConfig {
 export async function createTools(config: ToolsConfig = {}) {
   const state: ToolsState = {
     tools: {},
-    clients: [],
     categories: {
       ai: [],
       user: []
@@ -96,7 +58,7 @@ export async function createTools(config: ToolsConfig = {}) {
 
   try {
     // AI 自主工具
-    await initGithub(state)
+    initGithub(state)
 
     // 用户控制工具
     if (config.enableWebSearch) {
@@ -135,10 +97,9 @@ export async function createTools(config: ToolsConfig = {}) {
       return desc
     },
 
-    // 关闭所有客户端
+    // 关闭所有客户端（现在不需要了，但保留接口兼容性）
     close: async () => {
-      await Promise.allSettled(state.clients.map(({ client }) => client.close()))
-      state.clients = []
+      // 不需要关闭任何客户端
     }
   }
 }

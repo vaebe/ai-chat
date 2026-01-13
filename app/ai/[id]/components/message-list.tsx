@@ -12,7 +12,6 @@ import { Loading } from '@/components/ui/loading'
 import { Tool, ToolContent, ToolHeader, ToolInput, getStatusBadge } from '@/components/ai-elements/tool'
 import { Source, Sources, SourcesContent, SourcesTrigger } from '@/components/ai-elements/sources'
 import { ExaSearchResult } from '@exalabs/ai-sdk'
-import React from 'react'
 import { toast } from 'sonner'
 
 function handleCopy(part: TextUIPart) {
