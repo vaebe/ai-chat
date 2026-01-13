@@ -105,11 +105,11 @@ export async function POST(req: NextRequest) {
           return { ...part, endAt: Date.now() }
         }
       },
-      onFinish: async (result) => {
+      onFinish: (result) => {
         if (result?.responseMessage) {
-          await createAiMessage({ message: result.responseMessage, chatId })
+          createAiMessage({ message: result.responseMessage, chatId })
         }
-        await toolManager?.close()
+        toolManager?.close()
       },
       onError: (error) => {
         console.error('Stream error:', error)
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
       }
     })
   } catch (error) {
-    await toolManager?.close()
+    toolManager?.close()
     if (error instanceof ZodError) {
       console.error('请求参数验证失败:', error.issues)
       return createCustomAIMessagesResponse(`请求参数错误: ${JSON.stringify(error.issues)}`)
