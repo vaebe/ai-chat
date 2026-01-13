@@ -36,7 +36,8 @@ export const github_get_commit = tool({
     ref: z.string().describe('The commit SHA, branch name, or tag name')
   }),
   execute: async ({ owner, repo, ref }) => {
-    return githubRequest(`/repos/${owner}/${repo}/commits/${ref}`)
+    const encodedRef = encodeURIComponent(ref)
+    return githubRequest(`/repos/${owner}/${repo}/commits/${encodedRef}`)
   }
 })
 
@@ -79,7 +80,8 @@ export const github_get_file_contents = tool({
   }),
   execute: async ({ owner, repo, path, ref }) => {
     const params = ref ? `?ref=${encodeURIComponent(ref)}` : ''
-    return githubRequest(`/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}${params}`)
+    const encodedPath = path.split('/').map(encodeURIComponent).join('/')
+    return githubRequest(`/repos/${owner}/${repo}/contents/${encodedPath}${params}`)
   }
 })
 
