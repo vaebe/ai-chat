@@ -9,8 +9,8 @@ import { useEffect, useRef } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { getAiGatewayModels } from '@/lib/utils'
 import { ChatProvider, useChatContext } from '@/app/ai/context/chat-context'
-import { MessageList } from '../components/message-list'
-import { ChatPromptInput } from '../components/chat-prompt-input'
+import { MessageList } from './components/message-list'
+import { ChatMessageInput } from './components/chat-message-input'
 import { toast } from 'sonner'
 
 function ChatContent({ conversationId }: { conversationId: string }) {
@@ -59,7 +59,7 @@ function ChatContent({ conversationId }: { conversationId: string }) {
   return (
     <div className="flex flex-col h-screen">
       <MessageList messages={messages} status={status} loading={messagesLoading} />
-      <ChatPromptInput className="my-4 w-8/12 mx-auto" />
+      <ChatMessageInput className="my-4 w-8/12 mx-auto" />
     </div>
   )
 }

@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useConversationStore } from './store/conversation-store'
 import { useInputStore } from './store/input-store'
-import { AiPromptInput } from './components/prompt-input'
+import { StandaloneMessageInput } from './components/standalone-message-input'
 import { type PromptInputMessage } from '@/components/ai-elements/prompt-input'
 import { nanoid } from 'nanoid'
 import { createAiConversation } from '@/app/actions'
@@ -63,7 +63,7 @@ export default function AIChatPage() {
         <div className="text-3xl font-bold mb-10 text-center">有什么可以帮忙的？</div>
 
         <div className="flex justify-center p-2 md:w-8/12 mx-auto">
-          <AiPromptInput onSubmit={handleSubmit} className="w-full" />
+          <StandaloneMessageInput onSubmit={handleSubmit} className="w-full" />
         </div>
       </div>
     </div>
