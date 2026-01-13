@@ -83,7 +83,7 @@ export const StandaloneMessageInput = ({
           <ModelSelectorDropdown />
         </PromptInputTools>
 
-        <PromptInputSubmit disabled={!inputText} />
+        <PromptInputSubmit disabled={!inputText.trim()} />
       </PromptInputFooter>
     </PromptInput>
   )
