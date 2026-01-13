@@ -151,6 +151,49 @@ function HeroSection() {
   )
 }
 
+function PreviewSection() {
+  const { theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null
+  }
+
+  return (
+    <section className="py-24 bg-slate-50 dark:bg-slate-900/50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white mb-4">界面预览</h2>
+          <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+            支持浅色和深色主题，提供舒适的对话体验
+          </p>
+        </div>
+
+        <div className="relative max-w-4xl mx-auto">
+          <div className="rounded-2xl overflow-hidden shadow-2xl shadow-orange-500/10 dark:shadow-slate-900/50 border border-orange-100 dark:border-slate-800">
+            <Image
+              src={theme === 'dark' ? '/img/chat-dark.png' : '/img/chat-light.png'}
+              alt="AI Chat Interface Preview"
+              width={1200}
+              height={800}
+              className="w-full h-auto"
+              priority
+            />
+          </div>
+
+          {/* 装饰元素 */}
+          <div className="absolute -top-4 -left-4 w-8 h-8 bg-orange-400 rounded-full opacity-60 animate-pulse" />
+          <div className="absolute -bottom-4 -right-4 w-6 h-6 bg-rose-400 rounded-full opacity-60 animate-pulse delay-300" />
+        </div>
+      </div>
+    </section>
+  )
+}
+
 const features = [
   {
     icon: MessageSquare,
@@ -272,6 +315,7 @@ export default function Home() {
       <HomeHeader />
       <main>
         <HeroSection />
+        <PreviewSection />
         <FeaturesSection />
         <CTASection />
       </main>
