@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^2.0.4",
-    "@ai-sdk/gateway": "^3.0.11",
+    "@ai-sdk/gateway": "^3.0.55",
     "@ai-sdk/mcp": "^1.0.5",
     "@ai-sdk/openai": "^3.0.7",
     "@ai-sdk/react": "^3.0.29",
