@@ -2,8 +2,7 @@
 
 import { CopyIcon } from 'lucide-react'
 import { Conversation, ConversationContent, ConversationScrollButton } from '@/components/ai-elements/conversation'
-import { Message, MessageContent } from '@/components/ai-elements/message'
-import { Response } from '@/components/ai-elements/response'
+import { Message, MessageContent, MessageResponse } from '@/components/ai-elements/message'
 import { Fragment } from 'react'
 import { ChatStatus, TextUIPart, UIMessage } from 'ai'
 import { Loader } from '@/components/ai-elements/loader'
@@ -45,11 +44,11 @@ export const MessageList = ({ messages, status, loading = false }: MessageListPr
   return (
     <Conversation>
       <ConversationContent className="max-w-8/12 mx-auto">
-        {loading ? (
-          <Loading text="加载消息中..." size="lg" className="p-8" />
-        ) : (
-          processedMessages.map(({ message, messageIndex, isLastMessage }) => (
-            <div key={message.id}>
+        <div>
+          {loading && <Loading text="加载消息中..." className="p-8" />}
+
+          {processedMessages.map(({ message, messageIndex, isLastMessage }) => (
+            <div key={message.id} className="mb-4">
               <ToolsInfo message={message} />
               <WebSearchInfo message={message} />
               <IMessage
@@ -60,10 +59,10 @@ export const MessageList = ({ messages, status, loading = false }: MessageListPr
                 isLastMessage={isLastMessage}
               />
             </div>
-          ))
-        )}
+          ))}
 
-        {!isDone && !loading && <Loader />}
+          {!isDone && !loading && <Loader />}
+        </div>
       </ConversationContent>
       <ConversationScrollButton />
     </Conversation>
@@ -78,7 +77,7 @@ interface IMessageProps {
   isLastMessage: boolean
 }
 
-const IMessage = ({ message, isDone, isLastMessage }: IMessageProps) => {
+const IMessage = ({ message, isDone, isLastMessage, messageIndex }: IMessageProps) => {
   const textParts = message.parts.filter((item) => item.type === 'text')
   const part = textParts[textParts.length - 1]
 
@@ -98,7 +97,7 @@ const IMessage = ({ message, isDone, isLastMessage }: IMessageProps) => {
       <Fragment>
         <Message from={message.role}>
           <MessageContent>
-            <Response>{'text' in part ? part.text : ''}</Response>
+            <MessageResponse key={`${message.id}-${messageIndex}`}>{part.text}</MessageResponse>
           </MessageContent>
         </Message>
 
@@ -113,7 +112,7 @@ const IMessage = ({ message, isDone, isLastMessage }: IMessageProps) => {
     )
   }
 
-  return <Response>{part.type}</Response>
+  return <MessageResponse>{part.type}</MessageResponse>
 }
 
 interface ToolsInfoProps {
